@@ -1,7 +1,9 @@
+
 """
 FastMCP Echo Server
 """
 
+from openai import OpenAI
 from fastmcp import FastMCP
 
 # Create server
@@ -28,3 +30,20 @@ def echo_template(text: str) -> str:
 @mcp.prompt("echo")
 def echo_prompt(text: str) -> str:
     return text
+
+
+
+client = OpenAI()
+
+resp = client.responses.create(
+    model="gpt-4.1",
+    tools=[
+        {
+            "type": "mcp",
+            "server_label": "icy-magenta-snipe",
+            "server_url": "https://icy-magenta-snipe.fastmcp.app/mcp",
+            "require_approval": "never",
+        },
+    ],
+    input="Hello from FastMCP Cloud!",
+)
