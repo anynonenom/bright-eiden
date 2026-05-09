@@ -1,0 +1,727 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>EIDEN Group — Brand Identity System v2.0</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=DM+Serif+Display:ital@0;1&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400;1,500&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --canvas:    #FEFDFB;
+  --beige:     #F4EBD0;
+  --beige-dk:  #E8DCC8;
+  --forest:    #122620;
+  --forest-md: #0E1B17;
+  --teal:      #0C5752;
+  --teal-lt:   #0E7A73;
+  --gold:      #CFC292;
+  --gold-dk:   #B8A876;
+  --mint:      #34D399;
+  --cream:     #F8F3E8;
+  --ink:       #0A0F0C;
+  --white:     #FFFFFF;
+  --red:       #EF4444;
+  --blue:      #60A5FA;
+
+  --f-head:  'Outfit', sans-serif;
+  --f-edit:  'DM Serif Display', serif;
+  --f-label: 'Cormorant Garamond', serif;
+  --f-body:  'Inter', sans-serif;
+}
+
+*, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+html { font-size:16px; scroll-behavior:smooth; }
+body { font-family:var(--f-body); background:var(--canvas); color:var(--forest); overflow-x:hidden; }
+
+/* ═══════ GRAIN ═══════ */
+.grain::after {
+  content:''; position:absolute; inset:0;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23n)' opacity='.03'/%3E%3C/svg%3E");
+  pointer-events:none; z-index:10;
+}
+
+/* ═══════ NAV ═══════ */
+.nav-dots{position:fixed;right:24px;top:50%;transform:translateY(-50%);display:flex;flex-direction:column;gap:10px;z-index:999}
+.nav-dot{width:8px;height:8px;border-radius:50%;border:1.5px solid rgba(12,87,82,.25);background:transparent;cursor:pointer;transition:all .3s}
+.nav-dot.active{background:var(--teal);border-color:var(--teal);transform:scale(1.4)}
+.nav-dot-label{position:absolute;right:22px;top:50%;transform:translateY(-50%);font-family:var(--f-label);font-size:10px;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:var(--teal);opacity:0;transition:opacity .2s;white-space:nowrap;pointer-events:none}
+.nav-dot:hover .nav-dot-label{opacity:1}
+.nav-dot{position:relative}
+
+/* ═══════ SECTION BASE ═══════ */
+.section{padding:120px 80px}
+@media(max-width:900px){.section{padding:64px 24px}}
+
+.s-num{font-family:var(--f-label);font-size:11px;font-weight:600;letter-spacing:5px;text-transform:uppercase;display:flex;align-items:center;gap:14px;margin-bottom:14px}
+.s-num::before{content:'';width:32px;height:1.5px}
+.s-num.tl{color:var(--teal)}.s-num.tl::before{background:var(--teal)}
+.s-num.gd{color:var(--gold-dk)}.s-num.gd::before{background:var(--gold-dk)}
+.s-num.wh{color:rgba(254,253,251,.45)}.s-num.wh::before{background:rgba(254,253,251,.25)}
+.s-num.fr{color:var(--forest)}.s-num.fr::before{background:var(--forest)}
+.s-num.mt{color:var(--mint)}.s-num.mt::before{background:var(--mint)}
+
+.s-title{font-family:var(--f-head);font-weight:800;font-size:clamp(36px,5vw,64px);line-height:.95;margin-bottom:20px;letter-spacing:-.03em}
+.s-title.light{color:var(--canvas)}.s-title.dark{color:var(--forest)}
+.s-title em{font-style:normal;color:var(--teal)}
+.s-title span{color:var(--gold)}
+
+.s-sub{font-family:var(--f-edit);font-style:italic;font-size:clamp(16px,2vw,22px);line-height:1.6;max-width:640px;margin-bottom:64px}
+.s-sub.light{color:rgba(254,253,251,.45)}.s-sub.dark{color:rgba(18,38,32,.5)}
+
+/* ═══════════════════════════════════════
+   COVER
+═══════════════════════════════════════ */
+#cover{
+  width:100%;min-height:100vh;background:var(--beige);
+  display:flex;flex-direction:column;justify-content:center;align-items:center;
+  position:relative;overflow:hidden;text-align:center;
+}
+.cover-circle{
+  position:absolute;top:-15%;right:-10%;
+  width:55vw;height:55vw;border-radius:50%;
+  background:rgba(207,194,146,.12);pointer-events:none;
+}
+.cover-circle-2{
+  position:absolute;bottom:-20%;left:-8%;
+  width:40vw;height:40vw;border-radius:50%;
+  background:rgba(12,87,82,.03);pointer-events:none;
+}
+.cover-monogram{
+  font-family:var(--f-head);font-size:clamp(56px,8vw,100px);font-weight:900;
+  letter-spacing:8px;color:rgba(18,38,32,.06);margin-bottom:32px;
+  position:relative;z-index:2;
+}
+.cover-line{width:60px;height:2px;background:var(--teal);margin:0 auto 32px;position:relative;z-index:2}
+.cover-label{
+  font-family:var(--f-label);font-size:12px;font-weight:600;letter-spacing:6px;
+  text-transform:uppercase;color:var(--teal);margin-bottom:48px;position:relative;z-index:2;
+}
+.cover-tagline{
+  font-family:var(--f-edit);font-style:italic;font-size:clamp(22px,3vw,36px);
+  color:var(--teal);margin-bottom:80px;position:relative;z-index:2;
+}
+.cover-meta{
+  font-family:var(--f-label);font-size:11px;font-weight:500;letter-spacing:3px;
+  color:rgba(18,38,32,.25);position:relative;z-index:2;
+}
+.cover-bar{
+  position:absolute;bottom:0;left:0;right:0;height:4px;
+  background:linear-gradient(90deg,var(--forest),var(--teal),var(--teal-lt),var(--gold),var(--beige));
+}
+
+/* ═══════════════════════════════════════
+   01 — BRAND DNA
+═══════════════════════════════════════ */
+#dna{background:var(--canvas)}
+.dna-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:2px}
+.dna-card{padding:48px 36px;background:var(--white);border:1px solid rgba(18,38,32,.04);transition:border-color .3s,transform .3s}
+.dna-card:hover{border-color:var(--teal);transform:translateY(-3px)}
+.dna-num{font-family:var(--f-label);font-size:44px;font-weight:300;color:rgba(12,87,82,.08);margin-bottom:16px;line-height:1}
+.dna-name{font-family:var(--f-head);font-size:18px;font-weight:700;color:var(--forest);margin-bottom:10px;letter-spacing:-.01em}
+.dna-desc{font-size:14px;color:rgba(18,38,32,.5);line-height:1.8}
+
+.dna-manifesto{margin-top:2px;display:grid;grid-template-columns:1fr 1fr;gap:2px}
+.dna-m{padding:56px 48px;position:relative;overflow:hidden}
+.dna-m:first-child{background:var(--forest)}
+.dna-m:last-child{background:var(--teal)}
+.dna-m-label{font-family:var(--f-label);font-size:10px;font-weight:600;letter-spacing:4px;text-transform:uppercase;color:var(--gold);margin-bottom:20px}
+.dna-m-text{font-family:var(--f-edit);font-style:italic;font-size:20px;color:rgba(254,253,251,.75);line-height:1.7}
+.dna-m-ghost{position:absolute;bottom:-20px;right:-10px;font-family:var(--f-head);font-size:140px;font-weight:900;color:rgba(255,255,255,.02);line-height:1;pointer-events:none}
+
+/* ═══════════════════════════════════════
+   02 — LOGO SYSTEM
+═══════════════════════════════════════ */
+#logo{background:var(--beige)}
+.logo-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:2px}
+.logo-cell{padding:56px 32px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:24px;min-height:240px;position:relative}
+.logo-cell-label{font-family:var(--f-label);font-size:9px;font-weight:600;letter-spacing:3px;text-transform:uppercase;opacity:.4}
+
+.lv-wordmark{font-family:'DM Serif Display',serif;font-size:38px;font-weight:400;letter-spacing:1px;line-height:1;text-align:center;position:relative}
+.lv-group{font-family:var(--f-label);font-size:9px;font-weight:600;letter-spacing:4px;text-transform:uppercase;position:absolute;top:-2px;right:-28px}
+.lv-wrap{position:relative;display:inline-block}
+.lv-mono{font-family:'DM Serif Display',serif;font-size:52px;font-weight:400;letter-spacing:2px;line-height:1;text-align:center}
+
+.logo-cell:nth-child(1){background:var(--canvas)}
+.logo-cell:nth-child(1) .lv-wordmark,.logo-cell:nth-child(1) .lv-mono{color:var(--forest)}
+.logo-cell:nth-child(1) .lv-group{color:var(--teal)}
+.logo-cell:nth-child(1) .logo-cell-label{color:var(--forest)}
+
+.logo-cell:nth-child(2){background:var(--forest)}
+.logo-cell:nth-child(2) .lv-wordmark,.logo-cell:nth-child(2) .lv-mono{color:var(--gold)}
+.logo-cell:nth-child(2) .lv-group{color:var(--teal-lt)}
+.logo-cell:nth-child(2) .logo-cell-label{color:rgba(254,253,251,.35)}
+
+.logo-cell:nth-child(3){background:var(--teal)}
+.logo-cell:nth-child(3) .lv-wordmark,.logo-cell:nth-child(3) .lv-mono{color:var(--canvas)}
+.logo-cell:nth-child(3) .lv-group{color:var(--gold)}
+.logo-cell:nth-child(3) .logo-cell-label{color:rgba(254,253,251,.4)}
+
+.logo-cell:nth-child(4){background:var(--ink)}
+.logo-cell:nth-child(4) .lv-wordmark{color:var(--gold)}
+.logo-cell:nth-child(4) .lv-group{color:rgba(207,194,146,.5)}
+.logo-cell:nth-child(4) .logo-cell-label{color:rgba(254,253,251,.2)}
+
+.logo-cell:nth-child(5){background:var(--gold)}
+.logo-cell:nth-child(5) .lv-wordmark{color:var(--forest)}
+.logo-cell:nth-child(5) .lv-group{color:var(--teal)}
+.logo-cell:nth-child(5) .logo-cell-label{color:var(--forest)}
+
+.logo-cell:nth-child(6){background:var(--teal-lt)}
+.logo-cell:nth-child(6) .lv-wordmark{color:var(--canvas)}
+.logo-cell:nth-child(6) .lv-group{color:var(--beige)}
+.logo-cell:nth-child(6) .logo-cell-label{color:rgba(254,253,251,.4)}
+
+/* Clear space & donts */
+.logo-rules{margin-top:2px;display:grid;grid-template-columns:1fr 1fr;gap:2px}
+.lr{padding:48px;background:var(--white)}
+.lr h4{font-family:var(--f-head);font-size:16px;font-weight:700;color:var(--forest);margin-bottom:14px;letter-spacing:-.01em}
+.lr p{font-size:14px;color:rgba(18,38,32,.5);line-height:1.8}
+
+.logo-dont{display:grid;grid-template-columns:repeat(4,1fr);gap:2px;margin-top:2px}
+.dont-cell{background:rgba(244,235,208,.5);padding:36px 20px;position:relative;display:flex;flex-direction:column;align-items:center;gap:16px}
+.dont-cell::after{content:'';position:absolute;inset:0;background:repeating-linear-gradient(-45deg,transparent,transparent 8px,rgba(18,38,32,.015) 8px,rgba(18,38,32,.015) 9px);pointer-events:none}
+.dont-x{position:absolute;top:10px;right:14px;color:var(--red);font-size:16px;font-weight:700;z-index:2}
+.dont-vis{font-family:var(--f-head);font-size:20px;font-weight:800;letter-spacing:4px;position:relative;z-index:2}
+.dont-lbl{font-family:var(--f-label);font-size:10px;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:rgba(18,38,32,.35);text-align:center;z-index:2}
+
+.dont-cell:nth-child(1) .dont-vis{color:var(--red);transform:scaleX(1.5);display:inline-block}
+.dont-cell:nth-child(2) .dont-vis{color:#bbb}
+.dont-cell:nth-child(3) .dont-vis{color:var(--forest);transform:rotate(-12deg);display:inline-block}
+.dont-cell:nth-child(4) .dont-vis{color:#ccc;font-family:Arial,sans-serif;font-weight:400;letter-spacing:0}
+
+/* ═══════════════════════════════════════
+   03 — COLOR PALETTE
+═══════════════════════════════════════ */
+#palette{background:var(--canvas)}
+.palette-hero{display:flex;height:260px;gap:2px;margin-bottom:2px;overflow:hidden}
+.ph{flex:1;position:relative;display:flex;flex-direction:column;justify-content:flex-end;padding:22px 24px;cursor:default;transition:flex .4s cubic-bezier(.22,1,.36,1);overflow:hidden}
+.ph:hover{flex:2.5}
+.ph-name{font-family:var(--f-head);font-size:15px;font-weight:700;margin-bottom:3px;letter-spacing:.5px}
+.ph-hex{font-family:var(--f-label);font-size:11px;font-weight:600;letter-spacing:2px;opacity:.6}
+.ph-role{font-family:var(--f-label);font-size:9px;letter-spacing:1px;text-transform:uppercase;opacity:.35;margin-top:4px}
+.ph.drk .ph-name,.ph.drk .ph-hex,.ph.drk .ph-role{color:var(--canvas)}
+.ph.lgt .ph-name,.ph.lgt .ph-hex,.ph.lgt .ph-role{color:var(--forest)}
+
+.color-rule{margin-top:2px;padding:48px;background:var(--forest);position:relative}
+.color-rule-title{font-family:var(--f-head);font-size:18px;font-weight:700;color:var(--canvas);margin-bottom:8px;letter-spacing:-.01em}
+.color-rule-desc{font-family:var(--f-body);font-size:14px;color:rgba(254,253,251,.4);line-height:1.8;max-width:700px}
+.color-rule-bar{display:flex;height:48px;margin-top:24px;border-radius:4px;overflow:hidden}
+.crb-1{flex:7;background:var(--canvas)}.crb-2{flex:2;background:var(--teal)}.crb-3{flex:1;background:var(--gold)}
+.crb-label{display:flex;align-items:center;justify-content:center;font-family:var(--f-label);font-size:10px;font-weight:600;letter-spacing:2px}
+.crb-1 .crb-label{color:var(--forest)}.crb-2 .crb-label{color:var(--canvas)}.crb-3 .crb-label{color:var(--forest)}
+
+.palette-usage{display:grid;grid-template-columns:repeat(3,1fr);gap:2px;margin-top:2px}
+.pu{padding:32px 28px;background:var(--white)}
+.pu-dot{width:28px;height:28px;border-radius:50%;margin-bottom:14px}
+.pu-role{font-family:var(--f-label);font-size:9px;font-weight:600;letter-spacing:3px;text-transform:uppercase;color:rgba(18,38,32,.35);margin-bottom:6px}
+.pu-title{font-family:var(--f-head);font-size:15px;font-weight:700;color:var(--forest);margin-bottom:6px}
+.pu-desc{font-size:13px;color:rgba(18,38,32,.45);line-height:1.7}
+
+/* ═══════════════════════════════════════
+   04 — TYPOGRAPHY
+═══════════════════════════════════════ */
+#typography{background:var(--forest);position:relative;overflow:hidden}
+.typo-grid{display:grid;grid-template-columns:1fr 1fr;gap:2px}
+.fb{padding:52px 44px;background:rgba(255,255,255,.025);border:1px solid rgba(255,255,255,.04);transition:border-color .3s}
+.fb:hover{border-color:rgba(12,87,82,.5)}
+.fb-role{font-family:var(--f-label);font-size:9px;font-weight:600;letter-spacing:3px;text-transform:uppercase;color:rgba(254,253,251,.2);margin-bottom:24px}
+.fb-spec-head{font-family:var(--f-head);font-size:clamp(32px,4vw,52px);font-weight:800;color:var(--canvas);line-height:1;margin-bottom:14px;letter-spacing:-.03em}
+.fb-spec-edit{font-family:var(--f-edit);font-size:clamp(24px,3vw,38px);color:var(--gold);line-height:1.15;margin-bottom:14px}
+.fb-spec-label{font-family:var(--f-label);font-size:clamp(14px,1.5vw,18px);font-weight:600;letter-spacing:4px;text-transform:uppercase;color:var(--teal-lt);margin-bottom:14px}
+.fb-spec-body{font-family:var(--f-body);font-size:15px;font-weight:400;color:rgba(254,253,251,.45);line-height:1.85}
+.fb-meta{margin-top:20px;font-family:var(--f-body);font-size:11px;color:rgba(254,253,251,.15);border-top:1px solid rgba(255,255,255,.04);padding-top:14px;line-height:1.6}
+
+.type-scale{display:flex;flex-direction:column;border-top:1px solid rgba(255,255,255,.04);margin-top:2px}
+.ts-row{display:flex;align-items:baseline;gap:24px;padding:18px 44px;border-bottom:1px solid rgba(255,255,255,.03)}
+.ts-lbl{font-family:var(--f-label);font-size:9px;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:rgba(254,253,251,.15);min-width:130px;flex-shrink:0}
+.ts-sz{font-family:var(--f-label);font-size:9px;color:rgba(254,253,251,.1);min-width:70px;flex-shrink:0}
+
+.font-rule{margin-top:2px;padding:36px 44px;background:rgba(12,87,82,.3);display:flex;align-items:center;gap:24px}
+.fr-badge{font-family:var(--f-head);font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;padding:6px 16px;border-radius:100px;flex-shrink:0}
+.fr-badge.do{background:var(--teal-lt);color:var(--canvas)}.fr-badge.dont{background:rgba(239,68,68,.2);color:var(--red)}
+.fr-text{font-family:var(--f-body);font-size:13px;color:rgba(254,253,251,.5);line-height:1.6}
+
+/* Marquee */
+.marquee-bar{background:var(--teal);overflow:hidden;white-space:nowrap;padding:14px 0}
+.marquee-inner{display:inline-block;animation:marquee 22s linear infinite}
+.marquee-inner span{font-family:var(--f-head);font-weight:700;font-size:clamp(24px,3.5vw,42px);color:var(--canvas);padding:0 20px;letter-spacing:-.02em}
+.marquee-inner .sep{color:rgba(254,253,251,.15);font-weight:400}
+@keyframes marquee{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+
+/* ═══════════════════════════════════════
+   05 — VOICE & TONE (expanded)
+═══════════════════════════════════════ */
+#voice{background:var(--forest);position:relative;overflow:hidden}
+.voice-bg{position:absolute;bottom:-80px;right:-20px;font-family:var(--f-head);font-size:20vw;font-weight:900;color:rgba(254,253,251,.015);line-height:1;pointer-events:none;user-select:none;letter-spacing:-.05em}
+
+.voice-pillars{display:grid;grid-template-columns:repeat(3,1fr);gap:2px;position:relative;z-index:2}
+.vp{padding:48px 36px;background:rgba(255,255,255,.035);transition:background .3s}
+.vp:hover{background:rgba(255,255,255,.07)}
+.vp-ico{font-size:28px;margin-bottom:16px;display:block}
+.vp-name{font-family:var(--f-head);font-size:17px;font-weight:700;color:var(--canvas);margin-bottom:10px;letter-spacing:-.01em}
+.vp-desc{font-size:13px;color:rgba(254,253,251,.5);line-height:1.75;margin-bottom:16px}
+.vp-ex{font-family:var(--f-edit);font-style:italic;font-size:13px;color:rgba(254,253,251,.3);border-top:1px solid rgba(255,255,255,.06);padding-top:14px}
+
+.voice-vocab{display:grid;grid-template-columns:1fr 1fr;gap:2px;margin-top:2px;position:relative;z-index:2}
+.vv{padding:44px 40px}
+.vv:first-child{background:rgba(14,122,115,.15)}.vv:last-child{background:rgba(18,38,32,.4)}
+.vv-title{font-family:var(--f-head);font-size:14px;font-weight:700;letter-spacing:1px;color:var(--canvas);margin-bottom:22px}
+.vv-row{display:flex;gap:12px;align-items:baseline;margin-bottom:10px}
+.vv-ico{font-size:12px;min-width:16px;margin-top:2px}
+.vv-from{font-family:var(--f-body);font-size:13px;color:rgba(254,253,251,.35);text-decoration:line-through;min-width:120px}
+.vv-to{font-family:var(--f-head);font-size:13px;font-weight:600;color:var(--teal-lt)}
+.vv-plain{font-family:var(--f-body);font-size:13px;color:rgba(254,253,251,.55);line-height:1.6}
+
+/* writing style grid */
+.writing-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:2px;margin-top:2px;position:relative;z-index:2}
+.wg{padding:40px 36px;background:rgba(255,255,255,.025);border-left:3px solid transparent}
+.wg:nth-child(1){border-left-color:var(--teal)}.wg:nth-child(2){border-left-color:var(--gold)}
+.wg:nth-child(3){border-left-color:var(--teal-lt)}.wg:nth-child(4){border-left-color:var(--mint)}
+.wg-title{font-family:var(--f-head);font-size:14px;font-weight:700;color:var(--canvas);margin-bottom:8px}
+.wg-desc{font-size:13px;color:rgba(254,253,251,.45);line-height:1.7}
+.wg-example{font-family:var(--f-edit);font-style:italic;font-size:14px;color:rgba(254,253,251,.3);margin-top:12px;padding-top:12px;border-top:1px solid rgba(255,255,255,.04)}
+
+/* ═══════════════════════════════════════
+   06 — ICP
+═══════════════════════════════════════ */
+#icp{background:var(--canvas)}
+.icp-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:2px}
+.icp-card{padding:44px 32px;background:var(--white);border-top:3px solid var(--teal);transition:transform .3s}
+.icp-card:hover{transform:translateY(-4px)}
+.icp-card.gold{border-top-color:var(--gold)}
+.icp-card.mint{border-top-color:var(--mint)}
+.icp-ico{font-size:32px;margin-bottom:16px}
+.icp-name{font-family:var(--f-head);font-size:16px;font-weight:700;color:var(--forest);margin-bottom:8px}
+.icp-desc{font-size:13px;color:rgba(18,38,32,.5);line-height:1.75;margin-bottom:14px}
+.icp-tags{display:flex;flex-wrap:wrap;gap:6px}
+.icp-tag{font-family:var(--f-label);font-size:9px;font-weight:600;letter-spacing:2px;text-transform:uppercase;padding:5px 12px;border-radius:100px;border:1px solid rgba(12,87,82,.12);color:var(--teal)}
+
+.icp-anti{margin-top:2px;padding:44px 48px;background:var(--forest)}
+.icp-anti-title{font-family:var(--f-head);font-size:16px;font-weight:700;color:var(--red);margin-bottom:16px;letter-spacing:-.01em}
+.icp-anti-row{display:flex;gap:12px;align-items:flex-start;margin-bottom:10px}
+.icp-anti-ico{color:var(--red);font-size:13px;min-width:16px;margin-top:2px}
+.icp-anti-t{font-size:13px;color:rgba(254,253,251,.45);line-height:1.6}
+
+/* ═══════════════════════════════════════
+   07 — VISUAL AESTHETIC
+═══════════════════════════════════════ */
+#aesthetic{background:var(--beige)}
+.aes-mood{display:flex;gap:2px;margin-bottom:2px}
+.aes-cell{flex:1;padding:40px 24px;text-align:center;transition:transform .3s;cursor:default}
+.aes-cell:hover{transform:translateY(-4px)}
+.aes-word{font-family:var(--f-edit);font-size:20px}
+.aes-cell:nth-child(1){background:var(--forest)}.aes-cell:nth-child(1) .aes-word{color:var(--canvas)}
+.aes-cell:nth-child(2){background:var(--teal)}.aes-cell:nth-child(2) .aes-word{color:var(--gold)}
+.aes-cell:nth-child(3){background:var(--gold)}.aes-cell:nth-child(3) .aes-word{color:var(--forest)}
+.aes-cell:nth-child(4){background:var(--canvas)}.aes-cell:nth-child(4) .aes-word{color:var(--teal)}
+.aes-cell:nth-child(5){background:var(--teal-lt)}.aes-cell:nth-child(5) .aes-word{color:var(--canvas)}
+
+.aes-rules{display:grid;grid-template-columns:repeat(2,1fr);gap:2px}
+.ar{padding:40px 36px;background:var(--white)}
+.ar-ico{font-size:24px;margin-bottom:14px;display:block}
+.ar-label{font-family:var(--f-head);font-size:15px;font-weight:700;color:var(--forest);margin-bottom:8px}
+.ar.do .ar-label::before{content:'✓ ';color:var(--teal)}
+.ar.dont .ar-label::before{content:'✕ ';color:var(--red)}
+.ar-desc{font-size:13px;color:rgba(18,38,32,.5);line-height:1.75}
+
+.aes-philosophy{margin-top:2px;padding:56px 48px;background:var(--forest);position:relative}
+.aes-p-text{font-family:var(--f-edit);font-style:italic;font-size:22px;color:rgba(254,253,251,.6);line-height:1.7;max-width:700px}
+.aes-p-attr{font-family:var(--f-label);font-size:10px;font-weight:600;letter-spacing:4px;text-transform:uppercase;color:var(--teal-lt);margin-top:20px}
+
+/* ═══════════════════════════════════════
+   08 — SPACING
+═══════════════════════════════════════ */
+#spacing{background:var(--canvas)}
+.sp-row{display:flex;align-items:flex-end;gap:6px;margin-bottom:48px}
+.sp-col{display:flex;flex-direction:column;align-items:center;gap:8px;flex:1}
+.sp-bar{background:var(--teal);width:100%;border-radius:2px;transition:opacity .2s}
+.sp-col:hover .sp-bar{opacity:.6}
+.sp-val{font-family:var(--f-head);font-size:14px;font-weight:700;color:var(--teal)}
+.sp-nm{font-family:var(--f-label);font-size:9px;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:rgba(18,38,32,.3)}
+
+.layout-params{display:grid;grid-template-columns:repeat(3,1fr);gap:2px;margin-top:2px}
+.lp{padding:28px 24px;background:var(--white)}
+.lp-name{font-family:var(--f-label);font-size:9px;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:rgba(18,38,32,.3);margin-bottom:6px}
+.lp-val{font-family:var(--f-head);font-size:16px;font-weight:700;color:var(--forest)}
+
+/* ═══════════════════════════════════════
+   09 — SOCIAL / DIGITAL
+═══════════════════════════════════════ */
+#social{background:var(--forest);position:relative;overflow:hidden}
+.social-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:2px;position:relative;z-index:2}
+.sg{padding:44px 36px;background:rgba(255,255,255,.03);transition:background .3s}
+.sg:hover{background:rgba(255,255,255,.065)}
+.sg-ico{font-size:28px;margin-bottom:16px}
+.sg-name{font-family:var(--f-head);font-size:16px;font-weight:700;color:var(--canvas);margin-bottom:10px}
+.sg-desc{font-size:13px;color:rgba(254,253,251,.45);line-height:1.75}
+.sg-handle{font-family:var(--f-label);font-size:12px;font-weight:600;color:var(--teal-lt);margin-top:12px;letter-spacing:1px}
+
+/* ═══════════════════════════════════════
+   10 — APPLICATIONS
+═══════════════════════════════════════ */
+#applications{background:var(--gold);position:relative}
+.app-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:2px}
+.app-card{background:rgba(255,255,255,.15);padding:44px 32px;transition:background .3s;cursor:default}
+.app-card:hover{background:rgba(255,255,255,.28)}
+.app-ico{font-size:32px;margin-bottom:16px}
+.app-title{font-family:var(--f-head);font-size:16px;font-weight:700;color:var(--forest);margin-bottom:8px}
+.app-desc{font-size:13px;color:rgba(18,38,32,.55);line-height:1.7}
+
+/* ═══════════════════════════════════════
+   CLOSING
+═══════════════════════════════════════ */
+#closing{background:var(--beige);text-align:center;position:relative;overflow:hidden;padding:140px 80px}
+.closing-mono{font-family:var(--f-head);font-size:clamp(60px,9vw,120px);font-weight:900;letter-spacing:6px;color:rgba(18,38,32,.04);margin-bottom:20px}
+.closing-line{width:48px;height:2px;background:var(--teal);margin:0 auto 28px}
+.closing-tag{font-family:var(--f-edit);font-style:italic;font-size:clamp(20px,3vw,32px);color:var(--teal);margin-bottom:56px}
+.closing-contact{display:flex;justify-content:center;gap:56px;flex-wrap:wrap;margin-bottom:72px}
+.cc-item{text-align:center}
+.cc-label{font-family:var(--f-label);font-size:9px;font-weight:600;letter-spacing:3px;text-transform:uppercase;color:var(--teal);margin-bottom:8px}
+.cc-val{font-family:var(--f-body);font-size:14px;color:rgba(18,38,32,.45)}
+.cc-val a{color:rgba(18,38,32,.45);text-decoration:none;border-bottom:1px solid rgba(18,38,32,.12);transition:all .2s}
+.cc-val a:hover{color:var(--teal);border-color:var(--teal)}
+.closing-bar{position:absolute;bottom:0;left:0;right:0;height:4px;background:linear-gradient(90deg,var(--forest),var(--teal),var(--teal-lt),var(--gold),var(--beige))}
+.closing-footer{font-family:var(--f-label);font-size:10px;letter-spacing:3px;text-transform:uppercase;color:rgba(18,38,32,.15)}
+
+/* ═══════ RESPONSIVE ═══════ */
+@media(max-width:900px){
+  .dna-grid,.icp-grid,.voice-pillars,.voice-vocab,.writing-grid,.social-grid,.app-grid,.logo-grid,.typo-grid,.aes-rules,.logo-rules,.palette-usage,.layout-params{grid-template-columns:1fr}
+  .palette-hero{flex-direction:column;height:auto}.ph{min-height:72px}
+  .dna-manifesto{grid-template-columns:1fr}
+  .aes-mood{flex-wrap:wrap}.aes-cell{flex:1 1 45%}
+  .logo-dont{grid-template-columns:1fr 1fr}
+  .sp-row{flex-wrap:wrap}.sp-col{flex:1 1 18%}
+  .nav-dots{display:none}
+  .closing-contact{gap:32px}
+}
+</style>
+</head>
+<body>
+
+<nav class="nav-dots" id="navDots"></nav>
+
+<!-- ═══════ COVER ═══════ -->
+<section id="cover" class="grain">
+  <div class="cover-circle"></div>
+  <div class="cover-circle-2"></div>
+  <div class="cover-monogram">EIDEN</div>
+  <div class="cover-line"></div>
+  <div class="cover-label">B R A N D &nbsp; I D E N T I T Y &nbsp; S Y S T E M</div>
+  <div class="cover-tagline">Where chaos becomes architecture.</div>
+  <div class="cover-meta">Version 2.0 · March 2026 · Confidential<br>Agadir, Morocco</div>
+  <div class="cover-bar"></div>
+</section>
+
+<!-- ═══════ 01 — BRAND DNA ═══════ -->
+<section id="dna" class="section">
+  <div class="s-num tl">01 — Brand DNA</div>
+  <h2 class="s-title dark">We Don't Consult.<br>We <em>Architect.</em></h2>
+  <p class="s-sub dark">EIDEN is a business architecture firm. We design the systems, blueprints, and operational frameworks that turn ambitious organisations into machines built to scale.</p>
+
+  <div class="dna-grid">
+    <div class="dna-card"><div class="dna-num">01</div><div class="dna-name">Structure Over Advice</div><p class="dna-desc">We don't give opinions. We build frameworks. Every engagement produces a blueprint — a tangible, operational system the client owns and operates.</p></div>
+    <div class="dna-card"><div class="dna-num">02</div><div class="dna-name">Quiet Confidence</div><p class="dna-desc">We state facts. Show results. Never boast. Never compare to competitors. The work speaks. Silence is a brand tool. Restraint signals mastery.</p></div>
+    <div class="dna-card"><div class="dna-num">03</div><div class="dna-name">Morocco-First, Always</div><p class="dna-desc">Darija when appropriate. Local examples over Silicon Valley references. Moroccan trust psychology over American sales tactics. We are from here. We build for here — and beyond.</p></div>
+    <div class="dna-card"><div class="dna-num">04</div><div class="dna-name">The Hydra Philosophy</div><p class="dna-desc">Every business is a living organism of interconnected systems. We see every connection. We architect every dependency. Nothing exists in isolation — our methods reflect that.</p></div>
+    <div class="dna-card"><div class="dna-num">05</div><div class="dna-name">Effects Serve Meaning</div><p class="dna-desc">Every animation, every colour, every word earns its place. If it doesn't communicate, it gets removed. When in doubt, we add whitespace. Decoration is never the goal.</p></div>
+    <div class="dna-card"><div class="dna-num">06</div><div class="dna-name">Built to Scale</div><p class="dna-desc">From Morocco to Africa to the world. Our systems are designed to be replicated, adapted, and scaled. Architecture isn't local — it's universal. The structure travels.</p></div>
+  </div>
+
+  <div class="dna-manifesto">
+    <div class="dna-m"><div class="dna-m-ghost">M</div><div class="dna-m-label">Mission</div><p class="dna-m-text">To architect the operational infrastructure that transforms ambitious Moroccan and African businesses into precision-built, scalable organisations — through systems, not advice.</p></div>
+    <div class="dna-m"><div class="dna-m-ghost">V</div><div class="dna-m-label">Vision</div><p class="dna-m-text">To become the defining reference of Business Architecture — from Morocco, across Africa, and into the world. The standard others measure against.</p></div>
+  </div>
+</section>
+
+<!-- ═══════ 02 — LOGO SYSTEM ═══════ -->
+<section id="logo" class="section">
+  <div class="s-num fr">02 — Logo System</div>
+  <h2 class="s-title dark">The EIDEN <em>Wordmark</em></h2>
+  <p class="s-sub dark">A bespoke wordmark set in Giaza — a high-contrast display serif with dramatic ink traps and interlocking letterforms. "Group" sits at the top-right of the N. The wordmark adapts to any surface through colour — never through distortion.</p>
+
+  <div class="logo-grid">
+    <div class="logo-cell"><div class="lv-wrap"><div class="lv-wordmark">EIDEN</div><div class="lv-group"></div></div><span class="logo-cell-label">On Canvas — Primary</span></div>
+    <div class="logo-cell"><div class="lv-wrap"><div class="lv-wordmark">EIDEN</div><div class="lv-group"></div></div><span class="logo-cell-label">On Forest — Reversed</span></div>
+    <div class="logo-cell"><div class="lv-wrap"><div class="lv-wordmark">EIDEN</div><div class="lv-group"></div></div><span class="logo-cell-label">On EIDEN Teal</span></div>
+    <div class="logo-cell"><div class="lv-wrap"><div class="lv-wordmark">EIDEN</div><div class="lv-group"></div></div><span class="logo-cell-label">Gold on Black — Premium</span></div>
+    <div class="logo-cell"><div class="lv-wrap"><div class="lv-wordmark">EIDEN</div><div class="lv-group"></div></div><span class="logo-cell-label">On Gold</span></div>
+    <div class="logo-cell"><div class="lv-wrap"><div class="lv-wordmark">EIDEN</div><div class="lv-group"></div></div><span class="logo-cell-label">On Teal Light</span></div>
+  </div>
+
+  <div class="logo-rules">
+    <div class="lr"><h4>Logo Typeface — Giaza</h4><p>The EIDEN wordmark is set exclusively in <strong>Giaza</strong>, a high-contrast display serif with dramatic ink traps, sharp diagonal stress, and architectural weight distribution. Giaza is reserved for the logo only — it is never used for headlines, body text, or any other brand application. "Group" is set in Cormorant Garamond SemiBold, uppercase, positioned at the top-right of the final letter.</p></div>
+    <div class="lr"><h4>Clear Space & Minimum Size</h4><p>Maintain clear space equal to the cap-height of the "E" in EIDEN on all four sides. The wordmark must never appear below 80px wide in digital or 20mm in print. The EG monogram must never appear below 24px / 6mm. These thresholds are non-negotiable.</p></div>
+  </div>
+
+  <div class="logo-dont">
+    <div class="dont-cell"><span class="dont-x">✕</span><span class="dont-vis">EIDEN</span><span class="dont-lbl">Never stretch or distort</span></div>
+    <div class="dont-cell"><span class="dont-x">✕</span><span class="dont-vis">EIDEN</span><span class="dont-lbl">Never reduce opacity</span></div>
+    <div class="dont-cell"><span class="dont-x">✕</span><span class="dont-vis">EIDEN</span><span class="dont-lbl">Never rotate or skew</span></div>
+    <div class="dont-cell"><span class="dont-x">✕</span><span class="dont-vis">EIDEN</span><span class="dont-lbl">Never change typeface</span></div>
+  </div>
+</section>
+
+<!-- ═══════ 03 — COLOR PALETTE ═══════ -->
+<section id="palette" class="section">
+  <div class="s-num tl">03 — Colour Palette</div>
+  <h2 class="s-title dark">Rooted in Earth,<br>Sharpened by <em>Teal</em></h2>
+  <p class="s-sub dark">White & beige as the canvas. Three greens as the signature. Gold as authority. Every colour has a job — none exist for decoration.</p>
+
+  <div class="palette-hero">
+    <div class="ph lgt" style="background:var(--canvas)"><span class="ph-name">Canvas White</span><span class="ph-hex">#FEFDFB</span><span class="ph-role">Primary background</span></div>
+    <div class="ph lgt" style="background:var(--beige)"><span class="ph-name">Warm Beige</span><span class="ph-hex">#F4EBD0</span><span class="ph-role">Secondary surface</span></div>
+    <div class="ph drk" style="background:var(--forest)"><span class="ph-name">Forest Green</span><span class="ph-hex">#122620</span><span class="ph-role">Text / dark surfaces</span></div>
+    <div class="ph drk" style="background:var(--teal)"><span class="ph-name">EIDEN Teal</span><span class="ph-hex">#0C5752</span><span class="ph-role">Brand accent / CTA</span></div>
+    <div class="ph drk" style="background:var(--teal-lt)"><span class="ph-name">Teal Light</span><span class="ph-hex">#0E7A73</span><span class="ph-role">Hover / secondary accent</span></div>
+    <div class="ph lgt" style="background:var(--gold)"><span class="ph-name">Authority Gold</span><span class="ph-hex">#CFC292</span><span class="ph-role">Premium highlights</span></div>
+  </div>
+
+  <div class="color-rule">
+    <div class="color-rule-title">The 70 / 20 / 10 Rule</div>
+    <p class="color-rule-desc">70% white & beige canvas. 20% forest, teal, and teal-light for structure and hierarchy. 10% gold and signal colours for premium moments and critical data. This ratio is non-negotiable across all touchpoints.</p>
+    <div class="color-rule-bar"><div class="crb-1"><span class="crb-label">70% Canvas</span></div><div class="crb-2"><span class="crb-label">20% Teal</span></div><div class="crb-3"><span class="crb-label">10%</span></div></div>
+  </div>
+
+  <div class="palette-usage">
+    <div class="pu"><div class="pu-dot" style="background:var(--forest)"></div><div class="pu-role">Headlines & Text</div><div class="pu-title">Forest Green</div><p class="pu-desc">Primary text colour. Headlines, body copy, and all typographic elements on light backgrounds.</p></div>
+    <div class="pu"><div class="pu-dot" style="background:var(--teal)"></div><div class="pu-role">Brand Accent</div><div class="pu-title">EIDEN Teal</div><p class="pu-desc">CTAs, links, keyword emphasis in headlines (max 1 per line), interactive elements, and brand-defining moments.</p></div>
+    <div class="pu"><div class="pu-dot" style="background:var(--gold)"></div><div class="pu-role">Premium Signal</div><div class="pu-title">Authority Gold</div><p class="pu-desc">Primary buttons (gold fill + white text), premium card borders, awards, certifications, and authority markers.</p></div>
+    <div class="pu"><div class="pu-dot" style="background:var(--canvas)"></div><div class="pu-role">Primary Canvas</div><div class="pu-title">Canvas White</div><p class="pu-desc">Default page background. Never use teal or gold as full-page backgrounds in standard layouts.</p></div>
+    <div class="pu"><div class="pu-dot" style="background:var(--beige)"></div><div class="pu-role">Secondary Surface</div><div class="pu-title">Warm Beige</div><p class="pu-desc">Section dividers, card backgrounds, feature highlights, and alternate-row shading for visual rhythm.</p></div>
+    <div class="pu"><div class="pu-dot" style="background:var(--teal-lt)"></div><div class="pu-role">Interactive State</div><div class="pu-title">Teal Light</div><p class="pu-desc">Hover states, secondary accents, progress indicators, and gradient endpoints paired with EIDEN Teal.</p></div>
+  </div>
+</section>
+
+<!-- ═══════ 04 — TYPOGRAPHY ═══════ -->
+<section id="typography" class="section grain">
+  <div class="s-num wh">04 — Typography</div>
+  <h2 class="s-title light">Five Voices,<br><em>Five Roles</em></h2>
+  <p class="s-sub light">Each typeface owns a single job. They never cross. Mixing roles dilutes the brand. This hierarchy is absolute.</p>
+
+  <!-- Giaza block -->
+  <div style="padding:40px 44px;background:rgba(207,194,146,.08);border:1px solid rgba(207,194,146,.12);margin-bottom:2px;position:relative;overflow:hidden">
+    <div class="fb-role" style="color:var(--gold)">Logo Exclusive · Giaza</div>
+    <div style="font-family:'DM Serif Display',serif;font-size:clamp(44px,6vw,72px);color:var(--gold);line-height:1;margin-bottom:14px;letter-spacing:1px;position:relative">EIDEN<span style="font-family:var(--f-label);font-size:12px;font-weight:600;letter-spacing:4px;text-transform:uppercase;position:absolute;top:-4px;margin-left:4px;color:var(--teal-lt)">Group</span></div>
+    <p class="fb-meta" style="color:rgba(207,194,146,.4)">Giaza is reserved exclusively for the logo wordmark. High-contrast display serif with dramatic ink traps and architectural weight. Never used for headlines, body, or any other brand application. This typeface is the brand's visual signature.</p>
+  </div>
+
+  <div class="typo-grid">
+    <div class="fb"><div class="fb-role">Headlines & Display · Outfit</div><div class="fb-spec-head">Where Chaos Becomes Architecture</div><p class="fb-meta">Weights: 300–900. Primary headline font for all surfaces.<br>Use 800 ExtraBold for page titles, 700 Bold for sections.</p></div>
+    <div class="fb"><div class="fb-role">Marketing & Editorial · DM Serif Display</div><div class="fb-spec-edit">The Hydra Has Awakened</div><p class="fb-meta">Weight: 400 Regular + Italic only.<br>For marketing headlines, content creation, editorial layouts, strategy decks.</p></div>
+    <div class="fb"><div class="fb-role">Labels & Navigation · Cormorant Garamond</div><div class="fb-spec-label">HYDRA ANALYSIS™ · ONION METHODOLOGY™</div><p class="fb-meta">Weights: 300–700. Uppercase with +0.06em tracking.<br>For labels, captions, methodology names, navigation, metadata.</p></div>
+    <div class="fb"><div class="fb-role">Body & UI · Inter</div><p class="fb-spec-body">EIDEN doesn't consult. We architect. 93% of Morocco's entrepreneurial fabric consists of micro, small and medium enterprises. We build the systems that turn these businesses into scalable organisations.</p><p class="fb-meta">Weights: 300–700. Line-height: 1.72–1.85.<br>For all body text, paragraphs, buttons, UI elements, form fields.</p></div>
+  </div>
+
+  <div class="type-scale">
+    <div class="ts-row"><span class="ts-lbl">Page Title</span><span class="ts-sz">48–64px</span><span style="font-family:var(--f-head);font-size:42px;font-weight:800;color:var(--canvas);letter-spacing:-.03em">EIDEN Group</span></div>
+    <div class="ts-row"><span class="ts-lbl">Section Title</span><span class="ts-sz">24–36px</span><span style="font-family:var(--f-head);font-size:30px;font-weight:700;color:var(--canvas);letter-spacing:-.02em">What We Architect</span></div>
+    <div class="ts-row"><span class="ts-lbl">Editorial Head</span><span class="ts-sz">18–30px</span><span style="font-family:var(--f-edit);font-size:24px;color:var(--gold)">The Hydra Sees Every Connection</span></div>
+    <div class="ts-row"><span class="ts-lbl">Label / Caption</span><span class="ts-sz">10–12px</span><span style="font-family:var(--f-label);font-size:11px;font-weight:600;letter-spacing:4px;text-transform:uppercase;color:var(--teal-lt)">Strategic Architecture</span></div>
+    <div class="ts-row"><span class="ts-lbl">Body Text</span><span class="ts-sz">14–16px</span><span style="font-family:var(--f-body);font-size:15px;font-weight:400;color:rgba(254,253,251,.4)">We design the systems your business runs through.</span></div>
+    <div class="ts-row"><span class="ts-lbl">Button</span><span class="ts-sz">14px</span><span style="font-family:var(--f-body);font-size:14px;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:var(--gold)">GET STARTED</span></div>
+  </div>
+
+  <div class="font-rule"><span class="fr-badge do">RULE</span><span class="fr-text">Logo = Giaza (exclusive). Headlines = Outfit. Marketing/Editorial = DM Serif Display. Labels = Cormorant Garamond. Body = Inter. Five fonts, five roles — they never cross.</span></div>
+  <div class="font-rule"><span class="fr-badge dont">NEVER</span><span class="fr-text">Never use Giaza outside the logo. Never use Outfit for body text. Never use Inter for headlines. Never use DM Serif for labels. Never mix two headline fonts on the same page.</span></div>
+</section>
+
+<!-- MARQUEE -->
+<div class="marquee-bar">
+  <div class="marquee-inner">
+    <span>Architect</span><span class="sep">·</span><span>Structure</span><span class="sep">·</span><span>Blueprint</span><span class="sep">·</span><span>Scale</span><span class="sep">·</span><span>Morocco</span><span class="sep">·</span><span>Hydra</span><span class="sep">·</span>
+    <span>Architect</span><span class="sep">·</span><span>Structure</span><span class="sep">·</span><span>Blueprint</span><span class="sep">·</span><span>Scale</span><span class="sep">·</span><span>Morocco</span><span class="sep">·</span><span>Hydra</span><span class="sep">·</span>
+  </div>
+</div>
+
+<!-- ═══════ 05 — VOICE & TONE ═══════ -->
+<section id="voice" class="section grain">
+  <div class="voice-bg">VOICE</div>
+  <div class="s-num wh">05 — Voice & Tone</div>
+  <h2 class="s-title light">Quiet Confidence.<br><em>Structural Language.</em></h2>
+  <p class="s-sub light">The way EIDEN speaks is as intentional as the systems we build. Every word is chosen. Every sentence is engineered.</p>
+
+  <div class="voice-pillars">
+    <div class="vp"><span class="vp-ico">🎯</span><div class="vp-name">Confident, Not Arrogant</div><p class="vp-desc">State facts. Show results. Never boast. Never compare to competitors. Never promise miracles. Let the work speak. Silence is a brand tool.</p><p class="vp-ex">"We architected a 35% efficiency increase in 6 months."</p></div>
+    <div class="vp"><span class="vp-ico">🏛️</span><div class="vp-name">Architecture, Not Consulting</div><p class="vp-desc">Say "architect" not "consultant." Say "build" not "fix." Say "blueprint" not "plan." Say "structure" not "strategy." The vocabulary is intentional and non-negotiable.</p><p class="vp-ex">"We build the structure your business runs through."</p></div>
+    <div class="vp"><span class="vp-ico">🇲🇦</span><div class="vp-name">Morocco-First, Always</div><p class="vp-desc">Darija when appropriate. Local examples over Silicon Valley references. Moroccan trust psychology over American sales tactics. We are from here. We build for here.</p><p class="vp-ex">"93% of Morocco's fabric = MSMEs. We build for them."</p></div>
+    <div class="vp"><span class="vp-ico">📐</span><div class="vp-name">Precision Over Flair</div><p class="vp-desc">Short sentences. Active voice. No filler words. No buzzwords. Every claim is backed by data or methodology. We write like we build — with structural intent.</p><p class="vp-ex">"Before you build, you diagnose. Then you architect."</p></div>
+    <div class="vp"><span class="vp-ico">🔬</span><div class="vp-name">Show, Don't Tell</div><p class="vp-desc">Case numbers over adjectives. Methodologies over promises. Frameworks over opinions. If we can't prove it with a system, we don't say it.</p><p class="vp-ex">"Revenue: +45,000 MAD/mo · Growth: +23% · 12 retainers."</p></div>
+    <div class="vp"><span class="vp-ico">⚡</span><div class="vp-name">Controlled Intensity</div><p class="vp-desc">We're not loud. We're precise. Our intensity comes from the weight of the statement, not the volume. One bold sentence per section. Maximum impact, minimum noise.</p><p class="vp-ex">"The Hydra sees every connection."</p></div>
+  </div>
+
+  <div class="voice-vocab">
+    <div class="vv">
+      <div class="vv-title">✓ EIDEN Vocabulary — Always Use</div>
+      <div class="vv-row"><span class="vv-ico">→</span><span class="vv-from">Consultant</span><span class="vv-to">Architect</span></div>
+      <div class="vv-row"><span class="vv-ico">→</span><span class="vv-from">Fix / Solve</span><span class="vv-to">Build / Construct</span></div>
+      <div class="vv-row"><span class="vv-ico">→</span><span class="vv-from">Plan / Strategy</span><span class="vv-to">Blueprint / Framework</span></div>
+      <div class="vv-row"><span class="vv-ico">→</span><span class="vv-from">Tips / Advice</span><span class="vv-to">System / Architecture</span></div>
+      <div class="vv-row"><span class="vv-ico">→</span><span class="vv-from">Help / Support</span><span class="vv-to">Engineer / Deploy</span></div>
+      <div class="vv-row"><span class="vv-ico">→</span><span class="vv-from">Clients</span><span class="vv-to">Partners / Organisations</span></div>
+      <div class="vv-row"><span class="vv-ico">→</span><span class="vv-from">Potential</span><span class="vv-to">Infrastructure</span></div>
+    </div>
+    <div class="vv">
+      <div class="vv-title">✕ Never Say — Banned Language</div>
+      <div class="vv-row"><span class="vv-ico">✕</span><span class="vv-plain">"Unlock your potential" — we build infrastructure, not motivation</span></div>
+      <div class="vv-row"><span class="vv-ico">✕</span><span class="vv-plain">"Growth hacking" — we architect sustainable growth systems</span></div>
+      <div class="vv-row"><span class="vv-ico">✕</span><span class="vv-plain">"Game-changing" — the work speaks, hyperbole doesn't</span></div>
+      <div class="vv-row"><span class="vv-ico">✕</span><span class="vv-plain">"Best-in-class" — we define the class, we don't rank within it</span></div>
+      <div class="vv-row"><span class="vv-ico">✕</span><span class="vv-plain">"Disruption" — we build order from chaos, not more chaos</span></div>
+      <div class="vv-row"><span class="vv-ico">✕</span><span class="vv-plain">"Synergy" or "leverage" — corporate jargon dilutes precision</span></div>
+      <div class="vv-row"><span class="vv-ico">✕</span><span class="vv-plain">"We're the best" — confidence is shown, never claimed</span></div>
+    </div>
+  </div>
+
+  <div class="writing-grid">
+    <div class="wg"><div class="wg-title">Headlines: The Punch</div><p class="wg-desc">Max 8 words. One idea per headline. One keyword in teal or gold — never both. Active voice mandatory. End with a period for weight.</p><div class="wg-example">"We don't consult. We architect."</div></div>
+    <div class="wg"><div class="wg-title">Body: The Substance</div><p class="wg-desc">Short paragraphs (3-4 lines max). Lead with the conclusion, then support with evidence. No filler sentences. Every paragraph earns its space.</p><div class="wg-example">"93% of Morocco's entrepreneurial fabric = MSMEs."</div></div>
+    <div class="wg"><div class="wg-title">Instagram: The Story</div><p class="wg-desc">Conversational, visual-first. Captions tell the story behind the work — the process, the challenge, the transformation. Show personality. Bilingual when it feels natural (FR/Darija). Reels and carousels push to max reach.</p><div class="wg-example">"This hotel had 12 departments and zero structure. 90 days later, it ran like clockwork."</div></div>
+    <div class="wg"><div class="wg-title">LinkedIn: The Authority</div><p class="wg-desc">Formal, data-driven, methodological. Lead with a stat or insight. Break down a framework. Share case results with numbers. No storytelling — pure substance. Thread format for longer breakdowns.</p><div class="wg-example">"93% of Morocco's SMEs lack operational blueprints. Here's the framework we deploy."</div></div>
+  </div>
+</section>
+
+<!-- ═══════ 06 — ICP ═══════ -->
+<section id="icp" class="section">
+  <div class="s-num tl">06 — Ideal Client Profile</div>
+  <h2 class="s-title dark">Who We <em>Build</em> For</h2>
+  <p class="s-sub dark">EIDEN architects for organisations that have outgrown advice and need infrastructure. These are the profiles we serve — and the ones we don't.</p>
+
+  <div class="icp-grid">
+    <div class="icp-card"><div class="icp-ico">🏨</div><div class="icp-name">Hospitality & Tourism</div><p class="icp-desc">Hotels, resorts, riads, and F&B groups seeking operational frameworks, revenue architecture, and digital transformation. Morocco's core industry — our deepest expertise.</p><div class="icp-tags"><span class="icp-tag">Hotels</span><span class="icp-tag">Resorts</span><span class="icp-tag">F&B</span><span class="icp-tag">Tourism</span></div></div>
+    <div class="icp-card gold"><div class="icp-ico">🏢</div><div class="icp-name">Growth-Stage SMEs</div><p class="icp-desc">Businesses generating 500K–10M MAD annually that have product-market fit but lack operational structure to scale. Revenue exists; systems don't.</p><div class="icp-tags"><span class="icp-tag">500K–10M MAD</span><span class="icp-tag">5–50 staff</span><span class="icp-tag">Scaling</span></div></div>
+    <div class="icp-card mint"><div class="icp-ico">🎓</div><div class="icp-name">Education & Training</div><p class="icp-desc">Private schools, universities, and training institutions looking to systematise operations, improve student acquisition, and build scalable academic frameworks.</p><div class="icp-tags"><span class="icp-tag">Schools</span><span class="icp-tag">Universities</span><span class="icp-tag">EdTech</span></div></div>
+    <div class="icp-card"><div class="icp-ico">🛍️</div><div class="icp-name">Retail & E-Commerce</div><p class="icp-desc">Brands transitioning from founder-led sales to systematic revenue engines. Needs include customer journey architecture, pricing frameworks, and operational SOPs.</p><div class="icp-tags"><span class="icp-tag">DTC</span><span class="icp-tag">E-commerce</span><span class="icp-tag">Retail chains</span></div></div>
+    <div class="icp-card gold"><div class="icp-ico">🏗️</div><div class="icp-name">Professional Services</div><p class="icp-desc">Agencies, law firms, medical practices, and consulting firms that need to productise their expertise and build repeatable delivery systems.</p><div class="icp-tags"><span class="icp-tag">Agencies</span><span class="icp-tag">Legal</span><span class="icp-tag">Medical</span></div></div>
+    <div class="icp-card mint"><div class="icp-ico">🌍</div><div class="icp-name">Pan-African Ventures</div><p class="icp-desc">Moroccan-founded businesses expanding across the continent. We architect the cross-border operational systems, compliance frameworks, and market-entry blueprints.</p><div class="icp-tags"><span class="icp-tag">Expansion</span><span class="icp-tag">Africa</span><span class="icp-tag">Cross-border</span></div></div>
+  </div>
+
+  <div class="icp-anti">
+    <div class="icp-anti-title">✕ Anti-ICP — Who We Don't Serve</div>
+    <div class="icp-anti-row"><span class="icp-anti-ico">✕</span><span class="icp-anti-t">Businesses seeking quick fixes, marketing-only engagements, or one-off logo design without operational context</span></div>
+    <div class="icp-anti-row"><span class="icp-anti-ico">✕</span><span class="icp-anti-t">Founders who want advice but resist structural change — our work requires implementation, not just strategy decks</span></div>
+    <div class="icp-anti-row"><span class="icp-anti-ico">✕</span><span class="icp-anti-t">Pre-revenue startups without validated product-market fit — we build scale systems, not MVPs</span></div>
+    <div class="icp-anti-row"><span class="icp-anti-ico">✕</span><span class="icp-anti-t">Organisations seeking the cheapest option — our architecture is an investment in infrastructure, not an expense line</span></div>
+  </div>
+</section>
+
+<!-- ═══════ 07 — VISUAL AESTHETIC ═══════ -->
+<section id="aesthetic" class="section">
+  <div class="s-num fr">07 — Visual Aesthetic & Creative Direction</div>
+  <h2 class="s-title dark">Effects Serve <em>Meaning.</em></h2>
+  <p class="s-sub dark">If it doesn't communicate, remove it. When in doubt, add whitespace. Decoration is never the goal — precision is.</p>
+
+  <div class="aes-mood">
+    <div class="aes-cell"><span class="aes-word">Structured</span></div>
+    <div class="aes-cell"><span class="aes-word">Intentional</span></div>
+    <div class="aes-cell"><span class="aes-word">Authoritative</span></div>
+    <div class="aes-cell"><span class="aes-word">Warm</span></div>
+    <div class="aes-cell"><span class="aes-word">Precise</span></div>
+  </div>
+
+  <div class="aes-rules">
+    <div class="ar do"><span class="ar-ico">📐</span><div class="ar-label">Generous Whitespace</div><p class="ar-desc">Whitespace is not empty — it's architecture. Use 80px+ between major sections. Let content breathe. Density signals chaos; space signals mastery.</p></div>
+    <div class="ar do"><span class="ar-ico">📊</span><div class="ar-label">Data as Visual</div><p class="ar-desc">Charts, KPIs, and numbers are visual elements. Use the forest/teal/gold palette. Data should be the hero of any case study or report, not decorative stock imagery.</p></div>
+    <div class="ar dont"><span class="ar-ico">🎨</span><div class="ar-label">No Gradients or Glows</div><p class="ar-desc">No drop shadows, no glow effects, no gradient meshes. The EIDEN aesthetic is flat, precise, and architectural. Depth comes from colour contrast, not digital effects.</p></div>
+    <div class="ar dont"><span class="ar-ico">📸</span><div class="ar-label">No Generic Stock</div><p class="ar-desc">Never use smiling-at-laptops stock photos. Use architectural photography, Moroccan textures, clean workspace shots, or data-driven visuals. Authenticity is mandatory.</p></div>
+    <div class="ar do"><span class="ar-ico">🏗️</span><div class="ar-label">Geometric Patterns</div><p class="ar-desc">Use subtle geometric grids, Moroccan zellige-inspired patterns, or architectural line drawings as background textures. Opacity max 4%. Patterns serve rhythm, not attention.</p></div>
+    <div class="ar do"><span class="ar-ico">✏️</span><div class="ar-label">Card Top-Border System</div><p class="ar-desc">White cards with 2–3px coloured top borders. Teal = strategy. Gold = premium. Red = critical. Blue = info. This system creates visual hierarchy without visual noise.</p></div>
+  </div>
+
+  <div class="aes-philosophy">
+    <p class="aes-p-text">"Every pixel earns its place. Every animation serves a purpose. We design like architects — with structural intent, not decorative impulse. The canvas is white because the work is the colour."</p>
+    <div class="aes-p-attr">— EIDEN Design Philosophy</div>
+  </div>
+</section>
+
+<!-- ═══════ 08 — SPACING ═══════ -->
+<section id="spacing" class="section">
+  <div class="s-num tl">08 — Spacing & Components</div>
+  <h2 class="s-title dark">8px Grid — <em>Precision</em><br>With Breathing Room</h2>
+  <p class="s-sub dark">Architects design with negative space. Every element earns its place on the grid.</p>
+
+  <div class="sp-row">
+    <div class="sp-col"><div class="sp-bar" style="height:12px"></div><span class="sp-val">4</span><span class="sp-nm">2XS</span></div>
+    <div class="sp-col"><div class="sp-bar" style="height:24px"></div><span class="sp-val">8</span><span class="sp-nm">XS</span></div>
+    <div class="sp-col"><div class="sp-bar" style="height:48px"></div><span class="sp-val">16</span><span class="sp-nm">SM</span></div>
+    <div class="sp-col"><div class="sp-bar" style="height:72px"></div><span class="sp-val">24</span><span class="sp-nm">MD</span></div>
+    <div class="sp-col"><div class="sp-bar" style="height:96px"></div><span class="sp-val">32</span><span class="sp-nm">LG</span></div>
+    <div class="sp-col"><div class="sp-bar" style="height:140px"></div><span class="sp-val">48</span><span class="sp-nm">XL</span></div>
+    <div class="sp-col"><div class="sp-bar" style="height:180px"></div><span class="sp-val">64</span><span class="sp-nm">2XL</span></div>
+    <div class="sp-col"><div class="sp-bar" style="height:220px"></div><span class="sp-val">80</span><span class="sp-nm">3XL</span></div>
+    <div class="sp-col"><div class="sp-bar" style="height:280px"></div><span class="sp-val">120</span><span class="sp-nm">4XL</span></div>
+  </div>
+
+  <div class="layout-params">
+    <div class="lp"><div class="lp-name">Max Content Width</div><div class="lp-val">1100px</div></div>
+    <div class="lp"><div class="lp-name">Page Padding</div><div class="lp-val">24–40px responsive</div></div>
+    <div class="lp"><div class="lp-name">Section Gap</div><div class="lp-val">80px</div></div>
+    <div class="lp"><div class="lp-name">Card Radius</div><div class="lp-val">14px</div></div>
+    <div class="lp"><div class="lp-name">Button Radius</div><div class="lp-val">Pill (100px)</div></div>
+    <div class="lp"><div class="lp-name">Card Padding</div><div class="lp-val">20–24px</div></div>
+    <div class="lp"><div class="lp-name">Line Height</div><div class="lp-val">1.72–1.85</div></div>
+    <div class="lp"><div class="lp-name">Nav Height</div><div class="lp-val">56px fixed, glass blur</div></div>
+    <div class="lp"><div class="lp-name">Top-Border Width</div><div class="lp-val">2–3px</div></div>
+  </div>
+</section>
+
+<!-- ═══════ 09 — SOCIAL & DIGITAL ═══════ -->
+<section id="social" class="section grain">
+  <div class="s-num wh">09 — Social & Digital Presence</div>
+  <h2 class="s-title light">Every Platform,<br><em>Maximum Capacity</em></h2>
+  <p class="s-sub light">Every platform is pushed to its maximum capacity. Each one has a distinct role — and they never overlap. Instagram tells the story. LinkedIn deploys the strategy. The website closes the deal.</p>
+
+  <div class="social-grid">
+    <div class="sg"><div class="sg-ico">📷</div><div class="sg-name">Instagram — The Stage</div><p class="sg-desc">This is where we showcase our work, tell our story, and let people see who we are. Portfolio pieces, project transformations, behind-the-scenes of how we build, team moments, the EIDEN journey. Visual, human, and cinematic — not corporate or advice-driven. We show the craft, the process, the results. Reels, carousels, and stories used to maximum capacity.</p><div class="sg-handle">@eiden.group</div></div>
+    <div class="sg"><div class="sg-ico">💼</div><div class="sg-name">LinkedIn — The War Room</div><p class="sg-desc">The formal channel. This is where we deploy stats, strategies, methodology breakdowns, market intelligence, and thought leadership. Data-heavy long-form posts. Case study results with numbers. Business Architecture frameworks. Professional tone — no storytelling, no personality content. Pure substance and authority. Articles, documents, and carousel data decks.</p><div class="sg-handle">EIDEN Group</div></div>
+    <div class="sg"><div class="sg-ico">🌐</div><div class="sg-name">Website — The Blueprint</div><p class="sg-desc">The definitive touchpoint and conversion engine. Canvas white dominant. Outfit headlines. Inter body. Gold CTAs. Every page follows the 70/20/10 colour rule. Maximum 1 dark band per page. Blog content bridges Instagram storytelling with LinkedIn authority.</p><div class="sg-handle">eiden-group.com</div></div>
+    <div class="sg"><div class="sg-ico">📊</div><div class="sg-name">Content Pillars</div><p class="sg-desc"><strong>Instagram:</strong> Work showcase (40%) · Our journey & story (30%) · Team & culture (20%) · Client wins (10%).<br><strong>LinkedIn:</strong> Business Architecture insights (40%) · Morocco market data (25%) · Case study results (20%) · Methodology deep-dives (15%).</p></div>
+    <div class="sg"><div class="sg-ico">🎨</div><div class="sg-name">Visual Templates</div><p class="sg-desc"><strong>Instagram:</strong> Cinematic project shots, clean portfolio cards on beige, story sequences with teal accents, reel thumbnails with Giaza logo.<br><strong>LinkedIn:</strong> Data cards on forest backgrounds, stat-heavy carousels, methodology diagrams on canvas white, report-style visuals.</p></div>
+    <div class="sg"><div class="sg-ico">📱</div><div class="sg-name">Posting Cadence</div><p class="sg-desc"><strong>Instagram:</strong> 4–5 posts/week + daily stories when active. Reels: 2–3/week. Every post is a portfolio piece.<br><strong>LinkedIn:</strong> 2–3 articles/week. 1 carousel data deck/week. Blog cross-posts: 2/month. Every post is an authority asset.</p></div>
+  </div>
+</section>
+
+<!-- ═══════ 10 — APPLICATIONS ═══════ -->
+<section id="applications" class="section">
+  <div class="s-num fr">10 — Brand Applications</div>
+  <h2 class="s-title dark">Architecture <em>In Practice</em></h2>
+  <p class="s-sub dark">How the brand system deploys across every touchpoint and material.</p>
+
+  <div class="app-grid">
+    <div class="app-card"><div class="app-ico">📄</div><div class="app-title">Proposals & Decks</div><p class="app-desc">Beige/canvas base. Outfit 800 for titles. Cormorant Garamond labels. Forest/teal card borders. One dark-band section per deck maximum.</p></div>
+    <div class="app-card"><div class="app-ico">💻</div><div class="app-title">Website & Digital</div><p class="app-desc">Canvas white primary. 70/20/10 rule enforced. Gold pill buttons with white text. Glass-blur nav at 56px. Card top-border colour system.</p></div>
+    <div class="app-card"><div class="app-ico">✉️</div><div class="app-title">Email & Signatures</div><p class="app-desc">Plain text body in Inter. Teal name + gold title. EG monogram at 24px. Tagline in Cormorant Garamond italic. No images in signature block.</p></div>
+    <div class="app-card"><div class="app-ico">🖨️</div><div class="app-title">Print & Stationery</div><p class="app-desc">Heavyweight uncoated stock in warm white. Gold foil on forest green for premium pieces. Logo in forest on canvas or gold on forest. Never full-bleed teal.</p></div>
+    <div class="app-card"><div class="app-ico">📊</div><div class="app-title">Reports & Audits</div><p class="app-desc">Structured grid layout. Data-heavy with teal/gold chart palette. Methodology badges in Cormorant Garamond. Forest section dividers. Executive summary on page 1.</p></div>
+    <div class="app-card"><div class="app-ico">🏷️</div><div class="app-title">Merchandise & Swag</div><p class="app-desc">Minimal. EG monogram only — no full wordmark on merchandise. Forest green on cream fabric. Gold thread for premium embroidery. Less is architecture.</p></div>
+  </div>
+</section>
+
+<!-- ═══════ CLOSING ═══════ -->
+<section id="closing" class="grain">
+  <div class="cover-circle" style="top:-10%;right:-15%;width:45vw;height:45vw"></div>
+  <div class="closing-mono" style="padding-top:120px">EIDEN</div>
+  <div class="closing-line"></div>
+  <div class="closing-tag">Where chaos becomes architecture.</div>
+  <div class="closing-contact">
+    <div class="cc-item"><div class="cc-label">Website</div><div class="cc-val"><a href="https://eiden-group.com">eiden-group.com</a></div></div>
+    <div class="cc-item"><div class="cc-label">Email</div><div class="cc-val"><a href="mailto:contact@eiden-group.com">contact@eiden-group.com</a></div></div>
+    <div class="cc-item"><div class="cc-label">Instagram</div><div class="cc-val"><a href="https://instagram.com/eiden.group">@eiden.group</a></div></div>
+    <div class="cc-item"><div class="cc-label">Location</div><div class="cc-val">Agadir Bay, Technopole 1<br>Bloc B, Agadir 80000</div></div>
+  </div>
+  <div class="closing-footer" style="padding-bottom:120px">EIDEN GROUP · Brand Identity System v2.0 · March 2026</div>
+  <div class="cover-bar" style="position:absolute;bottom:0;left:0;right:0;height:4px;background:linear-gradient(90deg,var(--forest),var(--teal),var(--teal-lt),var(--gold),var(--beige))"></div>
+</section>
+
+<script>
+const sections=['cover','dna','logo','palette','typography','voice','icp','aesthetic','spacing','social','applications','closing'];
+const darkSets=new Set(['typography','voice','social']);
+const dotsC=document.getElementById('navDots');
+sections.forEach((id,i)=>{const d=document.createElement('div');d.className='nav-dot';d.addEventListener('click',()=>document.getElementById(id).scrollIntoView({behavior:'smooth'}));dotsC.appendChild(d)});
+const dots=dotsC.querySelectorAll('.nav-dot');
+const obs=new IntersectionObserver(entries=>{entries.forEach(e=>{if(e.isIntersecting){const idx=sections.indexOf(e.target.id);dots.forEach((d,i)=>{d.classList.toggle('active',i===idx);d.style.borderColor=i===idx?'var(--teal)':(darkSets.has(e.target.id)?'rgba(254,253,251,.2)':'rgba(12,87,82,.2)');if(i!==idx)d.style.background='transparent'})}})},{threshold:.3});
+sections.forEach(id=>{const el=document.getElementById(id);if(el)obs.observe(el)});
+</script>
+</body>
+</html>

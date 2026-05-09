@@ -8,8 +8,7 @@ STORAGES["staticfiles"] = {  # noqa: F405
     "BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage",
 }
 
-# Use console email backend in development
-EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
+# Email backend follows EMAIL_BACKEND_TYPE from .env (smtp or console)
 
 # Disable CSP in development
 CSP_REPORT_ONLY = True

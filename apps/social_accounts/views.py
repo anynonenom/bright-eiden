@@ -84,10 +84,12 @@ def _get_configured_platforms(org_id):
 
 
 def _build_redirect_uri(request, platform):
-    """Build the OAuth callback URL."""
+    """Build the OAuth callback URL using APP_URL so it works correctly behind a reverse proxy."""
     from django.urls import reverse
 
-    return request.build_absolute_uri(reverse("social_accounts:oauth_callback", kwargs={"platform": platform}))
+    path = reverse("social_accounts:oauth_callback", kwargs={"platform": platform})
+    base = settings.APP_URL.rstrip("/")
+    return f"{base}{path}"
 
 
 def _sign_state(workspace_id, platform, user_id, nonce):

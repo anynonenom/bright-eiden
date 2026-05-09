@@ -6,6 +6,13 @@ services:
     environment:
       - DJANGO_SETTINGS_MODULE=config.settings.development
       - DATABASE_URL=postgres://postgres:postgres@postgres:5432/brightbean
+      - EMAIL_BACKEND_TYPE=smtp
+      - EMAIL_HOST=smtp.resend.com
+      - EMAIL_PORT=587
+      - EMAIL_HOST_USER=resend
+      - EMAIL_HOST_PASSWORD=re_HEzEsHd7_Ly9HhAohkSJ4C4MNqewwXe3Q
+      - EMAIL_USE_TLS=True
+      - DEFAULT_FROM_EMAIL=onboarding@resend.dev
 
   worker:
     volumes:
@@ -13,3 +20,10 @@ services:
     environment:
       - DJANGO_SETTINGS_MODULE=config.settings.development
       - DATABASE_URL=postgres://postgres:postgres@postgres:5432/brightbean
+      - EMAIL_BACKEND_TYPE=smtp
+      - EMAIL_HOST=smtp.resend.com
+      - EMAIL_PORT=587
+      - EMAIL_HOST_USER=resend
+      - EMAIL_HOST_PASSWORD=re_HEzEsHd7_Ly9HhAohkSJ4C4MNqewwXe3Q
+      - EMAIL_USE_TLS=True
+      - DEFAULT_FROM_EMAIL=onboarding@resend.dev

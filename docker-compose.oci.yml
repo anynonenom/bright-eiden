@@ -1,0 +1,142 @@
+## ═══════════════════════════════════════════════════════════════
+##  EIDEN × BrightBean Studio — Oracle Cloud Infrastructure
+##  Production deployment via Docker Compose
+##
+##  Usage:
+##    docker compose -f docker-compose.oci.yml up -d
+##
+##  Prerequisites:
+##    - Ubuntu 22.04 OCI Compute VM (ARM Ampere or AMD x86)
+##    - Docker + Docker Compose installed (see deploy-oci.sh)
+##    - .env file populated from .env.oci.example
+##    - DNS A record pointing your domain to the VM public IP
+## ═══════════════════════════════════════════════════════════════
+
+x-app-common: &app-common
+  build:
+    context: .
+    dockerfile: Dockerfile
+  env_file:
+    - .env
+  environment:
+    - DJANGO_SETTINGS_MODULE=config.settings.production
+  restart: unless-stopped
+
+services:
+  # ── Database migrations (runs once on deploy) ────────────────
+  migrate:
+    <<: *app-common
+    command: python manage.py migrate --noinput
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: "no"
+
+  # ── Collect static files (runs once on deploy) ───────────────
+  collectstatic:
+    <<: *app-common
+    command: python manage.py collectstatic --noinput
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+    restart: "no"
+
+  # ── Web application (Gunicorn) ───────────────────────────────
+  app:
+    <<: *app-common
+    command: >
+      gunicorn config.wsgi:application
+      --bind 0.0.0.0:8000
+      --workers 3
+      --threads 2
+      --worker-class gthread
+      --worker-tmp-dir /dev/shm
+      --timeout 120
+      --keep-alive 5
+      --access-logfile -
+      --error-logfile -
+    volumes:
+      - media_data:/app/media
+    depends_on:
+      collectstatic:
+        condition: service_completed_successfully
+      postgres:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health/')"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 20s
+
+  # ── Background task worker ────────────────────────────────────
+  worker:
+    <<: *app-common
+    command: python manage.py process_tasks
+    volumes:
+      - media_data:/app/media
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+      postgres:
+        condition: service_healthy
+
+  # ── Maintenance tasks (sessions, orphaned media cleanup) ──────
+  maintenance:
+    <<: *app-common
+    command: >
+      sh -c "
+      while true; do
+        echo \"[maintenance] $$(date): Running clearsessions...\";
+        python manage.py clearsessions;
+        echo \"[maintenance] $$(date): Running media cleanup...\";
+        python manage.py cleanup_orphaned_media --once --min-age-days 14;
+        echo \"[maintenance] $$(date): Done. Sleeping 24h.\";
+        sleep 86400;
+      done
+      "
+    volumes:
+      - media_data:/app/media
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+
+  # ── PostgreSQL 16 ─────────────────────────────────────────────
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-brightbean}
+      POSTGRES_USER: ${POSTGRES_USER:-brightbean}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD must be set}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-brightbean} -d ${POSTGRES_DB:-brightbean}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+  # ── Caddy reverse proxy with automatic TLS ───────────────────
+  caddy:
+    image: caddy:2-alpine
+    ports:
+      - "80:80"
+      - "443:443"
+      - "443:443/udp"   # HTTP/3 (QUIC)
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    environment:
+      APP_DOMAIN: ${APP_DOMAIN:-}
+    depends_on:
+      app:
+        condition: service_healthy
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
+  media_data:
+  caddy_data:
+  caddy_config:

@@ -1,4 +1,38 @@
-{$APP_DOMAIN:localhost} {
-    reverse_proxy app:8000
-    encode gzip
+# ═══════════════════════════════════════════════════════════════
+#  BrightBean Studio — Caddy Reverse Proxy
+#  HTTP-only when APP_DOMAIN is an IP address.
+#  Switch to domain + auto HTTPS by setting APP_DOMAIN to a real domain.
+# ═══════════════════════════════════════════════════════════════
+
+{
+    auto_https off
+}
+
+:{$CADDY_PORT:80} {
+    # Proxy to Django/Gunicorn
+    reverse_proxy app:8000 {
+        header_up X-Forwarded-Proto {scheme}
+        header_up X-Forwarded-For {remote_host}
+        header_up X-Real-IP {remote_host}
+        header_up Host {host}
+    }
+
+    # Compression
+    encode zstd gzip
+
+    # Security headers
+    header {
+        X-Frame-Options "SAMEORIGIN"
+        X-Content-Type-Options "nosniff"
+        Referrer-Policy "strict-origin-when-cross-origin"
+        Permissions-Policy "geolocation=(), microphone=(), camera=(self)"
+        -Server
+    }
+
+    # Logging
+    log {
+        output stdout
+        format json
+        level WARN
+    }
 }

@@ -1,0 +1,592 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BrightBean Studio — Operations Guide</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #f5f5f0; color: #1a1a1a; line-height: 1.6; }
+  .header { background: #0C5752; color: #fff; padding: 40px 48px; }
+  .header h1 { font-size: 28px; font-weight: 700; margin-bottom: 6px; }
+  .header p { opacity: .75; font-size: 15px; }
+  .container { max-width: 960px; margin: 0 auto; padding: 40px 24px; }
+  .toc { background: #fff; border: 1px solid #e5e5e0; padding: 24px 28px; margin-bottom: 40px; border-radius: 4px; }
+  .toc h2 { font-size: 13px; text-transform: uppercase; letter-spacing: .08em; color: #888; margin-bottom: 12px; }
+  .toc ol { padding-left: 20px; }
+  .toc li { margin-bottom: 6px; }
+  .toc a { color: #0C5752; text-decoration: none; font-size: 14px; }
+  .toc a:hover { text-decoration: underline; }
+  .section { background: #fff; border: 1px solid #e5e5e0; margin-bottom: 24px; border-radius: 4px; overflow: hidden; }
+  .section-header { background: #0C5752; color: #fff; padding: 16px 24px; }
+  .section-header h2 { font-size: 16px; font-weight: 600; }
+  .section-header p { font-size: 13px; opacity: .8; margin-top: 4px; }
+  .section-body { padding: 24px; }
+  .step { margin-bottom: 28px; padding-bottom: 28px; border-bottom: 1px solid #f0f0eb; }
+  .step:last-child { margin-bottom: 0; padding-bottom: 0; border-bottom: none; }
+  .step h3 { font-size: 14px; font-weight: 600; color: #0C5752; margin-bottom: 6px; display: flex; align-items: center; gap: 8px; }
+  .step h3 .num { background: #0C5752; color: #fff; width: 22px; height: 22px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; flex-shrink: 0; }
+  .step p { font-size: 14px; color: #555; margin-bottom: 10px; }
+  .step .why { background: #f0f8f7; border-left: 3px solid #0C5752; padding: 10px 14px; font-size: 13px; color: #444; margin-bottom: 10px; border-radius: 0 4px 4px 0; }
+  .step .why strong { color: #0C5752; }
+  code, pre { font-family: 'SF Mono', 'Fira Code', monospace; }
+  pre { background: #1a1a1a; color: #e8e8e8; padding: 16px 20px; font-size: 13px; line-height: 1.7; overflow-x: auto; border-radius: 4px; margin: 8px 0; }
+  .tag { display: inline-block; font-size: 11px; font-weight: 600; padding: 2px 8px; border-radius: 20px; margin-right: 4px; }
+  .tag.local { background: #e8f5e9; color: #2e7d32; }
+  .tag.server { background: #e3f2fd; color: #1565c0; }
+  .tag.browser { background: #fff3e0; color: #e65100; }
+  .tag.once { background: #f3e5f5; color: #6a1b9a; }
+  .note { background: #fffbeb; border: 1px solid #f59e0b; padding: 12px 16px; border-radius: 4px; font-size: 13px; color: #92400e; margin-top: 10px; }
+  .note strong { color: #78350f; }
+  h2.standalone { font-size: 13px; text-transform: uppercase; letter-spacing: .08em; color: #888; margin: 40px 0 12px; padding: 0 2px; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>BrightBean Studio — Operations Guide</h1>
+  <p>Every command used to build, deploy, and maintain this app — with explanations.</p>
+</div>
+
+<div class="container">
+
+  <div class="toc">
+    <h2>Contents</h2>
+    <ol>
+      <li><a href="#local">Local Development</a></li>
+      <li><a href="#deploy">First-Time Deployment to Oracle Cloud</a></li>
+      <li><a href="#updates">Pushing Updates to Production</a></li>
+      <li><a href="#ssl">SSL / Domain Setup</a></li>
+      <li><a href="#email">Email (Resend)</a></li>
+      <li><a href="#media">Media & Storage</a></li>
+      <li><a href="#admin">Admin Tasks</a></li>
+      <li><a href="#troubleshoot">Troubleshooting</a></li>
+    </ol>
+  </div>
+
+  <!-- ── LOCAL DEV ── -->
+  <div class="section" id="local">
+    <div class="section-header">
+      <h2>1. Local Development</h2>
+      <p>Running the app on your Mac for development</p>
+    </div>
+    <div class="section-body">
+
+      <div class="step">
+        <h3><span class="num">1</span> Start the app locally</h3>
+        <div class="why"><strong>Why:</strong> Runs the Django app + PostgreSQL inside Docker on your Mac so you can develop without installing Python or Postgres manually.</div>
+        <span class="tag local">Local Mac</span>
+        <pre>cd /Users/mac/Desktop/Eiden-web-apps/brightbean-studio
+docker compose up -d</pre>
+        <p>App runs at <code>http://localhost:8000</code></p>
+      </div>
+
+      <div class="step">
+        <h3><span class="num">2</span> Stop the app</h3>
+        <span class="tag local">Local Mac</span>
+        <pre>docker compose down</pre>
+      </div>
+
+      <div class="step">
+        <h3><span class="num">3</span> Restart after code changes</h3>
+        <div class="why"><strong>Why:</strong> Django's dev server auto-reloads Python files, but if you change <code>.env</code> or docker-compose files you need a full restart.</div>
+        <span class="tag local">Local Mac</span>
+        <pre># For .py / .html changes — auto-reloads, no action needed
+
+# For .env or docker-compose changes:
+docker compose up -d</pre>
+      </div>
+
+      <div class="step">
+        <h3><span class="num">4</span> View logs</h3>
+        <span class="tag local">Local Mac</span>
+        <pre># All services
+docker compose logs -f
+
+# Just the app
+docker compose logs -f app
+
+# Just the background worker
+docker compose logs -f worker</pre>
+      </div>
+
+      <div class="step">
+        <h3><span class="num">5</span> Run database migrations after model changes</h3>
+        <div class="why"><strong>Why:</strong> Every time you change a Django model (add field, create model) you must create and apply a migration so the database schema updates.</div>
+        <span class="tag local">Local Mac</span>
+        <pre>docker compose exec app python manage.py makemigrations
+docker compose exec app python manage.py migrate</pre>
+      </div>
+
+      <div class="step">
+        <h3><span class="num">6</span> Create a local admin account</h3>
+        <span class="tag local">Local Mac</span>
+        <pre>docker compose exec app python manage.py createsuperuser</pre>
+      </div>
+
+      <div class="step">
+        <h3><span class="num">7</span> Rebuild Docker image (after adding Python packages)</h3>
+        <div class="why"><strong>Why:</strong> If you add a new package to <code>requirements.txt</code>, the Docker image must be rebuilt so it's installed inside the container.</div>
+        <span class="tag local">Local Mac</span>
+        <pre>docker compose build
+docker compose up -d</pre>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ── DEPLOY ── -->
+  <div class="section" id="deploy">
+    <div class="section-header">
+      <h2>2. First-Time Deployment to Oracle Cloud</h2>
+      <p>How we deployed to the OCI VM at 130.61.245.119</p>
+    </div>
+    <div class="section-body">
+
+      <div class="step">
+        <h3><span class="num">1</span> Copy SSH key and set permissions</h3>
+        <div class="why"><strong>Why:</strong> SSH keys must have permission 600 (owner read/write only) or SSH refuses to use them for security reasons.</div>
+        <span class="tag local">Local Mac</span>
+        <pre>cp ~/Downloads/ssh-key-2026-05-04.key ~/.ssh/oci_brightbean.key
+chmod 600 ~/.ssh/oci_brightbean.key</pre>
+      </div>
+
+      <div class="step">
+        <h3><span class="num">2</span> SSH into the server</h3>
+        <span class="tag local">Local Mac</span>
+        <pre>ssh -i ~/.ssh/oci_brightbean.key opc@130.61.245.119</pre>
+        <p>Note: Oracle Linux uses <code>opc</code> as the default user, not <code>ubuntu</code>.</p>
+      </div>
+
+      <div class="step">
+        <h3><span class="num">3</span> Install Docker on Oracle Linux</h3>
+        <div class="why"><strong>Why:</strong> Oracle Linux uses <code>dnf</code> (not <code>apt</code>). We add Docker's official RHEL repo then install.</div>
+        <span class="tag server">On Server</span>
+        <pre>sudo dnf install -y dnf-plugins-core
+sudo dnf config-manager --add-repo https://download.docker.com/linux/rhel/docker-ce.repo
+sudo dnf install -y docker-ce docker-ce-cli containerd.io docker-compose-plugin
+sudo systemctl enable docker --now
+sudo usermod -aG docker opc</pre>
+      </div>
+
+      <div class="step">
+        <h3><span class="num">4</span> Install rsync on server</h3>
+        <span class="tag server">On Server</span>
+        <pre>sudo dnf install -y rsync</pre>
+      </div>
+
+      <div class="step">
+        <h3><span class="num">5</span> Fix Docker DNS</h3>
+        <div class="why"><strong>Why:</strong> Oracle Linux's default DNS (127.0.0.53) doesn't work inside Docker containers. We tell Docker to use Google DNS (8.8.8.8) so containers can reach the internet (needed for Let's Encrypt SSL).</div>
+        <span class="tag server">On Server</span>
+        <pre>echo '{"dns": ["8.8.8.8", "8.8.4.4"]}' | sudo tee /etc/docker/daemon.json
+sudo systemctl restart docker</pre>
+      </div>
+
+      <div class="step">
+        <h3><span class="num">6</span> Open firewall ports on Oracle Linux</h3>
+        <div class="why"><strong>Why:</strong> Oracle Linux uses <code>firewalld</code> (not UFW). We need ports 80 (HTTP) and 443 (HTTPS) open at the OS level.</div>
+        <span class="tag server">On Server</span>
+        <pre>sudo firewall-cmd --permanent --add-port=80/tcp
+sudo firewall-cmd --permanent --add-port=443/tcp
+sudo firewall-cmd --permanent --add-port=443/udp
+sudo firewall-cmd --reload</pre>
+        <div class="note"><strong>Also required:</strong> In OCI Console → Networking → Virtual Cloud Networks → Security Lists → Add Ingress Rules for TCP port 80 and TCP port 443 with Source CIDR <code>0.0.0.0/0</code> and <strong>Source Port Range left blank</strong>.</div>
+      </div>
+
+      <div class="step">
+        <h3><span class="num">7</span> Sync project files from Mac to server</h3>
+        <div class="why"><strong>Why:</strong> <code>rsync</code> efficiently copies only changed files. We exclude <code>.git</code>, <code>__pycache__</code>, and <code>.env</code> since they shouldn't be on the server.</div>
+        <span class="tag local">Local Mac</span>
+        <pre>rsync -az \
+  -e "ssh -i ~/.ssh/oci_brightbean.key -o StrictHostKeyChecking=no" \
+  --exclude='.git' --exclude='__pycache__' --exclude='*.pyc' \
+  --exclude='.env' --exclude='media/' --exclude='staticfiles/' \
+  /Users/mac/Desktop/Eiden-web-apps/brightbean-studio/ \
+  opc@130.61.245.119:/opt/brightbean/</pre>
+      </div>
+
+      <div class="step">
+        <h3><span class="num">8</span> Create production .env on server</h3>
+        <span class="tag server">On Server</span>
+        <pre>cp /opt/brightbean/.env.production /opt/brightbean/.env</pre>
+      </div>
+
+      <div class="step">
+        <h3><span class="num">9</span> Build Docker images on server</h3>
+        <div class="why"><strong>Why:</strong> The server builds its own Docker image from the Dockerfile. This installs all Python packages inside the container.</div>
+        <span class="tag server">On Server</span>
+        <pre>cd /opt/brightbean
+sudo docker compose -f docker-compose.oci.yml build</pre>
+      </div>
+
+      <div class="step">
+        <h3><span class="num">10</span> Run migrations and start all services</h3>
+        <div class="why"><strong>Why:</strong> Migrations create all database tables. We run them before starting the app so the app doesn't crash on missing tables.</div>
+        <span class="tag server">On Server</span>
+        <pre>cd /opt/brightbean
+
+# Start database first
+sudo docker compose -f docker-compose.oci.yml up -d postgres
+sleep 10
+
+# Run migrations
+sudo docker compose -f docker-compose.oci.yml run --rm --no-deps migrate
+
+# Collect static files
+sudo docker compose -f docker-compose.oci.yml run --rm --no-deps collectstatic
+
+# Start everything
+sudo docker compose -f docker-compose.oci.yml up -d app worker maintenance caddy</pre>
+      </div>
+
+      <div class="step">
+        <h3><span class="num">11</span> Create admin superuser</h3>
+        <span class="tag server">On Server</span>
+        <pre>sudo docker compose -f /opt/brightbean/docker-compose.oci.yml exec app python manage.py createsuperuser</pre>
+      </div>
+
+      <div class="step">
+        <h3><span class="num">12</span> Stop nginx (was blocking port 80)</h3>
+        <div class="why"><strong>Why:</strong> Oracle Linux ships with nginx pre-installed and running on port 80. We disable it so Caddy can use that port.</div>
+        <span class="tag once">One-time only</span>
+        <span class="tag server">On Server</span>
+        <pre>sudo systemctl stop nginx
+sudo systemctl disable nginx</pre>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ── UPDATES ── -->
+  <div class="section" id="updates">
+    <div class="section-header">
+      <h2>3. Pushing Updates to Production</h2>
+      <p>Every time you make changes and want to deploy them live</p>
+    </div>
+    <div class="section-body">
+
+      <div class="step">
+        <h3><span class="num">1</span> Sync changed files to server</h3>
+        <span class="tag local">Local Mac</span>
+        <pre>rsync -az \
+  -e "ssh -i ~/.ssh/oci_brightbean.key -o StrictHostKeyChecking=no" \
+  --exclude='.git' --exclude='__pycache__' --exclude='*.pyc' \
+  --exclude='.env' --exclude='media/' --exclude='staticfiles/' \
+  /Users/mac/Desktop/Eiden-web-apps/brightbean-studio/ \
+  opc@130.61.245.119:/opt/brightbean/</pre>
+      </div>
+
+      <div class="step">
+        <h3><span class="num">2a</span> If you only changed templates or Python files</h3>
+        <div class="why"><strong>Why:</strong> Template and Python changes don't need a rebuild — just restart gunicorn.</div>
+        <span class="tag server">On Server</span>
+        <pre>sudo docker compose -f /opt/brightbean/docker-compose.oci.yml restart app</pre>
+      </div>
+
+      <div class="step">
+        <h3><span class="num">2b</span> If you added new static files (images, CSS, JS)</h3>
+        <div class="why"><strong>Why:</strong> Static files must be collected and hashed by WhiteNoise before the app can serve them. The copy+collectstatic approach works without rebuilding the image.</div>
+        <span class="tag server">On Server</span>
+        <pre># Copy the new file into the running container
+sudo docker cp /opt/brightbean/static/img/yourfile.jpg brightbean-app-1:/app/static/img/yourfile.jpg
+
+# Run collectstatic inside the app container
+sudo docker exec brightbean-app-1 python manage.py collectstatic --noinput
+
+# Restart app
+sudo docker compose -f /opt/brightbean/docker-compose.oci.yml restart app</pre>
+      </div>
+
+      <div class="step">
+        <h3><span class="num">2c</span> If you added new Python packages to requirements.txt</h3>
+        <div class="why"><strong>Why:</strong> New packages must be installed inside the Docker image. This requires a full rebuild.</div>
+        <span class="tag server">On Server</span>
+        <pre>cd /opt/brightbean
+sudo docker compose -f docker-compose.oci.yml build
+sudo docker compose -f docker-compose.oci.yml up -d --no-build app worker</pre>
+      </div>
+
+      <div class="step">
+        <h3><span class="num">2d</span> If you changed database models</h3>
+        <span class="tag server">On Server</span>
+        <pre>cd /opt/brightbean
+sudo docker compose -f docker-compose.oci.yml run --rm --no-deps migrate
+sudo docker compose -f docker-compose.oci.yml restart app</pre>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ── SSL ── -->
+  <div class="section" id="ssl">
+    <div class="section-header">
+      <h2>4. SSL / Domain Setup</h2>
+      <p>How HTTPS works with Caddy and Let's Encrypt</p>
+    </div>
+    <div class="section-body">
+
+      <div class="step">
+        <h3><span class="num">1</span> How SSL works automatically</h3>
+        <div class="why"><strong>Why:</strong> Caddy is the reverse proxy sitting in front of Django. It automatically gets a free SSL certificate from Let's Encrypt when it starts, as long as port 443 is open and DNS points to the server.</div>
+        <p>Caddy reads the <code>APP_DOMAIN</code> variable from <code>.env</code>, contacts Let's Encrypt, proves ownership via HTTP challenge on port 80, and installs the certificate. Renews automatically every 90 days.</p>
+      </div>
+
+      <div class="step">
+        <h3><span class="num">2</span> Change to a real domain</h3>
+        <span class="tag server">On Server</span>
+        <pre># Edit .env on server
+nano /opt/brightbean/.env
+
+# Change these lines:
+APP_URL=https://yourdomain.com
+ALLOWED_HOSTS=yourdomain.com,130.61.245.119,localhost
+APP_DOMAIN=yourdomain.com
+
+# Update Caddyfile
+cat > /opt/brightbean/Caddyfile &lt;&lt; 'EOF'
+yourdomain.com {
+    reverse_proxy app:8000
+    encode zstd gzip
+    header {
+        Strict-Transport-Security "max-age=31536000; includeSubDomains"
+        X-Frame-Options "SAMEORIGIN"
+        X-Content-Type-Options "nosniff"
+        -Server
+    }
+}
+EOF
+
+# Clear old SSL data and restart Caddy
+sudo docker rm -f brightbean-caddy-1
+sudo docker volume rm brightbean_caddy_data brightbean_caddy_config
+sudo docker compose -f docker-compose.oci.yml up -d --no-build caddy
+sudo docker compose -f docker-compose.oci.yml restart app</pre>
+      </div>
+
+      <div class="step">
+        <h3><span class="num">3</span> Check SSL certificate status</h3>
+        <span class="tag server">On Server</span>
+        <pre>sudo docker logs brightbean-caddy-1 2>&1 | grep -E "obtain|certificate|issued|error"</pre>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ── EMAIL ── -->
+  <div class="section" id="email">
+    <div class="section-header">
+      <h2>5. Email (Resend)</h2>
+      <p>Transactional email for invites, notifications</p>
+    </div>
+    <div class="section-body">
+
+      <div class="step">
+        <h3><span class="num">1</span> How email is configured</h3>
+        <p>Email is sent via <strong>Resend</strong> (resend.com) using SMTP. These variables are in <code>docker-compose.override.yml</code> (local) and <code>.env</code> (production).</p>
+        <pre>EMAIL_BACKEND_TYPE=smtp
+EMAIL_HOST=smtp.resend.com
+EMAIL_PORT=587
+EMAIL_HOST_USER=resend
+EMAIL_HOST_PASSWORD=re_your_api_key_here
+EMAIL_USE_TLS=True
+DEFAULT_FROM_EMAIL=onboarding@resend.dev  # or noreply@yourdomain.com once domain verified</pre>
+        <div class="note"><strong>Limitation:</strong> Without a verified domain in Resend, emails can only be sent to your own Resend account email. Verify your domain at resend.com/domains to send to anyone.</div>
+      </div>
+
+      <div class="step">
+        <h3><span class="num">2</span> Test email from server</h3>
+        <span class="tag server">On Server</span>
+        <pre>sudo docker exec brightbean-app-1 python manage.py shell -c "
+from django.core.mail import send_mail
+send_mail('Test', 'Working!', 'onboarding@resend.dev', ['your@email.com'])
+print('Sent')
+"</pre>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ── MEDIA ── -->
+  <div class="section" id="media">
+    <div class="section-header">
+      <h2>6. Media &amp; Storage</h2>
+      <p>Where uploaded images and videos are stored</p>
+    </div>
+    <div class="section-body">
+
+      <div class="step">
+        <h3><span class="num">1</span> Current setup (local storage)</h3>
+        <div class="why"><strong>Why:</strong> <code>STORAGE_BACKEND=local</code> in .env means uploaded files go to <code>/app/media/</code> inside the Docker container, mapped to the <code>media_data</code> Docker volume on the server. Files persist across restarts.</div>
+        <p>Media files are at: <code>/var/lib/docker/volumes/brightbean_media_data/_data/</code> on the server.</p>
+      </div>
+
+      <div class="step">
+        <h3><span class="num">2</span> Switch to OCI Object Storage (S3-compatible)</h3>
+        <div class="why"><strong>Why:</strong> Object Storage is better for production — files survive even if the VM is deleted, and can be served via CDN. OCI gives 20GB free.</div>
+        <p>Steps: OCI Console → Object Storage → Create Bucket → Profile → Customer Secret Keys → Generate. Then update <code>.env</code>:</p>
+        <pre>STORAGE_BACKEND=s3
+S3_ENDPOINT_URL=https://&lt;namespace&gt;.compat.objectstorage.eu-frankfurt-1.oraclecloud.com
+S3_ACCESS_KEY_ID=your_access_key
+S3_SECRET_ACCESS_KEY=your_secret
+S3_BUCKET_NAME=brightbean-media
+S3_REGION_NAME=eu-frankfurt-1</pre>
+        <pre># Then restart app
+sudo docker compose -f /opt/brightbean/docker-compose.oci.yml restart app worker</pre>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ── ADMIN ── -->
+  <div class="section" id="admin">
+    <div class="section-header">
+      <h2>7. Admin Tasks</h2>
+      <p>Common management commands</p>
+    </div>
+    <div class="section-body">
+
+      <div class="step">
+        <h3><span class="num">1</span> Check all containers are running</h3>
+        <span class="tag server">On Server</span>
+        <pre>sudo docker compose -f /opt/brightbean/docker-compose.oci.yml ps</pre>
+        <p>You should see 5 containers: <code>app</code>, <code>worker</code>, <code>postgres</code>, <code>caddy</code>, <code>maintenance</code> — all Up.</p>
+      </div>
+
+      <div class="step">
+        <h3><span class="num">2</span> View live app logs</h3>
+        <span class="tag server">On Server</span>
+        <pre>sudo docker compose -f /opt/brightbean/docker-compose.oci.yml logs -f app</pre>
+      </div>
+
+      <div class="step">
+        <h3><span class="num">3</span> Restart all services</h3>
+        <span class="tag server">On Server</span>
+        <pre>sudo docker compose -f /opt/brightbean/docker-compose.oci.yml restart</pre>
+      </div>
+
+      <div class="step">
+        <h3><span class="num">4</span> Stop everything</h3>
+        <span class="tag server">On Server</span>
+        <pre>sudo docker compose -f /opt/brightbean/docker-compose.oci.yml down</pre>
+      </div>
+
+      <div class="step">
+        <h3><span class="num">5</span> App starts automatically on server reboot</h3>
+        <div class="why"><strong>Why:</strong> We registered a systemd service called <code>brightbean</code> that runs <code>docker compose up</code> automatically when the VM boots.</div>
+        <span class="tag server">On Server</span>
+        <pre># Check status
+sudo systemctl status brightbean
+
+# Manually start/stop
+sudo systemctl start brightbean
+sudo systemctl stop brightbean</pre>
+      </div>
+
+      <div class="step">
+        <h3><span class="num">6</span> Open Django shell</h3>
+        <span class="tag server">On Server</span>
+        <pre>sudo docker exec -it brightbean-app-1 python manage.py shell</pre>
+      </div>
+
+      <div class="step">
+        <h3><span class="num">7</span> Backup the database</h3>
+        <span class="tag server">On Server</span>
+        <pre>sudo docker exec brightbean-postgres-1 pg_dump -U brightbean brightbean > backup_$(date +%Y%m%d).sql</pre>
+      </div>
+
+      <div class="step">
+        <h3><span class="num">8</span> Restore the database</h3>
+        <span class="tag server">On Server</span>
+        <pre>sudo docker exec -i brightbean-postgres-1 psql -U brightbean brightbean < backup_20260508.sql</pre>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ── TROUBLESHOOT ── -->
+  <div class="section" id="troubleshoot">
+    <div class="section-header">
+      <h2>8. Troubleshooting</h2>
+      <p>Common problems and their fixes</p>
+    </div>
+    <div class="section-body">
+
+      <div class="step">
+        <h3>App won't start — check logs first</h3>
+        <pre>sudo docker logs brightbean-app-1 2>&1 | tail -30</pre>
+      </div>
+
+      <div class="step">
+        <h3>SSL certificate not issuing</h3>
+        <div class="why">Caddy can't get a cert if port 443 is blocked or the domain doesn't resolve to the server.</div>
+        <pre># Check OCI Security List has port 443 open (source port blank, dest port 443)
+# Check DNS resolves: nslookup brightbean.mooo.com 8.8.8.8
+
+# Clear Caddy data and retry:
+sudo docker rm -f brightbean-caddy-1
+sudo docker volume rm brightbean_caddy_data brightbean_caddy_config
+cd /opt/brightbean
+sudo docker compose -f docker-compose.oci.yml up -d --no-build caddy</pre>
+      </div>
+
+      <div class="step">
+        <h3>Port 80 already in use</h3>
+        <div class="why">Oracle Linux ships with nginx running on port 80. Stop it so Caddy can use the port.</div>
+        <pre>sudo systemctl stop nginx
+sudo systemctl disable nginx</pre>
+      </div>
+
+      <div class="step">
+        <h3>Migration error: "relation already exists"</h3>
+        <div class="why">Happens when a previous migration run was interrupted mid-way, leaving partial tables.</div>
+        <pre># Only if this is a fresh deployment with no real data:
+sudo docker exec brightbean-postgres-1 psql -U brightbean postgres -c \
+  "DROP DATABASE brightbean; CREATE DATABASE brightbean;"
+sudo docker compose -f docker-compose.oci.yml run --rm --no-deps migrate</pre>
+      </div>
+
+      <div class="step">
+        <h3>Browser says "server not found"</h3>
+        <div class="why">Your local ISP's DNS hasn't propagated the new domain yet. Use Google's DNS temporarily.</div>
+        <p>Mac: System Settings → Network → your connection → Details → DNS → add <code>8.8.8.8</code></p>
+      </div>
+
+      <div class="step">
+        <h3>Image uploads not working</h3>
+        <div class="why">Django 4.2+ requires an explicit <code>STORAGES["default"]</code> key. Without it, all file uploads raise <code>InvalidStorageError</code>.</div>
+        <pre># In config/settings/base.py, make sure this exists in the local storage branch:
+STORAGES["default"] = {
+    "BACKEND": "django.core.files.storage.FileSystemStorage",
+}</pre>
+      </div>
+
+      <div class="step">
+        <h3>New static files not appearing in production</h3>
+        <div class="why">WhiteNoise serves files from <code>/app/staticfiles/</code> inside the container. New files must be copied in and collectstatic re-run.</div>
+        <pre># Copy file into running container
+sudo docker cp /opt/brightbean/static/img/newfile.jpg brightbean-app-1:/app/static/img/newfile.jpg
+
+# Collect inside container
+sudo docker exec brightbean-app-1 python manage.py collectstatic --noinput
+
+# Restart
+sudo docker compose -f /opt/brightbean/docker-compose.oci.yml restart app</pre>
+      </div>
+
+      <div class="step">
+        <h3>Containers not picking up .env changes</h3>
+        <div class="why"><code>docker compose restart</code> does NOT reload environment variables. You must recreate the container.</div>
+        <pre>sudo docker compose -f /opt/brightbean/docker-compose.oci.yml up -d --no-build app</pre>
+      </div>
+
+    </div>
+  </div>
+
+  <p style="text-align:center; font-size:13px; color:#999; margin-top:40px; padding-bottom:40px;">
+    BrightBean Studio — EIDEN Group &nbsp;·&nbsp; Server: 130.61.245.119 &nbsp;·&nbsp; Domain: brightbean.mooo.com
+  </p>
+
+</div>
+</body>
+</html>

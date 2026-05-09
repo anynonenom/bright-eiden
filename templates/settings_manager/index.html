@@ -1,8 +1,163 @@
-{% extends "base.html" %}
-{% block page_title %}Settings{% endblock %}
+{% extends "layouts/settings.html" %}
+{% block title %}Advanced Settings — Settings{% endblock %}
+
 {% block content %}
-<div class="max-w-4xl">
-    <h2 class="text-xl font-semibold mb-6">Settings</h2>
-    <p class="text-gray-500">Settings management coming soon.</p>
+<div class="max-w-3xl">
+    <div class="mb-8">
+        <h2 class="text-xl font-semibold mb-1" style="color: var(--text-primary); font-family: var(--font-display);">Advanced Settings</h2>
+        <p class="text-sm" style="color: var(--text-secondary);">Override default behavior for your organization and individual workspaces. Defaults are shown where no override exists.</p>
+    </div>
+
+    <!-- Tab nav: Org | Workspace -->
+    <div class="flex gap-0 mb-6" style="border-bottom: 1px solid var(--border);">
+        <a href="{% url 'settings_manager:index' %}"
+           class="px-4 py-2.5 text-sm font-semibold transition-colors"
+           style="{% if not active_workspace %}border-bottom: 2px solid var(--teal); color: var(--teal); margin-bottom: -1px;{% else %}color: var(--text-tertiary);{% endif %}">
+            Organization
+        </a>
+        {% for ws in workspaces %}
+        <a href="{% url 'settings_manager:index' %}?workspace={{ ws.id }}"
+           class="px-4 py-2.5 text-sm font-semibold transition-colors"
+           style="{% if active_workspace.id == ws.id %}border-bottom: 2px solid var(--teal); color: var(--teal); margin-bottom: -1px;{% else %}color: var(--text-tertiary);{% endif %}">
+            {{ ws.name }}
+        </a>
+        {% endfor %}
+    </div>
+
+    {% if not active_workspace %}
+    <!-- ORG SETTINGS -->
+    {% for section in org_sections %}
+    <div class="mb-6">
+        <h3 class="text-xs font-semibold uppercase tracking-wider mb-3" style="color: var(--text-tertiary);">{{ section.group }}</h3>
+        <div style="border: 1px solid var(--border); background: var(--surface-0);">
+            {% for s in section.settings %}
+            <div class="flex items-center gap-4 px-5 py-3.5 {% if not forloop.last %}border-b{% endif %}"
+                 style="{% if not forloop.last %}border-color: var(--border-subtle);{% endif %}">
+                <!-- Label -->
+                <div class="flex-1 min-w-0">
+                    <div class="flex items-center gap-2">
+                        <span class="text-sm" style="color: var(--text-primary);">{{ s.label }}</span>
+                        {% if s.overridden %}
+                        <span class="text-[10px] font-semibold px-1.5 py-0.5" style="background: var(--primary-soft); color: var(--teal);">Custom</span>
+                        {% endif %}
+                    </div>
+                    <span class="text-[11px]" style="color: var(--text-ghost);">{{ s.key }}</span>
+                </div>
+
+                <!-- Value form -->
+                <div class="flex items-center gap-2 flex-shrink-0">
+                    <form method="post" action="{% url 'settings_manager:save_org' s.key %}" class="flex items-center gap-2">
+                        {% csrf_token %}
+                        {% if s.type == 'bool' %}
+                        <label class="inline-flex items-center gap-2 cursor-pointer">
+                            <input type="hidden" name="value" value="0">
+                            <input type="checkbox" name="value" value="1"
+                                   {% if s.value %}checked{% endif %}
+                                   onchange="this.form.submit()"
+                                   class="w-4 h-4 cursor-pointer"
+                                   style="accent-color: var(--teal);">
+                        </label>
+                        {% else %}
+                        <input type="{% if s.type == 'int' %}number{% else %}text{% endif %}"
+                               name="value"
+                               value="{{ s.value }}"
+                               class="text-sm px-2.5 py-1.5 outline-none w-44 input-focus"
+                               style="border: 1px solid var(--border); background: var(--surface-0); color: var(--text-primary); font-family: var(--font-mono);">
+                        <button type="submit"
+                                class="text-xs font-medium px-3 py-1.5 cursor-pointer transition-all"
+                                style="background: var(--teal); color: var(--canvas);">Save</button>
+                        {% endif %}
+                    </form>
+
+                    {% if s.overridden %}
+                    <form method="post" action="{% url 'settings_manager:reset_org' s.key %}">
+                        {% csrf_token %}
+                        <button type="submit" title="Reset to default ({{ s.default }})"
+                                class="text-xs cursor-pointer transition-colors"
+                                style="color: var(--text-ghost);"
+                                onmouseover="this.style.color='var(--error-700)'" onmouseout="this.style.color='var(--text-ghost)'">
+                            Reset
+                        </button>
+                    </form>
+                    {% else %}
+                    <span class="text-xs" style="color: var(--text-ghost);">default</span>
+                    {% endif %}
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% empty %}
+    <p class="text-sm" style="color: var(--text-tertiary);">No organization settings found.</p>
+    {% endfor %}
+
+    {% else %}
+    <!-- WORKSPACE SETTINGS -->
+    <div class="mb-4 px-1">
+        <p class="text-sm" style="color: var(--text-secondary);">Overrides for <strong>{{ active_workspace.name }}</strong>. Leave at default to inherit organization settings.</p>
+    </div>
+    {% for section in workspace_sections %}
+    <div class="mb-6">
+        <h3 class="text-xs font-semibold uppercase tracking-wider mb-3" style="color: var(--text-tertiary);">{{ section.group }}</h3>
+        <div style="border: 1px solid var(--border); background: var(--surface-0);">
+            {% for s in section.settings %}
+            <div class="flex items-center gap-4 px-5 py-3.5 {% if not forloop.last %}border-b{% endif %}"
+                 style="{% if not forloop.last %}border-color: var(--border-subtle);{% endif %}">
+                <div class="flex-1 min-w-0">
+                    <div class="flex items-center gap-2">
+                        <span class="text-sm" style="color: var(--text-primary);">{{ s.label }}</span>
+                        {% if s.overridden %}
+                        <span class="text-[10px] font-semibold px-1.5 py-0.5" style="background: var(--primary-soft); color: var(--teal);">Custom</span>
+                        {% endif %}
+                    </div>
+                    <span class="text-[11px]" style="color: var(--text-ghost);">{{ s.key }}</span>
+                </div>
+
+                <div class="flex items-center gap-2 flex-shrink-0">
+                    <form method="post" action="{% url 'settings_manager:save_workspace' active_workspace.id s.key %}" class="flex items-center gap-2">
+                        {% csrf_token %}
+                        {% if s.type == 'bool' %}
+                        <label class="inline-flex items-center gap-2 cursor-pointer">
+                            <input type="hidden" name="value" value="0">
+                            <input type="checkbox" name="value" value="1"
+                                   {% if s.value %}checked{% endif %}
+                                   onchange="this.form.submit()"
+                                   class="w-4 h-4 cursor-pointer"
+                                   style="accent-color: var(--teal);">
+                        </label>
+                        {% else %}
+                        <input type="{% if s.type == 'int' %}number{% else %}text{% endif %}"
+                               name="value"
+                               value="{{ s.value }}"
+                               class="text-sm px-2.5 py-1.5 outline-none w-44 input-focus"
+                               style="border: 1px solid var(--border); background: var(--surface-0); color: var(--text-primary); font-family: var(--font-mono);">
+                        <button type="submit"
+                                class="text-xs font-medium px-3 py-1.5 cursor-pointer transition-all"
+                                style="background: var(--teal); color: var(--canvas);">Save</button>
+                        {% endif %}
+                    </form>
+
+                    {% if s.overridden %}
+                    <form method="post" action="{% url 'settings_manager:reset_workspace' active_workspace.id s.key %}">
+                        {% csrf_token %}
+                        <button type="submit" title="Reset to default ({{ s.default }})"
+                                class="text-xs cursor-pointer transition-colors"
+                                style="color: var(--text-ghost);"
+                                onmouseover="this.style.color='var(--error-700)'" onmouseout="this.style.color='var(--text-ghost)'">
+                            Reset
+                        </button>
+                    </form>
+                    {% else %}
+                    <span class="text-xs" style="color: var(--text-ghost);">default</span>
+                    {% endif %}
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% empty %}
+    <p class="text-sm" style="color: var(--text-tertiary);">No workspace settings found.</p>
+    {% endfor %}
+    {% endif %}
 </div>
 {% endblock %}

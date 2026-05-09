@@ -22,6 +22,14 @@ DEBUG = env("DEBUG")
 ALLOWED_HOSTS = env("ALLOWED_HOSTS")
 APP_URL = env("APP_URL")
 
+# Derive CSRF_TRUSTED_ORIGINS from APP_URL so HTTPS deployments work out of the box.
+# Can be overridden by setting CSRF_TRUSTED_ORIGINS in .env directly.
+_app_origin = "{scheme}://{host}".format(
+    scheme=urlparse(APP_URL).scheme,
+    host=urlparse(APP_URL).hostname,
+)
+CSRF_TRUSTED_ORIGINS = env.list("CSRF_TRUSTED_ORIGINS", default=[_app_origin])
+
 # Application definition
 
 DJANGO_APPS = [
@@ -181,6 +189,9 @@ if STORAGE_BACKEND.lower() == "s3":
 else:
     MEDIA_ROOT = env("MEDIA_ROOT", default=str(BASE_DIR / "media"))
     MEDIA_URL = "/media/"
+    STORAGES["default"] = {
+        "BACKEND": "django.core.files.storage.FileSystemStorage",
+    }
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
