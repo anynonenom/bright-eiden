@@ -247,15 +247,28 @@ def connect_platform(request, workspace_id):
         nonce = secrets.token_urlsafe(32)
         state = _sign_state(workspace_id, platform, request.user.id, nonce)
 
+        # Keep a pool of valid nonces so multiple rapid clicks don't break the flow.
+        pool = request.session.get(OAUTH_SESSION_KEY + "_pool", {})
+        if not isinstance(pool, dict):
+            pool = {}
+        pool[nonce] = {"workspace_id": str(workspace_id), "platform": platform}
+        # Trim pool to last 10 entries
+        if len(pool) > 10:
+            oldest = list(pool.keys())[:-10]
+            for k in oldest:
+                pool.pop(k, None)
+        request.session[OAUTH_SESSION_KEY + "_pool"] = pool
+        # Keep legacy key for backward compat
         request.session[OAUTH_SESSION_KEY] = {
             "nonce": nonce,
             "workspace_id": str(workspace_id),
             "platform": platform,
         }
+        request.session.modified = True
 
         redirect_uri = _build_redirect_uri(request, platform)
         auth_url = provider.get_auth_url(redirect_uri, state)
-        logger.info("OAuth redirect for platform=%s redirect_uri=%s", platform, redirect_uri)
+        logger.info("OAuth redirect for platform=%s auth_url=%s", platform, auth_url[:80])
         return redirect(auth_url)
     except Exception:
         logger.exception("Failed to initiate OAuth for platform=%s", platform)
@@ -300,10 +313,22 @@ def oauth_callback(request, platform):
         messages.error(request, "Invalid or expired OAuth state. Please try again.")
         return redirect("dashboard")
 
-    # Validate nonce from session
+    # Validate nonce — check the pool first, fall back to legacy single-key
+    incoming_nonce = state_data.get("nonce")
+    pool = request.session.pop(OAUTH_SESSION_KEY + "_pool", {})
     session_data = request.session.pop(OAUTH_SESSION_KEY, {})
-    if not session_data or session_data.get("nonce") != state_data.get("nonce"):
-        messages.error(request, "OAuth session mismatch. Please try again.")
+
+    if isinstance(pool, dict) and incoming_nonce in pool:
+        session_data = pool[incoming_nonce]
+        session_data["nonce"] = incoming_nonce
+    elif not session_data or session_data.get("nonce") != incoming_nonce:
+        logger.warning(
+            "OAuth session mismatch: incoming_nonce=%s session_nonce=%s pool_keys=%s",
+            incoming_nonce,
+            session_data.get("nonce") if session_data else "EMPTY",
+            list(pool.keys()) if pool else [],
+        )
+        messages.error(request, "OAuth session mismatch. Please try again (click Connect once and wait).")
         return redirect("dashboard")
 
     # Validate platform matches
