@@ -7,48 +7,6 @@
 <style>
   /* ── Media Library — Premium Dark Design ── */
 
-  /* Sidebar */
-  .ml-sidebar {
-    background: #1C1C1E;
-    border-right: 1px solid rgba(255,255,255,0.06);
-    color: #F5F5F5;
-  }
-  .ml-sidebar-label {
-    font-size: 0.625rem;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.1em;
-    color: rgba(255,255,255,0.35);
-  }
-  .ml-folder-item {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    padding: 0.45rem 0.75rem;
-    border-radius: 0.5rem;
-    font-size: 0.8125rem;
-    font-weight: 500;
-    color: rgba(255,255,255,0.65);
-    cursor: pointer;
-    transition: background 150ms ease, color 150ms ease;
-    text-decoration: none;
-  }
-  .ml-folder-item:hover {
-    background: rgba(255,255,255,0.07);
-    color: #F5F5F5;
-  }
-  .ml-folder-item.active {
-    background: rgba(255,255,255,0.12);
-    color: #FFFFFF;
-    font-weight: 600;
-  }
-  .ml-folder-item.active svg { opacity: 1; }
-  .ml-folder-item svg { opacity: 0.55; flex-shrink: 0; }
-  .ml-sidebar-divider {
-    height: 1px;
-    background: rgba(255,255,255,0.07);
-    margin: 0.75rem 0;
-  }
   .ml-new-folder-btn {
     width: 1.5rem; height: 1.5rem;
     display: flex; align-items: center; justify-content: center;
@@ -548,34 +506,13 @@
     margin-bottom: 0.75rem;
   }
 
-  /* Mobile toggle */
-  .ml-mobile-sidebar-btn {
-    position: fixed;
-    bottom: 1rem;
-    left: 1rem;
-    z-index: 40;
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    padding: 0.5rem 0.875rem;
-    background: #1C1C1E;
-    color: rgba(255,255,255,0.85);
-    border: none;
-    border-radius: 0.875rem;
-    font-size: 0.8125rem;
-    font-weight: 600;
-    cursor: pointer;
-    box-shadow: 0 4px 20px rgba(0,0,0,0.3);
-    transition: opacity 150ms ease;
-  }
-  .ml-mobile-sidebar-btn:hover { opacity: 0.9; }
 </style>
 {% endblock %}
 
 {% block page_title %}Media Library{% endblock %}
 
 {% block content %}
-<div x-data="{ ...mediaLibrary(), folderSidebarOpen: false }" class="flex flex-1 min-h-0 -m-3 sm:-m-4 lg:-m-6 -mb-3 sm:-mb-4 lg:-mb-6">
+<div x-data="mediaLibrary()" class="flex flex-1 min-h-0 -m-3 sm:-m-4 lg:-m-6 -mb-3 sm:-mb-4 lg:-mb-6">
 
   <!-- Full-page drag overlay -->
   <div x-show="dragOver" x-cloak class="ml-drag-overlay">
@@ -585,77 +522,6 @@
       </svg>
       <p class="text-base font-bold" style="color: var(--text-primary, #1C1917);">Drop to upload</p>
       <p class="text-sm mt-1" style="color: var(--text-secondary, #57534E);">Release to add files to your library</p>
-    </div>
-  </div>
-
-  <!-- Mobile sidebar toggle -->
-  <button @click="folderSidebarOpen = !folderSidebarOpen"
-          class="ml-mobile-sidebar-btn lg:hidden"
-          x-show="!detailOpen">
-    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 6a2 2 0 012-2h2l2 2h6a2 2 0 012 2v2M4 6v10a2 2 0 002 2h12a2 2 0 002-2V10a2 2 0 00-2-2H4z"/>
-    </svg>
-    Folders
-  </button>
-
-  <!-- Mobile sidebar backdrop -->
-  <div x-show="folderSidebarOpen" x-cloak @click="folderSidebarOpen = false"
-       class="fixed inset-0 bg-black/50 z-40 lg:hidden"
-       x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100"
-       x-transition:leave="transition ease-in duration-150" x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0"></div>
-
-  <!-- ═══════ FOLDER SIDEBAR ═══════ -->
-  <div class="ml-sidebar w-52 flex-shrink-0 flex flex-col overflow-y-auto rounded-tl-xl rounded-bl-xl
-              fixed inset-y-0 left-0 z-50 transition-transform duration-200
-              lg:relative lg:z-auto lg:translate-x-0"
-       :class="folderSidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'"
-       @click="if (window.innerWidth < 1024 && $event.target.closest('a')) { folderSidebarOpen = false }">
-
-    <div class="p-3 pt-4">
-      <!-- Sidebar header -->
-      <div class="flex items-center justify-between mb-3 px-1">
-        <span class="ml-sidebar-label">Media</span>
-        <button @click="showNewFolder = true"
-                class="ml-new-folder-btn"
-                title="New folder">
-          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/>
-          </svg>
-        </button>
-      </div>
-
-      <!-- All Media -->
-      <a href="{% url 'media_library:index' workspace_id=workspace.id %}"
-         class="ml-folder-item {% if not current_folder and not is_starred %}active{% endif %}">
-        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 6a2 2 0 012-2h2l2 2h6a2 2 0 012 2v2M4 6v10a2 2 0 002 2h12a2 2 0 002-2V10a2 2 0 00-2-2H4z"/>
-        </svg>
-        All Media
-      </a>
-
-      <!-- Starred -->
-      <a href="{% url 'media_library:index' workspace_id=workspace.id %}?starred=1"
-         class="ml-folder-item {% if is_starred %}active{% endif %}">
-        <svg class="w-4 h-4" fill="{% if is_starred %}#F59E0B{% else %}none{% endif %}" stroke="{% if is_starred %}#F59E0B{% else %}currentColor{% endif %}" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"/>
-        </svg>
-        Starred
-      </a>
-
-      <div class="ml-sidebar-divider"></div>
-
-      <!-- Folder tree -->
-      <div id="folder-tree"
-           hx-get="{% url 'media_library:index' workspace_id=workspace.id %}folders/create/"
-           hx-trigger="folderUpdated from:body"
-           hx-target="#folder-tree">
-        {% include "media_library/_folder_tree.html" %}
-      </div>
-
-      <!-- New folder form -->
-      <div x-show="showNewFolder" x-cloak class="mt-2">
-        {% include "media_library/_folder_form.html" %}
-      </div>
     </div>
   </div>
 
