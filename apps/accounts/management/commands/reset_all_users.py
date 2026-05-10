@@ -10,6 +10,4 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         org_count, _ = Organization.objects.all().delete()
         user_count, _ = User.objects.all().delete()
-        self.stdout.write(
-            self.style.SUCCESS(f"Deleted {org_count} organizations and {user_count} users.")
-        )
+        self.stdout.write(self.style.SUCCESS(f"Deleted {org_count} organizations and {user_count} users."))

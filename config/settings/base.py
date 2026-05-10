@@ -192,7 +192,7 @@ if STORAGE_BACKEND.lower() == "s3":
 else:
     MEDIA_ROOT = env("MEDIA_ROOT", default=str(BASE_DIR / "media"))
     MEDIA_URL = "/media/"
-    STORAGES["default"] = {  # type: ignore[assignment]
+    STORAGES["default"] = {  # type: ignore[assignment,dict-item]
         "BACKEND": "django.core.files.storage.FileSystemStorage",
         "OPTIONS": {
             "location": MEDIA_ROOT,
