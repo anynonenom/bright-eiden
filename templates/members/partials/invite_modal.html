@@ -18,10 +18,12 @@
             </div>
 
             <!-- Form -->
-            <form hx-post="{% url 'members:invite' %}"
+            <form x-init="htmx.process($el)"
+                  hx-post="{% url 'members:invite' %}"
                   hx-target="#invitations-list"
                   hx-swap="beforeend"
-                  @htmx:after-request.window="if(event.detail.successful) { showInviteModal = false; document.getElementById('no-invites-placeholder')?.remove(); }"
+                  hx-on:htmx:after-request="if(event.detail.successful){ showInviteModal = false; document.getElementById('no-invites-placeholder')?.remove(); }"
+                  hx-on:htmx:response-error="document.getElementById('invite-error').innerHTML = event.detail.xhr.responseText"
                   class="px-6 py-5 overflow-y-auto">
                 {% csrf_token %}
 
@@ -60,7 +62,7 @@
                         {% for ws in org_workspaces %}
                         <div class="flex items-center gap-3 py-2 px-3 rounded-lg" style="background: var(--neutral-50);">
                             <input type="checkbox" name="ws_{{ ws.id }}" value="1" id="invite-ws-{{ ws.id }}"
-                                   class="accent-orange-500 cursor-pointer">
+                                   class="cursor-pointer" style="accent-color: var(--primary);">
                             <label for="invite-ws-{{ ws.id }}" class="flex-1 text-sm cursor-pointer" style="color: var(--text-primary);">
                                 {{ ws.name }}
                             </label>
