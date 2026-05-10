@@ -20,8 +20,12 @@ AUTH_RATE_WINDOW = 60  # seconds
 EXEMPT_PATH_PREFIXES = (
     "/accounts/accept-terms/",
     "/accounts/logout/",
+    "/accounts/signup/",
+    "/accounts/login/",
+    "/accounts/confirm-email/",
     "/accounts/google/",
     "/accounts/3rdparty/",
+    "/members/invite/",
     "/health/",
     "/static/",
     "/admin/",
