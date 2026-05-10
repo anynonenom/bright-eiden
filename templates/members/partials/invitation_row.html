@@ -35,6 +35,13 @@
     <!-- Actions -->
     {% if is_admin %}
     <div class="flex-shrink-0 flex items-center gap-2">
+        <!-- Copy invite link -->
+        <button type="button"
+                onclick="navigator.clipboard.writeText('{{ request.scheme }}://{{ request.get_host }}/members/invite/{{ invite.token }}/accept/').then(() => { this.textContent = 'Copied!'; setTimeout(() => this.textContent = 'Copy Link', 2000) })"
+                class="text-xs px-3 py-1.5 rounded-full font-medium cursor-pointer transition-colors"
+                style="border: 1px solid var(--teal); color: var(--teal); background: transparent;">
+            Copy Link
+        </button>
         <form hx-post="{% url 'members:resend_invite' invitation_id=invite.id %}"
               hx-target="#invite-{{ invite.id }}"
               hx-swap="outerHTML">
