@@ -31,4 +31,7 @@ RUN DJANGO_SETTINGS_MODULE=config.settings.production \
 
 EXPOSE 8000
 
-CMD ["/bin/sh", "-c", "gunicorn config.wsgi:application --bind 0.0.0.0:${PORT:-8000} --workers 2 --threads 2"]
+COPY entrypoint.sh /entrypoint.sh
+RUN chmod +x /entrypoint.sh
+
+CMD ["/entrypoint.sh"]
