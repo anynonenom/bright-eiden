@@ -1,0 +1,700 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>System Workflow Guide — EIDEN SCC</title>
+<style>
+  :root {
+    --forest: #122620;
+    --teal: #2D9E8F;
+    --teal-light: #E6F5F3;
+    --beige: #F5F0E8;
+    --text: #1C1917;
+    --text-sec: #57534E;
+    --text-ghost: #A8A29E;
+    --border: #E7E5E4;
+    --white: #FFFFFF;
+    --radius: 12px;
+    --shadow: 0 2px 16px rgba(18,38,32,0.08);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Segoe UI', system-ui, sans-serif; background: var(--beige); color: var(--text); line-height: 1.6; }
+
+  /* Cover */
+  .cover {
+    min-height: 100vh; background: var(--forest);
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    text-align: center; padding: 60px 40px; position: relative; overflow: hidden;
+  }
+  .cover::before {
+    content:''; position:absolute; width:700px; height:700px; border-radius:50%;
+    background:radial-gradient(circle,rgba(45,158,143,.15) 0%,transparent 70%);
+    top:-150px; right:-200px;
+  }
+  .cover::after {
+    content:''; position:absolute; width:400px; height:400px; border-radius:50%;
+    background:radial-gradient(circle,rgba(45,158,143,.1) 0%,transparent 70%);
+    bottom:-80px; left:-100px;
+  }
+  .badge {
+    display:inline-block; background:rgba(45,158,143,.2); color:var(--teal);
+    border:1px solid rgba(45,158,143,.3); border-radius:999px;
+    font-size:12px; font-weight:700; letter-spacing:.08em; text-transform:uppercase;
+    padding:6px 16px; margin-bottom:28px;
+  }
+  .cover h1 {
+    font-size:clamp(30px,5vw,54px); font-weight:800; color:#fff;
+    letter-spacing:-.02em; line-height:1.1; max-width:700px; margin-bottom:20px;
+  }
+  .cover h1 span { color:var(--teal); }
+  .cover p { font-size:17px; color:rgba(255,255,255,.6); max-width:480px; margin-bottom:48px; }
+  .cover-meta { display:flex; align-items:center; gap:24px; flex-wrap:wrap; justify-content:center; }
+  .cover-meta-item { display:flex; align-items:center; gap:8px; color:rgba(255,255,255,.5); font-size:14px; }
+  .dot { width:6px; height:6px; border-radius:50%; background:var(--teal); }
+
+  /* Layout */
+  .page { max-width:940px; margin:0 auto; padding:60px 24px; }
+  .section { margin-bottom:64px; }
+  .section-label { font-size:11px; font-weight:700; letter-spacing:.12em; text-transform:uppercase; color:var(--teal); margin-bottom:8px; }
+  .section-title { font-size:28px; font-weight:800; color:var(--forest); letter-spacing:-.02em; margin-bottom:8px; }
+  .section-sub { font-size:15px; color:var(--text-sec); margin-bottom:32px; max-width:600px; }
+  hr.div { border:none; border-top:1px solid var(--border); margin:48px 0; }
+
+  /* Info / Warn boxes */
+  .info, .warn {
+    border-radius:var(--radius); padding:20px 24px;
+    display:flex; gap:14px; align-items:flex-start; margin-bottom:28px;
+  }
+  .info { background:var(--teal-light); border:1px solid rgba(45,158,143,.25); }
+  .info h4 { font-size:14px; font-weight:700; color:#1a5e56; margin-bottom:4px; }
+  .info p  { font-size:13px; color:#1a5e56; line-height:1.6; }
+  .warn { background:#FFFBEB; border:1px solid #FDE68A; }
+  .warn h4 { font-size:14px; font-weight:700; color:#92400E; margin-bottom:4px; }
+  .warn p  { font-size:13px; color:#78350F; line-height:1.6; }
+  .box-icon { font-size:20px; flex-shrink:0; margin-top:1px; }
+
+  /* Role cards */
+  .roles { display:grid; grid-template-columns:repeat(auto-fill,minmax(220px,1fr)); gap:16px; margin-bottom:32px; }
+  .role-card {
+    background:var(--white); border:1px solid var(--border); border-radius:var(--radius);
+    padding:20px; box-shadow:var(--shadow);
+  }
+  .role-card .role-icon {
+    width:40px; height:40px; border-radius:10px;
+    display:flex; align-items:center; justify-content:center; font-size:20px;
+    margin-bottom:12px;
+  }
+  .role-card h3 { font-size:15px; font-weight:700; color:var(--forest); margin-bottom:6px; }
+  .role-card ul { list-style:none; display:flex; flex-direction:column; gap:5px; }
+  .role-card ul li { font-size:13px; color:var(--text-sec); display:flex; gap:7px; }
+  .role-card ul li::before { content:'✓'; color:var(--teal); font-weight:700; flex-shrink:0; }
+
+  /* Flow steps */
+  .flow { display:flex; flex-direction:column; gap:0; position:relative; }
+  .flow-step {
+    display:flex; gap:20px; padding-bottom:32px; position:relative;
+  }
+  .flow-step:last-child { padding-bottom:0; }
+  .flow-left { display:flex; flex-direction:column; align-items:center; flex-shrink:0; }
+  .flow-num {
+    width:38px; height:38px; border-radius:50%;
+    background:var(--forest); color:#fff;
+    font-size:14px; font-weight:800;
+    display:flex; align-items:center; justify-content:center; flex-shrink:0; z-index:1;
+  }
+  .flow-line {
+    width:2px; flex:1; background:var(--border); margin-top:4px;
+  }
+  .flow-step:last-child .flow-line { display:none; }
+  .flow-body {
+    background:var(--white); border:1px solid var(--border); border-radius:var(--radius);
+    padding:20px 22px; flex:1; box-shadow:var(--shadow);
+  }
+  .flow-body h3 { font-size:16px; font-weight:700; color:var(--forest); margin-bottom:6px; }
+  .flow-body p { font-size:14px; color:var(--text-sec); line-height:1.6; }
+  .flow-body .sub { margin-top:10px; display:flex; flex-wrap:wrap; gap:8px; }
+  .chip {
+    display:inline-flex; align-items:center; gap:5px;
+    font-size:12px; font-weight:600; padding:4px 10px; border-radius:999px;
+    background:var(--forest); color:#fff;
+  }
+  .chip.teal { background:var(--teal-light); color:#1a5e56; }
+  .chip.gray { background:#F5F5F4; color:var(--text-sec); }
+  .tip {
+    margin-top:12px; background:var(--teal-light); border-left:3px solid var(--teal);
+    border-radius:0 8px 8px 0; padding:10px 14px;
+    font-size:13px; color:#1a5e56;
+  }
+
+  /* Feature grid */
+  .features { display:grid; grid-template-columns:repeat(auto-fill,minmax(270px,1fr)); gap:16px; }
+  .feat-card {
+    background:var(--white); border:1px solid var(--border); border-radius:var(--radius);
+    padding:22px; box-shadow:var(--shadow);
+  }
+  .feat-card .feat-icon {
+    font-size:24px; margin-bottom:12px; display:block;
+  }
+  .feat-card h3 { font-size:15px; font-weight:700; color:var(--forest); margin-bottom:6px; }
+  .feat-card p { font-size:13px; color:var(--text-sec); line-height:1.6; }
+  .feat-card .where {
+    margin-top:10px; font-size:12px; font-weight:600; color:var(--teal);
+    letter-spacing:.04em;
+  }
+
+  /* Table */
+  .table { background:var(--white); border:1px solid var(--border); border-radius:var(--radius); overflow:hidden; box-shadow:var(--shadow); }
+  .tr { display:grid; grid-template-columns:180px 1fr; border-bottom:1px solid var(--border); }
+  .tr:last-child { border-bottom:none; }
+  .tr.head { background:var(--forest); }
+  .td { padding:13px 18px; font-size:14px; color:var(--text-sec); border-right:1px solid var(--border); }
+  .td:last-child { border-right:none; }
+  .tr.head .td { color:rgba(255,255,255,.8); border-color:rgba(255,255,255,.1); font-size:12px; font-weight:700; letter-spacing:.06em; text-transform:uppercase; }
+  .td strong { color:var(--forest); font-weight:600; }
+
+  /* Approval flow */
+  .ap-flow { display:flex; align-items:center; gap:0; flex-wrap:wrap; margin-bottom:24px; }
+  .ap-step {
+    background:var(--white); border:1px solid var(--border); border-radius:10px;
+    padding:12px 18px; font-size:13px; font-weight:600; color:var(--forest);
+    text-align:center; min-width:110px;
+  }
+  .ap-arrow { font-size:18px; color:var(--text-ghost); padding:0 8px; }
+
+  footer { background:var(--forest); color:rgba(255,255,255,.45); text-align:center; padding:32px 24px; font-size:13px; }
+  footer strong { color:rgba(255,255,255,.8); }
+
+  @media print {
+    .cover { min-height:auto; padding:40px; page-break-after:always; }
+    .section { page-break-inside:avoid; }
+  }
+</style>
+</head>
+<body>
+
+<!-- COVER -->
+<div class="cover">
+  <div class="badge">Internal Guide · EIDEN Group</div>
+  <h1>How to Work in <span>SCC</span></h1>
+  <p>Complete workflow guide — from creating content to publishing across all social platforms.</p>
+  <div class="cover-meta">
+    <div class="cover-meta-item"><div class="dot"></div> scc.eiden-group.com</div>
+    <div class="cover-meta-item"><div class="dot"></div> All team members</div>
+    <div class="cover-meta-item"><div class="dot"></div> Updated May 2026</div>
+  </div>
+</div>
+
+<div class="page">
+
+  <!-- WHAT IS SCC -->
+  <div class="section">
+    <div class="section-label">Introduction</div>
+    <div class="section-title">What is SCC?</div>
+    <p class="section-sub">SCC (Social Content Center) is EIDEN Group's internal platform for managing, scheduling, and publishing social media content across all platforms from one place.</p>
+
+    <div class="info">
+      <div class="box-icon">💡</div>
+      <div>
+        <h4>One platform, all channels</h4>
+        <p>Instead of logging into Facebook, Instagram, LinkedIn, TikTok separately — everything happens inside SCC. You write the post once, choose which platforms to publish to, and the system handles the rest.</p>
+      </div>
+    </div>
+
+    <div class="features">
+      <div class="feat-card">
+        <span class="feat-icon">📝</span>
+        <h3>Content Composer</h3>
+        <p>Write posts, attach images/videos, preview how they look on each platform before publishing.</p>
+        <div class="where">Workspace → Create</div>
+      </div>
+      <div class="feat-card">
+        <span class="feat-icon">📅</span>
+        <h3>Content Calendar</h3>
+        <p>See all scheduled and published posts in a calendar view. Drag and drop to reschedule.</p>
+        <div class="where">Workspace → Calendar</div>
+      </div>
+      <div class="feat-card">
+        <span class="feat-icon">✅</span>
+        <h3>Approval Workflow</h3>
+        <p>Posts can require manager approval before going live. Review, comment, approve or reject.</p>
+        <div class="where">Workspace → Approvals</div>
+      </div>
+      <div class="feat-card">
+        <span class="feat-icon">📥</span>
+        <h3>Inbox</h3>
+        <p>Receive messages and comments from your connected social accounts in one unified inbox.</p>
+        <div class="where">Workspace → Inbox</div>
+      </div>
+      <div class="feat-card">
+        <span class="feat-icon">🖼️</span>
+        <h3>Media Library</h3>
+        <p>Upload and organize images, videos, GIFs, and documents. Reuse assets across posts.</p>
+        <div class="where">Workspace → Settings → Media Library</div>
+      </div>
+      <div class="feat-card">
+        <span class="feat-icon">🔗</span>
+        <h3>Social Accounts</h3>
+        <p>Connect your social profiles. Once connected, you can publish directly from the composer.</p>
+        <div class="where">Workspace → Settings → Social Accounts</div>
+      </div>
+      <div class="feat-card">
+        <span class="feat-icon">👥</span>
+        <h3>Team Members</h3>
+        <p>Invite colleagues, assign roles (Admin / Member), and control who has access to each workspace.</p>
+        <div class="where">Organization → Members</div>
+      </div>
+      <div class="feat-card">
+        <span class="feat-icon">🏢</span>
+        <h3>Client Portal</h3>
+        <p>Give clients read access to review and approve content without seeing internal tools.</p>
+        <div class="where">Workspace → Settings → Client Portal</div>
+      </div>
+      <div class="feat-card">
+        <span class="feat-icon">💡</span>
+        <h3>Idea Board</h3>
+        <p>Capture content ideas in a Kanban board before they become scheduled posts.</p>
+        <div class="where">Workspace → Create → Ideas</div>
+      </div>
+    </div>
+  </div>
+
+  <hr class="div">
+
+  <!-- STRUCTURE -->
+  <div class="section">
+    <div class="section-label">Structure</div>
+    <div class="section-title">How the System is Organized</div>
+    <p class="section-sub">SCC uses a two-level structure: Organization at the top, Workspaces underneath.</p>
+
+    <div class="table" style="margin-bottom:28px;">
+      <div class="tr head">
+        <div class="td">Level</div>
+        <div class="td">What it is</div>
+      </div>
+      <div class="tr">
+        <div class="td"><strong>Organization</strong></div>
+        <div class="td">Your company (EIDEN Group). Contains all members, billing, and settings. One per company.</div>
+      </div>
+      <div class="tr">
+        <div class="td"><strong>Workspace</strong></div>
+        <div class="td">A project or brand (e.g. "EIDEN Instagram", "Client ABC"). Each workspace has its own connected social accounts, calendar, and team.</div>
+      </div>
+      <div class="tr">
+        <div class="td"><strong>Member</strong></div>
+        <div class="td">A team member belongs to the Organization and can be assigned to one or more Workspaces with a specific role.</div>
+      </div>
+    </div>
+
+    <div class="info">
+      <div class="box-icon">ℹ️</div>
+      <div>
+        <h4>Think of it like this</h4>
+        <p>The <strong>Organization</strong> is the office building. Each <strong>Workspace</strong> is a room inside. Members can have keys to multiple rooms, with different permissions in each.</p>
+      </div>
+    </div>
+  </div>
+
+  <hr class="div">
+
+  <!-- ROLES -->
+  <div class="section">
+    <div class="section-label">Permissions</div>
+    <div class="section-title">Roles and What They Can Do</div>
+    <p class="section-sub">Each member has an Organization role and can also have a Workspace role.</p>
+
+    <div class="roles">
+      <div class="role-card">
+        <div class="role-icon" style="background:#FEF3C7;">👑</div>
+        <h3>Owner</h3>
+        <ul>
+          <li>Full access to everything</li>
+          <li>Manage billing and org settings</li>
+          <li>Add and remove admins</li>
+          <li>Cannot be removed</li>
+        </ul>
+      </div>
+      <div class="role-card">
+        <div class="role-icon" style="background:#DBEAFE;">🛡️</div>
+        <h3>Admin</h3>
+        <ul>
+          <li>Invite and remove members</li>
+          <li>Create and manage workspaces</li>
+          <li>Configure social accounts</li>
+          <li>Approve or reject posts</li>
+        </ul>
+      </div>
+      <div class="role-card">
+        <div class="role-icon" style="background:#DCFCE7;">✏️</div>
+        <h3>Member</h3>
+        <ul>
+          <li>Create and schedule posts</li>
+          <li>Upload media</li>
+          <li>Submit posts for approval</li>
+          <li>View calendar and inbox</li>
+        </ul>
+      </div>
+      <div class="role-card">
+        <div class="role-icon" style="background:#F3F4F6;">👁️</div>
+        <h3>Viewer (Workspace)</h3>
+        <ul>
+          <li>Read-only access</li>
+          <li>See calendar and posts</li>
+          <li>Cannot create or edit</li>
+          <li>Used for client access</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <hr class="div">
+
+  <!-- DAILY WORKFLOW -->
+  <div class="section">
+    <div class="section-label">Daily Workflow</div>
+    <div class="section-title">How a Post Goes from Idea to Published</div>
+    <p class="section-sub">Follow these steps every time you need to create and publish content.</p>
+
+    <div class="flow">
+
+      <div class="flow-step">
+        <div class="flow-left">
+          <div class="flow-num">1</div>
+          <div class="flow-line"></div>
+        </div>
+        <div class="flow-body">
+          <h3>Select your Workspace</h3>
+          <p>From the left sidebar, click the workspace you are working in (e.g. "EIDEN Instagram"). All work happens inside a workspace.</p>
+          <div class="sub">
+            <span class="chip">Sidebar → Workspace Name</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="flow-step">
+        <div class="flow-left">
+          <div class="flow-num">2</div>
+          <div class="flow-line"></div>
+        </div>
+        <div class="flow-body">
+          <h3>Capture the Idea (Optional)</h3>
+          <p>If the content isn't ready to post yet, save it as an Idea first. The Idea Board is a Kanban board where you can organize content by status (e.g. "Idea", "In Progress", "Ready").</p>
+          <div class="sub">
+            <span class="chip">Create → Ideas Board</span>
+            <span class="chip teal">Optional step</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="flow-step">
+        <div class="flow-left">
+          <div class="flow-num">3</div>
+          <div class="flow-line"></div>
+        </div>
+        <div class="flow-body">
+          <h3>Write the Post in the Composer</h3>
+          <p>Click <strong>Create → New Post</strong>. Write your caption, upload media, and choose which social accounts to publish to. You can write platform-specific variations of the same post.</p>
+          <div class="sub">
+            <span class="chip">Create → New Post</span>
+          </div>
+          <div class="tip">💡 Use the live preview panel to see exactly how your post will look on each platform before saving.</div>
+        </div>
+      </div>
+
+      <div class="flow-step">
+        <div class="flow-left">
+          <div class="flow-num">4</div>
+          <div class="flow-line"></div>
+        </div>
+        <div class="flow-body">
+          <h3>Upload Media (if needed)</h3>
+          <p>Images and videos can be uploaded directly in the Composer, or picked from the Media Library. The library keeps all assets organized so you can reuse them across posts.</p>
+          <div class="sub">
+            <span class="chip">Settings → Media Library</span>
+            <span class="chip gray">Or upload directly in Composer</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="flow-step">
+        <div class="flow-left">
+          <div class="flow-num">5</div>
+          <div class="flow-line"></div>
+        </div>
+        <div class="flow-body">
+          <h3>Schedule or Submit for Approval</h3>
+          <p>Choose a publish date and time, then either:</p>
+          <p>• <strong>Schedule directly</strong> — if you have permission to publish without approval.<br>
+             • <strong>Submit for approval</strong> — if your workspace requires a manager to approve first.</p>
+          <div class="sub">
+            <span class="chip">Save as Draft → Schedule → Submit for Approval</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="flow-step">
+        <div class="flow-left">
+          <div class="flow-num">6</div>
+          <div class="flow-line"></div>
+        </div>
+        <div class="flow-body">
+          <h3>Approval Review (Admins)</h3>
+          <p>If the post requires approval, the admin will see it in the <strong>Approvals</strong> queue. They can approve, request changes with a comment, or reject the post.</p>
+          <div class="sub">
+            <span class="chip">Workspace → Approvals</span>
+          </div>
+          <div class="tip">📨 The author is notified when their post is approved, rejected, or has comments.</div>
+        </div>
+      </div>
+
+      <div class="flow-step">
+        <div class="flow-left">
+          <div class="flow-num">7</div>
+          <div class="flow-line"></div>
+        </div>
+        <div class="flow-body">
+          <h3>Post Goes Live Automatically</h3>
+          <p>At the scheduled time, the system publishes the post to all selected platforms automatically. No action needed — the background worker handles it.</p>
+          <div class="sub">
+            <span class="chip teal">✓ Fully automatic</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="flow-step">
+        <div class="flow-left">
+          <div class="flow-num">8</div>
+        </div>
+        <div class="flow-body">
+          <h3>Monitor the Calendar and Inbox</h3>
+          <p>After publishing, check the <strong>Calendar</strong> to see all past and upcoming posts. Check the <strong>Inbox</strong> to reply to comments and messages received from any connected account.</p>
+          <div class="sub">
+            <span class="chip">Workspace → Calendar</span>
+            <span class="chip">Workspace → Inbox</span>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <hr class="div">
+
+  <!-- APPROVAL WORKFLOW -->
+  <div class="section">
+    <div class="section-label">Approval System</div>
+    <div class="section-title">Post Status Flow</div>
+    <p class="section-sub">Every post moves through these statuses on its way to being published.</p>
+
+    <div class="ap-flow">
+      <div class="ap-step">📝 Draft</div>
+      <div class="ap-arrow">→</div>
+      <div class="ap-step">🔍 In Review</div>
+      <div class="ap-arrow">→</div>
+      <div class="ap-step">✅ Approved</div>
+      <div class="ap-arrow">→</div>
+      <div class="ap-step">📅 Scheduled</div>
+      <div class="ap-arrow">→</div>
+      <div class="ap-step">🚀 Published</div>
+    </div>
+
+    <div class="table">
+      <div class="tr head">
+        <div class="td">Status</div>
+        <div class="td">Meaning</div>
+      </div>
+      <div class="tr">
+        <div class="td"><strong>Draft</strong></div>
+        <div class="td">Post is saved but not submitted. Only the author can see it. Still editable.</div>
+      </div>
+      <div class="tr">
+        <div class="td"><strong>In Review</strong></div>
+        <div class="td">Post has been submitted for approval. Waiting for admin/manager to review. Author cannot edit.</div>
+      </div>
+      <div class="tr">
+        <div class="td"><strong>Changes Requested</strong></div>
+        <div class="td">Admin reviewed and left comments. Author must revise and resubmit.</div>
+      </div>
+      <div class="tr">
+        <div class="td"><strong>Approved</strong></div>
+        <div class="td">Admin approved the post. It can now be scheduled or published immediately.</div>
+      </div>
+      <div class="tr">
+        <div class="td"><strong>Scheduled</strong></div>
+        <div class="td">Post has a publish date set. The system will publish it automatically at that time.</div>
+      </div>
+      <div class="tr">
+        <div class="td"><strong>Published</strong></div>
+        <div class="td">Post has gone live on the selected platforms. Visible in the calendar as a published item.</div>
+      </div>
+      <div class="tr">
+        <div class="td"><strong>Failed</strong></div>
+        <div class="td">The system tried to publish but encountered an error (e.g. expired token). Reconnect the social account and retry.</div>
+      </div>
+    </div>
+  </div>
+
+  <hr class="div">
+
+  <!-- TEAM SETUP -->
+  <div class="section">
+    <div class="section-label">Team Setup</div>
+    <div class="section-title">How to Add a New Team Member</div>
+    <p class="section-sub">Only Admins and Owners can invite new members. Follow these steps.</p>
+
+    <div class="flow">
+      <div class="flow-step">
+        <div class="flow-left"><div class="flow-num">1</div><div class="flow-line"></div></div>
+        <div class="flow-body">
+          <h3>Go to Organization Members</h3>
+          <p>From the sidebar, click <strong>Settings → Members</strong>. This is at the organization level, not workspace level.</p>
+          <div class="sub"><span class="chip">Settings → Members</span></div>
+        </div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-left"><div class="flow-num">2</div><div class="flow-line"></div></div>
+        <div class="flow-body">
+          <h3>Click "Invite Member"</h3>
+          <p>Enter the person's email address, choose their organization role (Admin or Member), and optionally assign them to one or more workspaces with a specific workspace role.</p>
+        </div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-left"><div class="flow-num">3</div><div class="flow-line"></div></div>
+        <div class="flow-body">
+          <h3>Share the Invitation Link</h3>
+          <p>After sending the invite, use the <strong>Copy Link</strong> button next to the invitation and send it directly to the person (via WhatsApp, email, or any other channel). This is the most reliable method.</p>
+          <div class="tip">⚠️ Email delivery may sometimes be delayed. The Copy Link button is always available as a direct alternative.</div>
+        </div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-left"><div class="flow-num">4</div></div>
+        <div class="flow-body">
+          <h3>New Member Accepts the Invite</h3>
+          <p>When they open the link, they will be asked to create an account (or log in if they already have one). Once accepted, they appear in the Members list and can access their assigned workspaces immediately.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <hr class="div">
+
+  <!-- CLIENT PORTAL -->
+  <div class="section">
+    <div class="section-label">Client Portal</div>
+    <div class="section-title">Giving Clients Access</div>
+    <p class="section-sub">Clients can be invited to review and approve content without seeing internal tools or team settings.</p>
+
+    <div class="info">
+      <div class="box-icon">🏢</div>
+      <div>
+        <h4>What clients can do</h4>
+        <p>Clients see a simplified portal with the content scheduled for their workspace. They can <strong>approve</strong> or <strong>request changes</strong> on posts. They cannot create posts, invite members, or access any settings.</p>
+      </div>
+    </div>
+
+    <div class="flow">
+      <div class="flow-step">
+        <div class="flow-left"><div class="flow-num">1</div><div class="flow-line"></div></div>
+        <div class="flow-body">
+          <h3>Open Client Portal Settings</h3>
+          <p>Go to the workspace → <strong>Settings → Client Portal</strong>.</p>
+          <div class="sub"><span class="chip">Workspace → Settings → Client Portal</span></div>
+        </div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-left"><div class="flow-num">2</div><div class="flow-line"></div></div>
+        <div class="flow-body">
+          <h3>Invite the Client by Email</h3>
+          <p>Enter the client's email and send the invitation. Use <strong>Copy Link</strong> to send the invite URL directly to them.</p>
+        </div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-left"><div class="flow-num">3</div></div>
+        <div class="flow-body">
+          <h3>Client Reviews Content</h3>
+          <p>The client accesses their portal at <strong>scc.eiden-group.com/portal/</strong>. They can view all content prepared for them and give feedback directly.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <hr class="div">
+
+  <!-- QUICK REFERENCE -->
+  <div class="section">
+    <div class="section-label">Quick Reference</div>
+    <div class="section-title">Where to Find Everything</div>
+
+    <div class="table">
+      <div class="tr head">
+        <div class="td">What you want to do</div>
+        <div class="td">Where to go</div>
+      </div>
+      <div class="tr">
+        <div class="td"><strong>Create a new post</strong></div>
+        <div class="td">Workspace → Create → New Post</div>
+      </div>
+      <div class="tr">
+        <div class="td"><strong>See scheduled posts</strong></div>
+        <div class="td">Workspace → Calendar</div>
+      </div>
+      <div class="tr">
+        <div class="td"><strong>Approve / reject a post</strong></div>
+        <div class="td">Workspace → Approvals</div>
+      </div>
+      <div class="tr">
+        <div class="td"><strong>Reply to a comment/message</strong></div>
+        <div class="td">Workspace → Inbox</div>
+      </div>
+      <div class="tr">
+        <div class="td"><strong>Upload an image or video</strong></div>
+        <div class="td">Workspace → Settings → Media Library</div>
+      </div>
+      <div class="tr">
+        <div class="td"><strong>Connect a social account</strong></div>
+        <div class="td">Workspace → Settings → Social Accounts</div>
+      </div>
+      <div class="tr">
+        <div class="td"><strong>Invite a team member</strong></div>
+        <div class="td">Settings → Members → Invite</div>
+      </div>
+      <div class="tr">
+        <div class="td"><strong>Invite a client</strong></div>
+        <div class="td">Workspace → Settings → Client Portal → Invite</div>
+      </div>
+      <div class="tr">
+        <div class="td"><strong>Save a content idea</strong></div>
+        <div class="td">Workspace → Create → Ideas Board</div>
+      </div>
+      <div class="tr">
+        <div class="td"><strong>Import posts from CSV</strong></div>
+        <div class="td">Workspace → Create → Import CSV</div>
+      </div>
+      <div class="tr">
+        <div class="td"><strong>Create a content template</strong></div>
+        <div class="td">Workspace → Create → Templates</div>
+      </div>
+      <div class="tr">
+        <div class="td"><strong>Set posting schedule / slots</strong></div>
+        <div class="td">Workspace → Calendar → Posting Slots</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="warn" style="margin-top:32px;">
+    <div class="box-icon">⚠️</div>
+    <div>
+      <h4>If something is not working</h4>
+      <p>Most issues come from one of three things: (1) a social account token expired — reconnect it in Settings → Social Accounts; (2) a post failed to publish — check its status in the Calendar for an error message; (3) you don't have permission — ask your Admin to check your workspace role.</p>
+    </div>
+  </div>
+
+</div>
+
+<footer>
+  <strong>EIDEN Group — Social Content Center (SCC)</strong><br>
+  Internal use only · scc.eiden-group.com · Updated May 2026
+</footer>
+
+</body>
+</html>
