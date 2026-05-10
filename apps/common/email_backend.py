@@ -46,8 +46,8 @@ class ResendEmailBackend(BaseEmailBackend):
 
                 resend.Emails.send(params)
                 sent += 1
-            except Exception:
-                logger.exception("Resend API failed for %s", message.to)
+            except Exception as exc:
+                logger.exception("Resend API failed for %s: %s", message.to, exc)
                 if not self.fail_silently:
                     raise
 
