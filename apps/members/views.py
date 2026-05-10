@@ -217,7 +217,7 @@ def accept_invite(request, token):
             return redirect(f"/accounts/login/?next=/members/invite/{token}/accept/")
 
         try:
-            services.accept_invitation(invitation, request.user)
+            services.accept_invitation(invitation, request.user, require_email_match=False)
         except ValueError as e:
             return render(
                 request,
