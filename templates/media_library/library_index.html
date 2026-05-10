@@ -32,6 +32,10 @@
     gap: 0.625rem;
     padding: 0.625rem 1.25rem;
     border-top-right-radius: 0.75rem;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    flex-shrink: 0;
   }
   .ml-search-wrap {
     position: relative;
@@ -512,7 +516,7 @@
 {% block page_title %}Media Library{% endblock %}
 
 {% block content %}
-<div x-data="mediaLibrary()" class="flex flex-1 min-h-0 -m-3 sm:-m-4 lg:-m-6 -mb-3 sm:-mb-4 lg:-mb-6">
+<div x-data="mediaLibrary()" class="flex flex-col flex-1 -m-3 sm:-m-4 lg:-m-6 -mb-3 sm:-mb-4 lg:-mb-6">
 
   <!-- Full-page drag overlay -->
   <div x-show="dragOver" x-cloak class="ml-drag-overlay">
@@ -526,7 +530,7 @@
   </div>
 
   <!-- ═══════ MAIN CONTENT ═══════ -->
-  <div class="flex-1 flex flex-col overflow-hidden"
+  <div class="flex-1 flex flex-col"
        @dragover.prevent="dragOver = true"
        @dragleave.self.prevent="dragOver = false"
        @drop.prevent="handleDrop($event)">
