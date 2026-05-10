@@ -2816,7 +2816,7 @@ def _fetch_feed_events_for_workspace(feeds):
 
     headers = {
         "Accept": "application/rss+xml, application/atom+xml, application/xml, text/xml;q=0.9, */*;q=0.1",
-        "User-Agent": "Brightbean RSS Reader/1.0",
+        "User-Agent": "EIDEN GROUP RSS Reader/1.0",
     }
     all_events = []
     with httpx.Client(headers=headers, timeout=8.0, follow_redirects=True) as client:
@@ -2922,7 +2922,7 @@ def _validate_rss_url(rss_url):
     """Validate that a URL points to a reachable RSS/Atom XML feed."""
     headers = {
         "Accept": "application/rss+xml, application/atom+xml, application/xml, text/xml;q=0.9, */*;q=0.1",
-        "User-Agent": "Brightbean RSS Validator/1.0",
+        "User-Agent": "EIDEN GROUP RSS Validator/1.0",
     }
     try:
         response = httpx.get(rss_url, headers=headers, timeout=8.0, follow_redirects=True)
@@ -2982,7 +2982,7 @@ def feed_add(request, workspace_id):
     name = request.POST.get("name", "").strip()
     website_url = request.POST.get("website_url", "").strip()
     source = request.POST.get("source", "")
-    category = request.POST.get("category", "brightbean-favorites")
+    category = request.POST.get("category", "eiden-group-favorites")
     selected_feed_id = request.POST.get("feed_id", "all")
     derived_metadata = {}
 
@@ -3077,7 +3077,7 @@ def feed_delete(request, workspace_id, feed_id):
 def feed_explore(request, workspace_id):
     """Return the explore feeds modal content for a given category."""
     workspace = _get_workspace(request, workspace_id)
-    category = request.GET.get("category", "brightbean-favorites")
+    category = request.GET.get("category", "eiden-group-favorites")
     return _render_explore(request, workspace, category)
 
 

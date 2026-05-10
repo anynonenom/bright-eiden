@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}Brightbean{% endblock %}</title>
+    <title>{% block title %}EIDEN GROUP{% endblock %}</title>
     <link rel="icon" type="image/jpeg" href="{% static 'img/eiden-gree-logo.jpg' %}">
     <link rel="apple-touch-icon" href="{% static 'img/eiden-gree-logo.jpg' %}">
     <!-- EIDEN Typography System -->
@@ -269,7 +269,7 @@
                     <span class="flex-1 text-[0.9375rem] font-bold truncate" style="font-family: var(--font-display); color: var(--forest); letter-spacing: -0.01em;" x-show="!sidebarCollapsed" x-cloak>{{ sidebar_workspaces.0.name }}</span>
                     {% else %}
                     <img src="{% static 'img/eiden-gree-logo.jpg' %}" alt="EIDEN" class="sidebar-logo-mark flex-shrink-0 object-contain">
-                    <span class="flex-1 text-[0.9375rem] font-bold truncate" style="font-family: var(--font-display); color: var(--forest); letter-spacing: -0.01em;" x-show="!sidebarCollapsed" x-cloak>Brightbean</span>
+                    <span class="flex-1 text-[0.9375rem] font-bold truncate" style="font-family: var(--font-display); color: var(--forest); letter-spacing: -0.01em;" x-show="!sidebarCollapsed" x-cloak>EIDEN GROUP</span>
                     {% endif %}
                     {% endwith %}
                     <svg class="w-3.5 h-3.5 flex-shrink-0 transition-transform" style="color: var(--text-ghost);" :class="wsOpen && 'rotate-180'" x-show="!sidebarCollapsed" x-cloak fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
@@ -832,7 +832,7 @@
                     <span class="text-sm font-bold truncate max-w-[160px]" style="color: var(--forest); font-family: var(--font-display);">{{ current_ws.name }}</span>
                     {% else %}
                     <div class="w-7 h-7 rounded-md flex items-center justify-center text-[11px] font-bold" style="background: var(--teal); color: var(--canvas);">B</div>
-                    <span class="text-sm font-bold" style="color: var(--forest); font-family: var(--font-display);">Brightbean</span>
+                    <span class="text-sm font-bold" style="color: var(--forest); font-family: var(--font-display);">EIDEN GROUP</span>
                     {% endif %}
                     {% endwith %}
                 </div>
