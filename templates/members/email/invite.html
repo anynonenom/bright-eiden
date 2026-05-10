@@ -1,55 +1,110 @@
 <!DOCTYPE html>
-<html>
-<head><meta charset="UTF-8"></head>
-<body style="margin:0; padding:0; font-family: system-ui, -apple-system, sans-serif; background: #FAFAF9;">
-    <table width="100%" cellpadding="0" cellspacing="0" style="padding: 40px 20px;">
-        <tr>
-            <td align="center">
-                <table width="520" cellpadding="0" cellspacing="0" style="background: #FFFFFF; border-radius: 12px; border: 1px solid #E7E5E4; overflow: hidden;">
-                    <!-- Header -->
-                    <tr>
-                        <td style="padding: 32px 32px 0 32px;">
-                            <p style="font-size: 15px; font-weight: 700; color: #1C1917; margin: 0;">
-                                Join {{ org_name }} on EIDEN GROUP
-                            </p>
-                        </td>
-                    </tr>
-                    <!-- Body -->
-                    <tr>
-                        <td style="padding: 24px 32px 32px 32px;">
-                            <p style="font-size: 15px; color: #44403C; line-height: 1.6; margin: 0 0 8px 0;">
-                                Hi there,
-                            </p>
-                            <p style="font-size: 15px; color: #44403C; line-height: 1.6; margin: 0 0 24px 0;">
-                                {{ invited_by.display_name }} has invited you to join <strong>{{ org_name }}</strong> as a team member. Click the button below to accept the invitation and get started.
-                            </p>
-                            <!-- CTA Button -->
-                            <table cellpadding="0" cellspacing="0" width="100%">
-                                <tr>
-                                    <td align="center">
-                                        <a href="{{ accept_url }}"
-                                           style="display: inline-block; padding: 12px 32px; background: #F97316; color: #FFFFFF; font-size: 14px; font-weight: 600; text-decoration: none; border-radius: 9999px;">
-                                            Accept Invitation
-                                        </a>
-                                    </td>
-                                </tr>
-                            </table>
-                            <p style="font-size: 13px; color: #A8A29E; line-height: 1.6; margin: 24px 0 0 0;">
-                                This invitation expires in 7 days. If it expires, ask your team admin for a new one.
-                            </p>
-                        </td>
-                    </tr>
-                    <!-- Footer -->
-                    <tr>
-                        <td style="padding: 16px 32px; border-top: 1px solid #E7E5E4;">
-                            <p style="font-size: 12px; color: #A8A29E; margin: 0;">
-                                You're receiving this because someone invited you to {{ org_name }} on EIDEN GROUP.
-                            </p>
-                        </td>
-                    </tr>
-                </table>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>You've been invited to {{ org_name }}</title>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<!--[if mso]><noscript><xml><o:OfficeDocumentSettings><o:PixelsPerInch>96</o:PixelsPerInch></o:OfficeDocumentSettings></xml></noscript><![endif]-->
+<style>
+  body,table,td,a{-webkit-text-size-adjust:100%;-ms-text-size-adjust:100%;}
+  table,td{mso-table-lspace:0pt;mso-table-rspace:0pt;}
+  body{margin:0;padding:0;width:100%!important;}
+</style>
+</head>
+<body style="margin:0;padding:0;background-color:#F4EBD0;font-family:'Inter',system-ui,sans-serif;color:#122620;">
+
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#F4EBD0;">
+<tr><td align="center" style="padding:48px 20px;">
+
+  <table role="presentation" width="560" cellpadding="0" cellspacing="0" border="0" style="max-width:560px;width:100%;border-radius:14px;overflow:hidden;border:1px solid #CFC292;">
+
+    <!-- Header bar -->
+    <tr>
+      <td style="background-color:#122620;padding:28px 36px 24px;">
+        <table role="presentation" cellpadding="0" cellspacing="0" border="0">
+          <tr>
+            <td style="border-left:3px solid #0C5752;padding-left:12px;">
+              <p style="margin:0;font-family:'Outfit',sans-serif;font-size:11px;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:#CFC292;">EIDEN GROUP</p>
+              <p style="margin:3px 0 0;font-family:'Outfit',sans-serif;font-size:20px;font-weight:800;color:#FEFDFB;letter-spacing:-0.01em;">Team Invitation</p>
             </td>
-        </tr>
-    </table>
+          </tr>
+        </table>
+      </td>
+    </tr>
+
+    <!-- Body -->
+    <tr>
+      <td style="background-color:#FEFDFB;padding:36px 36px 12px;">
+        <p style="margin:0 0 16px;font-size:15px;color:#122620;line-height:1.65;">
+          Hi there,
+        </p>
+        <p style="margin:0 0 28px;font-size:15px;color:#3D4F4A;line-height:1.65;">
+          <strong style="color:#122620;">{{ invited_by.display_name }}</strong> has invited you to join
+          <strong style="color:#122620;">{{ org_name }}</strong> as a team member on EIDEN GROUP.
+          Click the button below to accept and get started.
+        </p>
+
+        <!-- CTA -->
+        <table role="presentation" cellpadding="0" cellspacing="0" border="0" style="margin-bottom:28px;">
+          <tr>
+            <td style="background-color:#0C5752;border-radius:9999px;">
+              <a href="{{ accept_url }}" target="_blank" rel="noopener"
+                 style="display:inline-block;padding:13px 36px;font-family:'Inter',sans-serif;font-size:14px;font-weight:600;color:#FEFDFB;text-decoration:none;border-radius:9999px;letter-spacing:0.01em;">
+                Accept Invitation
+              </a>
+            </td>
+          </tr>
+        </table>
+
+        <!-- Details card -->
+        <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-bottom:28px;">
+          <tr>
+            <td style="background-color:#F4EBD0;border-radius:10px;padding:18px 20px;border-left:3px solid #CFC292;">
+              <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
+                <tr>
+                  <td style="padding-bottom:10px;">
+                    <p style="margin:0;font-size:10px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:#0C5752;font-family:'Inter',sans-serif;">Organization</p>
+                    <p style="margin:3px 0 0;font-size:14px;font-weight:600;color:#122620;">{{ org_name }}</p>
+                  </td>
+                </tr>
+                <tr>
+                  <td>
+                    <p style="margin:0;font-size:10px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:#0C5752;font-family:'Inter',sans-serif;">Invited by</p>
+                    <p style="margin:3px 0 0;font-size:14px;color:#122620;">{{ invited_by.display_name }}</p>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+        </table>
+
+        <p style="margin:0 0 0;font-size:12px;color:#8A9E99;line-height:1.6;">
+          This invitation expires in <strong>7 days</strong>. If it expires, ask your team admin to resend it.
+        </p>
+      </td>
+    </tr>
+
+    <!-- Footer -->
+    <tr>
+      <td style="background-color:#FEFDFB;padding:20px 36px 28px;border-top:1px solid #F4EBD0;">
+        <p style="margin:0;font-size:11px;color:#8A9E99;line-height:1.6;">
+          You're receiving this because someone invited you to {{ org_name }} on EIDEN GROUP.
+          If this was unexpected, you can safely ignore this email.
+        </p>
+      </td>
+    </tr>
+
+    <!-- Brand footer -->
+    <tr>
+      <td style="background-color:#0E1B17;padding:16px 36px;text-align:center;">
+        <p style="margin:0;font-family:'Outfit',sans-serif;font-size:11px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:#CFC292;opacity:0.7;">EIDEN GROUP</p>
+      </td>
+    </tr>
+
+  </table>
+
+</td></tr>
+</table>
 </body>
 </html>
