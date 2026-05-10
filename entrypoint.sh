@@ -7,7 +7,7 @@ echo "Ensuring media directories exist..."
 mkdir -p "${MEDIA_ROOT:-/app/media}/workspaces/icons"
 chmod -R 777 "${MEDIA_ROOT:-/app/media}"
 echo "Media root: ${MEDIA_ROOT:-/app/media}"
-ls -la "${MEDIA_ROOT:-/app/media}"
+find "${MEDIA_ROOT:-/app/media}" -type f | head -20
 
 echo "Running migrations..."
 python manage.py migrate --noinput
