@@ -1,6 +1,20 @@
+from allauth.account.adapter import DefaultAccountAdapter
 from allauth.socialaccount.adapter import DefaultSocialAccountAdapter
+from django.core.exceptions import ValidationError
 
 from apps.accounts.models import OAuthConnection
+
+ALLOWED_EMAIL_DOMAIN = "eiden-group.com"
+
+
+class AccountAdapter(DefaultAccountAdapter):
+    """Restrict signups to @eiden-group.com email addresses."""
+
+    def clean_email(self, email):
+        email = super().clean_email(email)
+        if not email.lower().endswith(f"@{ALLOWED_EMAIL_DOMAIN}"):
+            raise ValidationError(f"Only @{ALLOWED_EMAIL_DOMAIN} email addresses are allowed.")
+        return email
 
 
 class SocialAccountAdapter(DefaultSocialAccountAdapter):
