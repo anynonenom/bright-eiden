@@ -15,9 +15,6 @@ python manage.py migrate --noinput
 echo "Creating superuser if not exists..."
 python manage.py createsuperuser --noinput || true
 
-echo "Django MEDIA_ROOT:"
-python -c "from django.conf import settings; print(settings.MEDIA_ROOT, settings.MEDIA_URL)"
-
 echo "Starting gunicorn on port $PORT"
 exec gunicorn config.wsgi:application \
     --bind "0.0.0.0:$PORT" \

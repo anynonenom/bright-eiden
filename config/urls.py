@@ -39,15 +39,6 @@ urlpatterns = [
     path("", include("apps.accounts.urls_root")),
 ]
 
-def _serve_media(request, path):
-    import os
-    from django.views.static import serve as _serve
-    document_root = settings.MEDIA_ROOT
-    full_path = os.path.join(document_root, path)
-    import logging
-    logging.getLogger(__name__).warning("MEDIA SERVE: root=%s path=%s full=%s exists=%s", document_root, path, full_path, os.path.exists(full_path))
-    return _serve(request, path, document_root=document_root)
-
 urlpatterns += [
-    re_path(r"^media/(?P<path>.*)$", _serve_media),
+    re_path(r"^media/(?P<path>.*)$", serve, {"document_root": settings.MEDIA_ROOT}),
 ]
