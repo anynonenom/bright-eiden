@@ -17,6 +17,9 @@
     border-bottom: 1px solid var(--border, #E7E5E4);
     flex-shrink: 0;
     flex-wrap: wrap;
+    position: sticky;
+    top: 44px;
+    z-index: 9;
   }
   .ml-nav-item {
     display: inline-flex;
@@ -124,7 +127,7 @@
     transition: border-color 150ms ease, box-shadow 150ms ease;
   }
   .ml-search:focus {
-    border-color: var(--primary, #F97316);
+    border-color: var(--teal, #2D9E8F);
     box-shadow: 0 0 0 3px var(--primary-ring, #FED7AA);
     background: #FFF;
   }
@@ -149,9 +152,9 @@
     color: var(--text-primary, #1C1917);
   }
   .ml-filter-pill.active {
-    background: var(--primary, #F97316);
+    background: var(--teal, #2D9E8F);
     color: #FFF;
-    border-color: var(--primary, #F97316);
+    border-color: var(--teal, #2D9E8F);
   }
 
   /* View toggle */
@@ -193,7 +196,7 @@
     cursor: pointer;
   }
   .ml-sort-select:focus {
-    border-color: var(--primary, #F97316);
+    border-color: var(--teal, #2D9E8F);
     box-shadow: 0 0 0 3px var(--primary-ring, #FED7AA);
   }
 
@@ -207,16 +210,16 @@
     font-weight: 700;
     border-radius: 9999px;
     border: none;
-    background: var(--primary, #F97316);
+    background: var(--teal, #2D9E8F);
     color: #FFF;
     cursor: pointer;
     transition: opacity 150ms ease, transform 120ms ease, box-shadow 150ms ease;
-    box-shadow: 0 1px 4px rgba(249,115,22,0.35);
+    box-shadow: 0 1px 4px rgba(45,158,143,0.25);
     white-space: nowrap;
   }
   .ml-upload-btn:hover {
     opacity: 0.92;
-    box-shadow: 0 4px 14px rgba(249,115,22,0.4);
+    box-shadow: 0 4px 14px rgba(45,158,143,0.35);
     transform: translateY(-1px);
   }
   .ml-upload-btn:active { transform: translateY(0); opacity: 1; }
@@ -305,7 +308,7 @@
     top: 0.5rem;
     right: 0.5rem;
     z-index: 2;
-    color: #F59E0B;
+    color: var(--teal, #2D9E8F);
     filter: drop-shadow(0 1px 2px rgba(0,0,0,0.2));
   }
 
@@ -445,7 +448,7 @@
     transition: border-color 160ms ease, background 160ms ease;
   }
   .ml-dropzone-inline.drag-over {
-    border-color: var(--primary, #F97316);
+    border-color: var(--teal, #2D9E8F);
     background: #FFF7ED;
   }
 
@@ -459,7 +462,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    border: 3px dashed var(--primary, #F97316);
+    border: 3px dashed var(--teal, #2D9E8F);
     pointer-events: none;
   }
   .ml-drag-overlay-inner {
@@ -480,7 +483,7 @@
   }
   .ml-progress-fill {
     height: 100%;
-    background: var(--primary, #F97316);
+    background: var(--teal, #2D9E8F);
     border-radius: 9999px;
     transition: width 120ms ease;
   }
@@ -580,7 +583,7 @@
   <!-- Full-page drag overlay -->
   <div x-show="dragOver" x-cloak class="ml-drag-overlay">
     <div class="ml-drag-overlay-inner">
-      <svg class="w-12 h-12 mx-auto mb-3 text-orange-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <svg class="w-12 h-12 mx-auto mb-3" style="color: var(--teal, #2D9E8F);" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/>
       </svg>
       <p class="text-base font-bold" style="color: var(--text-primary, #1C1917);">Drop to upload</p>
@@ -710,7 +713,7 @@
     <div x-show="uploading" x-cloak class="ml-upload-panel">
       <div class="ml-upload-header">
         <span>Uploading <span x-text="uploadQueue.length"></span> file(s)</span>
-        <svg class="w-3 h-3 animate-spin text-orange-500" fill="none" viewBox="0 0 24 24">
+        <svg class="w-3 h-3 animate-spin" style="color: var(--teal, #2D9E8F);" fill="none" viewBox="0 0 24 24">
           <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
           <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
         </svg>

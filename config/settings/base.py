@@ -24,13 +24,13 @@ DEBUG = env("DEBUG")
 ALLOWED_HOSTS = env("ALLOWED_HOSTS") or ["*"]
 APP_URL = env("APP_URL")
 
-# Derive CSRF_TRUSTED_ORIGINS from APP_URL so HTTPS deployments work out of the box.
-# Can be overridden by setting CSRF_TRUSTED_ORIGINS in .env directly.
+# Accept all origins that include APP_URL hostname plus any extras in CSRF_TRUSTED_ORIGINS env var.
 _app_origin = "{scheme}://{host}".format(
     scheme=urlparse(APP_URL).scheme,
     host=urlparse(APP_URL).hostname,
 )
-CSRF_TRUSTED_ORIGINS = env.list("CSRF_TRUSTED_ORIGINS", default=[_app_origin])
+_extra_origins = env.list("CSRF_TRUSTED_ORIGINS", default=[])
+CSRF_TRUSTED_ORIGINS = list({_app_origin, *_extra_origins}) if _extra_origins else [_app_origin, "https://*.eiden-group.com", "https://*.up.railway.app"]
 
 # Application definition
 
