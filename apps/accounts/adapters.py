@@ -4,16 +4,17 @@ from django.core.exceptions import ValidationError
 
 from apps.accounts.models import OAuthConnection
 
-ALLOWED_EMAIL_DOMAIN = "eiden-group.com"
+ALLOWED_EMAIL_DOMAINS = {"eiden-group.com", "gmail.com"}
 
 
 class AccountAdapter(DefaultAccountAdapter):
-    """Restrict signups to @eiden-group.com email addresses."""
+    """Restrict signups to allowed email domains."""
 
     def clean_email(self, email):
         email = super().clean_email(email)
-        if not email.lower().endswith(f"@{ALLOWED_EMAIL_DOMAIN}"):
-            raise ValidationError(f"Only @{ALLOWED_EMAIL_DOMAIN} email addresses are allowed.")
+        domain = email.lower().split("@")[-1]
+        if domain not in ALLOWED_EMAIL_DOMAINS:
+            raise ValidationError("Only @eiden-group.com or @gmail.com email addresses are allowed.")
         return email
 
 
