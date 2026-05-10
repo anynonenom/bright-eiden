@@ -18,7 +18,7 @@
             </div>
 
             <!-- Form -->
-            <form x-init="htmx.process($el)"
+            <form x-init="$nextTick(() => htmx.process($el))"
                   hx-post="{% url 'members:invite' %}"
                   hx-target="#invitations-list"
                   hx-swap="beforeend"

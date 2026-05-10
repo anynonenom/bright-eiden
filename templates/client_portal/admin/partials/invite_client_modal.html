@@ -18,7 +18,7 @@
             </div>
 
             <!-- Form -->
-            <form x-init="htmx.process($el)"
+            <form x-init="$nextTick(() => htmx.process($el))"
                   hx-post="{% url 'client_portal_admin:invite_client' workspace_id=request.workspace.id %}"
                   hx-target="#pending-invites-section"
                   hx-swap="innerHTML"

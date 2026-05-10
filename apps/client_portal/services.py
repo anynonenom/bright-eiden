@@ -79,7 +79,7 @@ def generate_magic_link(workspace, client_user, created_by):
     msg.attach_alternative(html_content, "text/html")
 
     try:
-        msg.send(fail_silently=True)
+        msg.send(fail_silently=False)
     except Exception:
         logger.exception("Failed to send magic link email to %s", client_user.email)
 
