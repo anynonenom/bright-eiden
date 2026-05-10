@@ -25,12 +25,13 @@ ALLOWED_HOSTS = env("ALLOWED_HOSTS") or ["*"]
 APP_URL = env("APP_URL")
 
 # Accept all origins that include APP_URL hostname plus any extras in CSRF_TRUSTED_ORIGINS env var.
-_app_origin = "{scheme}://{host}".format(
-    scheme=urlparse(APP_URL).scheme,
-    host=urlparse(APP_URL).hostname,
-)
+_app_origin = f"{urlparse(APP_URL).scheme}://{urlparse(APP_URL).hostname}"
 _extra_origins = env.list("CSRF_TRUSTED_ORIGINS", default=[])
-CSRF_TRUSTED_ORIGINS = list({_app_origin, *_extra_origins}) if _extra_origins else [_app_origin, "https://*.eiden-group.com", "https://*.up.railway.app"]
+CSRF_TRUSTED_ORIGINS = (
+    list({_app_origin, *_extra_origins})
+    if _extra_origins
+    else [_app_origin, "https://*.eiden-group.com", "https://*.up.railway.app"]
+)
 
 # Application definition
 
@@ -191,7 +192,7 @@ if STORAGE_BACKEND.lower() == "s3":
 else:
     MEDIA_ROOT = env("MEDIA_ROOT", default=str(BASE_DIR / "media"))
     MEDIA_URL = "/media/"
-    STORAGES["default"] = {
+    STORAGES["default"] = {  # type: ignore[assignment]
         "BACKEND": "django.core.files.storage.FileSystemStorage",
         "OPTIONS": {
             "location": MEDIA_ROOT,

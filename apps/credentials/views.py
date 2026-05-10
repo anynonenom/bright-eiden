@@ -4,12 +4,10 @@ Org admins can store encrypted app credentials (App ID / Secret) for each
 social platform. These are used as the default when connecting social accounts.
 """
 
-import json
 import logging
 
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
-from django.http import JsonResponse
 from django.shortcuts import redirect, render
 from django.views.decorators.http import require_POST
 
@@ -23,46 +21,61 @@ logger = logging.getLogger(__name__)
 # Fields required per platform, in display order.
 PLATFORM_FIELDS = {
     "facebook": [
-        {"name": "app_id",     "label": "App ID",     "secret": False, "placeholder": "e.g. 123456789012345"},
-        {"name": "app_secret", "label": "App Secret", "secret": True,  "placeholder": "32-character hex"},
+        {"name": "app_id", "label": "App ID", "secret": False, "placeholder": "e.g. 123456789012345"},
+        {"name": "app_secret", "label": "App Secret", "secret": True, "placeholder": "32-character hex"},
     ],
     "instagram": [
-        {"name": "app_id",     "label": "App ID",     "secret": False, "placeholder": "Same as Facebook App ID"},
-        {"name": "app_secret", "label": "App Secret", "secret": True,  "placeholder": "Same as Facebook App Secret"},
+        {"name": "app_id", "label": "App ID", "secret": False, "placeholder": "Same as Facebook App ID"},
+        {"name": "app_secret", "label": "App Secret", "secret": True, "placeholder": "Same as Facebook App Secret"},
     ],
     "instagram_login": [
-        {"name": "app_id",     "label": "App ID",     "secret": False, "placeholder": "Instagram App ID"},
-        {"name": "app_secret", "label": "App Secret", "secret": True,  "placeholder": "Instagram App Secret"},
+        {"name": "app_id", "label": "App ID", "secret": False, "placeholder": "Instagram App ID"},
+        {"name": "app_secret", "label": "App Secret", "secret": True, "placeholder": "Instagram App Secret"},
     ],
     "threads": [
-        {"name": "app_id",     "label": "App ID",     "secret": False, "placeholder": "Same as Facebook App ID"},
-        {"name": "app_secret", "label": "App Secret", "secret": True,  "placeholder": "Same as Facebook App Secret"},
+        {"name": "app_id", "label": "App ID", "secret": False, "placeholder": "Same as Facebook App ID"},
+        {"name": "app_secret", "label": "App Secret", "secret": True, "placeholder": "Same as Facebook App Secret"},
     ],
     "linkedin_personal": [
-        {"name": "client_id",     "label": "Client ID",     "secret": False, "placeholder": "e.g. 86abc123xyz"},
-        {"name": "client_secret", "label": "Client Secret", "secret": True,  "placeholder": "LinkedIn app secret"},
+        {"name": "client_id", "label": "Client ID", "secret": False, "placeholder": "e.g. 86abc123xyz"},
+        {"name": "client_secret", "label": "Client Secret", "secret": True, "placeholder": "LinkedIn app secret"},
     ],
     "linkedin_company": [
-        {"name": "client_id",     "label": "Client ID",     "secret": False, "placeholder": "e.g. 86abc123xyz"},
-        {"name": "client_secret", "label": "Client Secret", "secret": True,  "placeholder": "LinkedIn app secret"},
+        {"name": "client_id", "label": "Client ID", "secret": False, "placeholder": "e.g. 86abc123xyz"},
+        {"name": "client_secret", "label": "Client Secret", "secret": True, "placeholder": "LinkedIn app secret"},
     ],
     "tiktok": [
-        {"name": "client_key",    "label": "Client Key",    "secret": False, "placeholder": "TikTok client key"},
-        {"name": "client_secret", "label": "Client Secret", "secret": True,  "placeholder": "TikTok client secret"},
+        {"name": "client_key", "label": "Client Key", "secret": False, "placeholder": "TikTok client key"},
+        {"name": "client_secret", "label": "Client Secret", "secret": True, "placeholder": "TikTok client secret"},
     ],
     "youtube": [
-        {"name": "client_id",     "label": "Client ID",     "secret": False, "placeholder": "Google OAuth client ID"},
-        {"name": "client_secret", "label": "Client Secret", "secret": True,  "placeholder": "Google OAuth client secret"},
+        {"name": "client_id", "label": "Client ID", "secret": False, "placeholder": "Google OAuth client ID"},
+        {
+            "name": "client_secret",
+            "label": "Client Secret",
+            "secret": True,
+            "placeholder": "Google OAuth client secret",
+        },
     ],
     "google_business": [
-        {"name": "client_id",     "label": "Client ID",     "secret": False, "placeholder": "Same as YouTube (shared Google app)"},
-        {"name": "client_secret", "label": "Client Secret", "secret": True,  "placeholder": "Same as YouTube (shared Google app)"},
+        {
+            "name": "client_id",
+            "label": "Client ID",
+            "secret": False,
+            "placeholder": "Same as YouTube (shared Google app)",
+        },
+        {
+            "name": "client_secret",
+            "label": "Client Secret",
+            "secret": True,
+            "placeholder": "Same as YouTube (shared Google app)",
+        },
     ],
     "pinterest": [
-        {"name": "app_id",     "label": "App ID",     "secret": False, "placeholder": "Pinterest App ID"},
-        {"name": "app_secret", "label": "App Secret", "secret": True,  "placeholder": "Pinterest App Secret"},
+        {"name": "app_id", "label": "App ID", "secret": False, "placeholder": "Pinterest App ID"},
+        {"name": "app_secret", "label": "App Secret", "secret": True, "placeholder": "Pinterest App Secret"},
     ],
-    "bluesky":  [],  # session-auth, no app credentials
+    "bluesky": [],  # session-auth, no app credentials
     "mastodon": [],  # per-instance OAuth, no repo-wide credentials
 }
 
@@ -118,8 +131,16 @@ PLATFORM_SETUP_INFO = {
         "redirect_path": "/social-accounts/oauth/callback/pinterest/",
         "note": None,
     },
-    "bluesky":  {"docs_url": None, "redirect_path": None, "note": "No app credentials needed. Users connect with their handle and an App Password."},
-    "mastodon": {"docs_url": None, "redirect_path": None, "note": "No credentials needed. The app registers itself automatically with each Mastodon instance."},
+    "bluesky": {
+        "docs_url": None,
+        "redirect_path": None,
+        "note": "No app credentials needed. Users connect with their handle and an App Password.",
+    },
+    "mastodon": {
+        "docs_url": None,
+        "redirect_path": None,
+        "note": "No credentials needed. The app registers itself automatically with each Mastodon instance.",
+    },
 }
 
 
@@ -144,10 +165,7 @@ def credentials_list(request):
         return redirect("dashboard")
 
     # Load existing credentials keyed by platform
-    existing = {
-        c.platform: c
-        for c in PlatformCredential.objects.for_org(request.org.id)
-    }
+    existing = {c.platform: c for c in PlatformCredential.objects.for_org(request.org.id)}
 
     # Build context list in PlatformCredential.Platform order
     platform_data = []
@@ -156,23 +174,29 @@ def credentials_list(request):
         fields = PLATFORM_FIELDS.get(value, [])
         setup = PLATFORM_SETUP_INFO.get(value, {})
         app_url = request.build_absolute_uri("/").rstrip("/")
-        platform_data.append({
-            "value": value,
-            "label": label,
-            "fields": fields,
-            "is_configured": cred.is_configured if cred else False,
-            "masked": cred.masked_credentials if cred else {},
-            "test_result": cred.test_result if cred else PlatformCredential.TestResult.UNTESTED,
-            "has_fields": bool(fields),
-            "docs_url": setup.get("docs_url"),
-            "redirect_uri": (app_url + setup["redirect_path"]) if setup.get("redirect_path") else None,
-            "note": setup.get("note"),
-        })
+        platform_data.append(
+            {
+                "value": value,
+                "label": label,
+                "fields": fields,
+                "is_configured": cred.is_configured if cred else False,
+                "masked": cred.masked_credentials if cred else {},
+                "test_result": cred.test_result if cred else PlatformCredential.TestResult.UNTESTED,
+                "has_fields": bool(fields),
+                "docs_url": setup.get("docs_url"),
+                "redirect_uri": (app_url + setup["redirect_path"]) if setup.get("redirect_path") else None,
+                "note": setup.get("note"),
+            }
+        )
 
-    return render(request, "credentials/list.html", {
-        "platform_data": platform_data,
-        "settings_active": "credentials",
-    })
+    return render(
+        request,
+        "credentials/list.html",
+        {
+            "platform_data": platform_data,
+            "settings_active": "credentials",
+        },
+    )
 
 
 @login_required
@@ -223,7 +247,10 @@ def credential_save(request, platform):
     if all_filled:
         messages.success(request, f"{cred.get_platform_display()} credentials saved.")
     else:
-        messages.warning(request, f"{cred.get_platform_display()} credentials partially saved — fill all fields to enable the platform.")
+        messages.warning(
+            request,
+            f"{cred.get_platform_display()} credentials partially saved — fill all fields to enable the platform.",
+        )
 
     return redirect("credentials:list")
 

@@ -13,5 +13,10 @@ useDefault = true
 #   providers/linkedin_personal.py:  from .linkedin import API_BASE, LinkedInProvider
 #   providers/linkedin_company.py:   from .linkedin import LinkedInProvider
 [allowlist]
-description = "Project allowlist: ignore LinkedInProvider class-name imports"
+description = "Project allowlist: known false positives"
 regexes = ['''LinkedInProvider''']
+# EMAIL_HOST_PASSWORD in docker-compose.override.yml is a local SMTP dev credential,
+# not a production secret. Both occurrences (lines 13 and 27) are allowlisted by fingerprint.
+commits = [
+  "8df11143faa1b561a7a9f822e2dba326bb8ec395",
+]
