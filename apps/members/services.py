@@ -279,6 +279,6 @@ def _send_invite_email(invitation):
     msg.attach_alternative(html_content, "text/html")
 
     try:
-        msg.send(fail_silently=False)
+        msg.send(fail_silently=True)
     except Exception:
         logger.exception("Failed to send invite email to %s", invitation.email)

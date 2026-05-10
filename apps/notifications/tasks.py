@@ -57,7 +57,7 @@ def send_daily_digests():
                 to=[user.email],
             )
             msg.attach_alternative(html_content, "text/html")
-            msg.send(fail_silently=False)
+            msg.send(fail_silently=True)
 
             logger.info("Sent daily digest to %s (%d notifications)", user.email, len(notifications))
         except Exception:
