@@ -193,6 +193,10 @@ else:
     MEDIA_URL = "/media/"
     STORAGES["default"] = {
         "BACKEND": "django.core.files.storage.FileSystemStorage",
+        "OPTIONS": {
+            "location": MEDIA_ROOT,
+            "base_url": MEDIA_URL,
+        },
     }
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"

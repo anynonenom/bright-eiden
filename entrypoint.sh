@@ -3,11 +3,11 @@ set -e
 
 PORT="${PORT:-8000}"
 
-echo "Ensuring media directory exists..."
-mkdir -p "${MEDIA_ROOT:-/app/media}"
+echo "Ensuring media directories exist..."
+mkdir -p "${MEDIA_ROOT:-/app/media}/workspaces/icons"
+chmod -R 777 "${MEDIA_ROOT:-/app/media}"
 echo "Media root: ${MEDIA_ROOT:-/app/media}"
-ls -la "${MEDIA_ROOT:-/app/media}" || echo "Media dir empty or missing"
-touch "${MEDIA_ROOT:-/app/media}/.writable" && echo "Media dir is writable" || echo "ERROR: Media dir NOT writable"
+ls -la "${MEDIA_ROOT:-/app/media}"
 
 echo "Running migrations..."
 python manage.py migrate --noinput
