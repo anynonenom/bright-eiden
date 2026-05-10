@@ -10,6 +10,11 @@ chmod -R 777 "${MEDIA_ROOT:-/app/media}"
 echo "Running migrations..."
 python manage.py migrate --noinput
 
+if [ "${RESET_USERS}" = "1" ]; then
+    echo "Resetting all users and organizations..."
+    python manage.py reset_all_users
+fi
+
 if [ "${START_COMMAND}" = "worker" ]; then
     echo "Starting background task worker..."
     exec python manage.py process_tasks
