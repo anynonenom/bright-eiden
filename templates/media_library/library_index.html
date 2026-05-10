@@ -686,22 +686,22 @@
         Starred
       </a>
       <div class="ml-nav-divider"></div>
-      <!-- Folder tree inline -->
-      <div id="folder-tree" class="flex items-center gap-1 flex-wrap"
-           hx-get="{% url 'media_library:index' workspace_id=workspace.id %}folders/create/"
-           hx-trigger="folderUpdated from:body"
-           hx-target="#folder-tree">
-        {% include "media_library/_folder_tree.html" %}
-      </div>
-      <button @click="showNewFolder = !showNewFolder"
-              class="ml-nav-item"
-              title="New folder">
+      {% for folder in folders %}
+      <a href="{% url 'media_library:index' workspace_id=workspace.id %}?folder={{ folder.id }}"
+         class="ml-nav-item {% if current_folder == folder.id|slugify %}active{% endif %}">
+        <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"/>
+        </svg>
+        {{ folder.name }}
+      </a>
+      {% endfor %}
+      <button @click="showNewFolder = !showNewFolder" class="ml-nav-item cursor-pointer" style="border:none;background:transparent;">
         <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
           <path d="M12 4v16m8-8H4"/>
         </svg>
         New Folder
       </button>
-      <div x-show="showNewFolder" x-cloak class="ml-3">
+      <div x-show="showNewFolder" x-cloak class="ml-2">
         {% include "media_library/_folder_form.html" %}
       </div>
     </div>
