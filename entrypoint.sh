@@ -3,6 +3,9 @@ set -e
 
 PORT="${PORT:-8000}"
 
+echo "Ensuring media directory exists..."
+mkdir -p "${MEDIA_ROOT:-/app/media}"
+
 echo "Running migrations..."
 python manage.py migrate --noinput
 
