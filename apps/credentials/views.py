@@ -124,6 +124,8 @@ PLATFORM_SETUP_INFO = {
 
 
 def _is_org_admin(request):
+    if not getattr(request, "org", None):
+        return False
     try:
         membership = OrgMembership.objects.get(user=request.user, organization=request.org)
         return membership.org_role in (OrgMembership.OrgRole.OWNER, OrgMembership.OrgRole.ADMIN)
@@ -134,6 +136,9 @@ def _is_org_admin(request):
 @login_required
 def credentials_list(request):
     """Show all platforms with their credential status and a save form."""
+    if not getattr(request, "org", None):
+        messages.error(request, "No organization found. Please create or join an organization first.")
+        return redirect("dashboard")
     if not _is_org_admin(request):
         messages.error(request, "Only organization admins can manage platform credentials.")
         return redirect("dashboard")
@@ -174,6 +179,9 @@ def credentials_list(request):
 @require_POST
 def credential_save(request, platform):
     """Save (create or update) credentials for a platform."""
+    if not getattr(request, "org", None):
+        messages.error(request, "No organization found.")
+        return redirect("dashboard")
     if not _is_org_admin(request):
         messages.error(request, "Only organization admins can manage platform credentials.")
         return redirect("credentials:list")
@@ -224,6 +232,9 @@ def credential_save(request, platform):
 @require_POST
 def credential_clear(request, platform):
     """Clear credentials for a platform."""
+    if not getattr(request, "org", None):
+        messages.error(request, "No organization found.")
+        return redirect("dashboard")
     if not _is_org_admin(request):
         messages.error(request, "Only organization admins can manage platform credentials.")
         return redirect("credentials:list")

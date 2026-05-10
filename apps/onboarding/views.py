@@ -179,9 +179,12 @@ def send_link_email(request, workspace_id, link_id):
         to=[email],
     )
     msg.attach_alternative(html_content, "text/html")
-    msg.send(fail_silently=False)
-
-    messages.success(request, f"Connection link sent to {email}.")
+    try:
+        msg.send(fail_silently=False)
+        messages.success(request, f"Connection link sent to {email}.")
+    except Exception as exc:
+        logger.error("Failed to send connection link email to %s: %s", email, exc)
+        messages.error(request, "Failed to send email. Please check your email settings.")
     return redirect("social_accounts:list", workspace_id=workspace_id)
 
 

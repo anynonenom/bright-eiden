@@ -7,19 +7,21 @@ BASE_DIR = Path(__file__).resolve().parent.parent.parent
 
 env = environ.Env(
     DEBUG=(bool, False),
-    ALLOWED_HOSTS=(list, []),
+    ALLOWED_HOSTS=(list, ["*"]),
     APP_URL=(str, "http://localhost:8000"),
     STORAGE_BACKEND=(str, "local"),
     EMAIL_BACKEND_TYPE=(str, "smtp"),
     SENTRY_DSN=(str, ""),
     REDIS_URL=(str, ""),
+    SECRET_KEY=(str, "insecure-default-change-me-in-production"),
+    ENCRYPTION_KEY_SALT=(str, ""),
 )
 
 environ.Env.read_env(BASE_DIR / ".env", overwrite=False)
 
 SECRET_KEY = env("SECRET_KEY")
 DEBUG = env("DEBUG")
-ALLOWED_HOSTS = env("ALLOWED_HOSTS")
+ALLOWED_HOSTS = env("ALLOWED_HOSTS") or ["*"]
 APP_URL = env("APP_URL")
 
 # Derive CSRF_TRUSTED_ORIGINS from APP_URL so HTTPS deployments work out of the box.
@@ -290,7 +292,7 @@ MEDIA_LIBRARY_FFMPEG_TIMEOUT = 300  # 5 minutes
 MEDIA_LIBRARY_MAX_CONCURRENT_TRANSCODES = 2
 
 # Encryption key derivation salt - MUST be set per-deployment via environment
-ENCRYPTION_KEY_SALT = env("ENCRYPTION_KEY_SALT", default="").encode("utf-8") or None
+ENCRYPTION_KEY_SALT = env("ENCRYPTION_KEY_SALT").encode("utf-8") or None
 
 # Sentry
 SENTRY_DSN = env("SENTRY_DSN")
