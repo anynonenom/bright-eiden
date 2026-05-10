@@ -242,20 +242,28 @@ def connect_platform(request, workspace_id):
         return redirect("social_accounts:connect_mastodon", workspace_id=workspace_id)
 
     # Standard OAuth flow
-    provider = _get_provider_for_platform(platform, request.org.id)
-    nonce = secrets.token_urlsafe(32)
-    state = _sign_state(workspace_id, platform, request.user.id, nonce)
+    try:
+        provider = _get_provider_for_platform(platform, request.org.id)
+        nonce = secrets.token_urlsafe(32)
+        state = _sign_state(workspace_id, platform, request.user.id, nonce)
 
-    # Store nonce in session to prevent replay
-    request.session[OAUTH_SESSION_KEY] = {
-        "nonce": nonce,
-        "workspace_id": str(workspace_id),
-        "platform": platform,
-    }
+        request.session[OAUTH_SESSION_KEY] = {
+            "nonce": nonce,
+            "workspace_id": str(workspace_id),
+            "platform": platform,
+        }
 
-    redirect_uri = _build_redirect_uri(request, platform)
-    auth_url = provider.get_auth_url(redirect_uri, state)
-    return redirect(auth_url)
+        redirect_uri = _build_redirect_uri(request, platform)
+        auth_url = provider.get_auth_url(redirect_uri, state)
+        logger.info("OAuth redirect for platform=%s redirect_uri=%s", platform, redirect_uri)
+        return redirect(auth_url)
+    except Exception:
+        logger.exception("Failed to initiate OAuth for platform=%s", platform)
+        messages.error(
+            request,
+            f"Could not start the {platform} connection. Check that credentials are fully configured.",
+        )
+        return redirect("social_accounts:connect", workspace_id=workspace_id)
 
 
 # ------------------------------------------------------------------
