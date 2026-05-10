@@ -15,6 +15,7 @@ env = environ.Env(
     REDIS_URL=(str, ""),
     SECRET_KEY=(str, "insecure-default-change-me-in-production"),
     ENCRYPTION_KEY_SALT=(str, ""),
+    RESEND_API_KEY=(str, ""),
 )
 
 environ.Env.read_env(BASE_DIR / ".env", overwrite=False)
@@ -252,8 +253,12 @@ SESSION_SAVE_EVERY_REQUEST = True  # Sliding window
 # Email
 EMAIL_BACKEND_TYPE = env("EMAIL_BACKEND_TYPE")
 DEFAULT_FROM_EMAIL = env("DEFAULT_FROM_EMAIL", default="noreply@localhost")
+RESEND_API_KEY = env("RESEND_API_KEY")
 
-if EMAIL_BACKEND_TYPE == "smtp":
+if RESEND_API_KEY:
+    # Use Resend HTTP API — avoids SMTP port blocks on Railway
+    EMAIL_BACKEND = "apps.common.email_backend.ResendEmailBackend"
+elif EMAIL_BACKEND_TYPE == "smtp":
     EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
     EMAIL_HOST = env("EMAIL_HOST", default="localhost")
     EMAIL_PORT = env.int("EMAIL_PORT", default=465)
