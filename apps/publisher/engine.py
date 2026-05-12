@@ -29,6 +29,8 @@ from django.utils import timezone
 
 from apps.composer.models import PlatformPost
 from apps.credentials.models import PlatformCredential
+from apps.notifications.engine import notify
+from apps.notifications.models import EventType
 from providers import get_provider
 from providers.types import AuthType, PostType, PublishContent
 
@@ -228,6 +230,21 @@ class PublishEngine:
 
                 # Update rate limit state
                 self._update_rate_limit(account, result)
+
+                # Notify the post author
+                author = platform_post.post.author
+                if author:
+                    notify(
+                        user=author,
+                        event_type=EventType.POST_PUBLISHED,
+                        title="Post published",
+                        body=f'Your post "{platform_post.post.caption_snippet}" was published to {account.account_name} ({account.get_platform_display()}).',
+                        data={
+                            "post_id": str(platform_post.post_id),
+                            "platform_post_id": str(platform_post.id),
+                            "workspace_id": str(platform_post.post.workspace_id),
+                        },
+                    )
 
                 return result
             else:
@@ -484,6 +501,20 @@ class PublishEngine:
                 MAX_RETRIES,
                 error_msg,
             )
+            author = platform_post.post.author
+            if author:
+                account = platform_post.social_account
+                notify(
+                    user=author,
+                    event_type=EventType.POST_FAILED,
+                    title="Post failed to publish",
+                    body=f'Your post "{platform_post.post.caption_snippet}" could not be published to {account.account_name} ({account.get_platform_display()}). Error: {error_msg[:200]}',
+                    data={
+                        "post_id": str(platform_post.post_id),
+                        "platform_post_id": str(platform_post.id),
+                        "workspace_id": str(platform_post.post.workspace_id),
+                    },
+                )
             return
 
         backoff_seconds = RETRY_BACKOFF[min(platform_post.retry_count, len(RETRY_BACKOFF) - 1)]

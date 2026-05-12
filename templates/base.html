@@ -619,10 +619,44 @@
                 </a>
                 {% endif %}
 
-                <a href="{% url 'notifications:list' %}" class="mb-1 sidebar-nav-item {% if request.resolver_match.url_name == 'list' and request.resolver_match.app_name == 'notifications' %}active{% endif %}">
-                    <svg class="flex-shrink-0" width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg>
-                    <span class="sidebar-nav-label">Notifications</span>
-                </a>
+                <!-- Notification bell -->
+                <div x-data="notificationBell()" x-init="startPolling()" @destroy="destroy()" class="relative mb-1">
+                    <button @click="toggle()"
+                            class="sidebar-nav-item w-full {% if request.resolver_match.app_name == 'notifications' %}active{% endif %}"
+                            :class="open ? 'active' : ''">
+                        <div class="relative flex-shrink-0">
+                            <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg>
+                            <span x-show="unreadCount > 0"
+                                  x-text="unreadCount > 99 ? '99+' : unreadCount"
+                                  class="absolute -top-1.5 -right-1.5 min-w-[16px] h-4 px-0.5 rounded-full text-[10px] font-bold leading-4 text-center text-white"
+                                  style="background: #E05D2A;"></span>
+                        </div>
+                        <span class="sidebar-nav-label">Notifications</span>
+                        {% if unread_notification_count %}<span class="sidebar-badge">{{ unread_notification_count }}</span>{% endif %}
+                    </button>
+
+                    <!-- Drawer overlay -->
+                    <div x-show="open" @click="open = false" x-cloak
+                         class="fixed inset-0 z-40" style="background: rgba(0,0,0,.25);"></div>
+
+                    <!-- Drawer panel -->
+                    <div x-show="open" x-cloak
+                         x-transition:enter="transition ease-out duration-200"
+                         x-transition:enter-start="opacity-0 translate-x-2"
+                         x-transition:enter-end="opacity-100 translate-x-0"
+                         x-transition:leave="transition ease-in duration-150"
+                         x-transition:leave-start="opacity-100 translate-x-0"
+                         x-transition:leave-end="opacity-0 translate-x-2"
+                         class="fixed left-[var(--sidebar-width,240px)] top-0 h-full w-80 bg-white shadow-xl z-50 flex flex-col border-r border-stone-100 overflow-hidden">
+                        <div id="notification-drawer-content"
+                             hx-get="{% url 'notifications:drawer' %}"
+                             hx-trigger="load"
+                             hx-swap="innerHTML"
+                             class="flex flex-col h-full">
+                            <div class="flex items-center justify-center h-20 text-stone-400 text-sm">Loading…</div>
+                        </div>
+                    </div>
+                </div>
 
                 {% if request.workspace %}
                 {% if sidebar_channels or sidebar_unhealthy_channels %}
