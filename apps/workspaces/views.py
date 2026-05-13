@@ -1,12 +1,14 @@
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.db import transaction
-from django.http import Http404
-from django.shortcuts import redirect, render
+from django.http import Http404, HttpResponse
+from django.shortcuts import get_object_or_404, redirect, render
+from django.utils import timezone
 from django.views.decorators.http import require_http_methods, require_POST
 
 from apps.members.decorators import require_org_role
-from apps.members.models import OrgMembership, WorkspaceMembership
+from apps.members.models import Invitation, OrgMembership, WorkspaceMembership
+from apps.members import services as member_services
 
 from .models import Workspace
 
@@ -198,3 +200,104 @@ def approvals_settings(request, workspace_id):
             "approval_modes": Workspace.ApprovalWorkflowMode,
         },
     )
+
+
+@login_required
+@require_http_methods(["GET", "POST"])
+def workspace_members(request, workspace_id):
+    """Workspace-scoped members management."""
+    workspace = get_object_or_404(Workspace, id=workspace_id, organization=request.org)
+
+    my_membership = WorkspaceMembership.objects.filter(user=request.user, workspace=workspace).first()
+    if not my_membership:
+        raise Http404
+
+    is_manager = my_membership.workspace_role in (
+        WorkspaceMembership.WorkspaceRole.OWNER,
+        WorkspaceMembership.WorkspaceRole.MANAGER,
+    )
+
+    if request.method == "POST":
+        if not is_manager:
+            return HttpResponse("Permission denied.", status=403)
+
+        action = request.POST.get("action")
+
+        if action == "invite":
+            email = request.POST.get("email", "").strip()
+            ws_role = request.POST.get("ws_role", WorkspaceMembership.WorkspaceRole.VIEWER)
+            try:
+                invitation = member_services.create_invitation(
+                    org=request.org,
+                    email=email,
+                    org_role=OrgMembership.OrgRole.MEMBER,
+                    workspace_assignments=[{"workspace_id": str(workspace.id), "role": ws_role}],
+                    invited_by=request.user,
+                )
+            except ValueError as e:
+                if request.headers.get("HX-Request"):
+                    return HttpResponse(f'<p class="text-red-600 text-sm">{e}</p>', status=422)
+                messages.error(request, str(e))
+                return redirect("workspaces:workspace_members", workspace_id=workspace.id)
+
+            if request.headers.get("HX-Request"):
+                return render(request, "workspaces/partials/ws_invite_row.html", {
+                    "invite": invitation,
+                    "workspace": workspace,
+                    "is_manager": is_manager,
+                })
+            messages.success(request, f"Invitation sent to {email}.")
+            return redirect("workspaces:workspace_members", workspace_id=workspace.id)
+
+        if action == "remove":
+            membership_id = request.POST.get("membership_id")
+            wm = get_object_or_404(WorkspaceMembership, id=membership_id, workspace=workspace)
+            if wm.user == request.user:
+                if request.headers.get("HX-Request"):
+                    return HttpResponse("You cannot remove yourself.", status=400)
+                messages.error(request, "You cannot remove yourself.")
+                return redirect("workspaces:workspace_members", workspace_id=workspace.id)
+            wm.delete()
+            if request.headers.get("HX-Request"):
+                return HttpResponse(status=200, headers={"HX-Trigger": "memberRemoved"})
+            return redirect("workspaces:workspace_members", workspace_id=workspace.id)
+
+        if action == "update_role":
+            membership_id = request.POST.get("membership_id")
+            new_role = request.POST.get("ws_role")
+            wm = get_object_or_404(WorkspaceMembership, id=membership_id, workspace=workspace)
+            valid_roles = [r for r, _ in WorkspaceMembership.WorkspaceRole.choices]
+            if new_role in valid_roles:
+                wm.workspace_role = new_role
+                wm.save(update_fields=["workspace_role"])
+            if request.headers.get("HX-Request"):
+                return HttpResponse(status=200)
+            return redirect("workspaces:workspace_members", workspace_id=workspace.id)
+
+    # GET
+    ws_memberships = (
+        WorkspaceMembership.objects.filter(workspace=workspace)
+        .select_related("user")
+        .order_by("added_at")
+    )
+
+    pending_invites = (
+        Invitation.objects.filter(
+            organization=request.org,
+            accepted_at__isnull=True,
+            expires_at__gt=timezone.now(),
+        )
+        .filter(workspace_assignments__contains=[{"workspace_id": str(workspace.id)}])
+        .select_related("invited_by")
+        .order_by("-created_at")
+    ) if is_manager else []
+
+    return render(request, "workspaces/workspace_members.html", {
+        "workspace": workspace,
+        "settings_active": "members",
+        "ws_memberships": ws_memberships,
+        "pending_invites": pending_invites,
+        "is_manager": is_manager,
+        "workspace_role_choices": WorkspaceMembership.WorkspaceRole.choices,
+        "current_user": request.user,
+    })

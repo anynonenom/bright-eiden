@@ -1,0 +1,189 @@
+{% extends "layouts/workspace_settings.html" %}
+{% block title %}Members — {{ workspace.name }} — EIDEN GROUP{% endblock %}
+
+{% block content %}
+<div x-data="{ showInviteModal: false }">
+
+    <!-- Header -->
+    <div class="flex items-center justify-between mb-6">
+        <h2 class="text-xl font-semibold" style="color: var(--text-primary);">Members — {{ workspace.name }}</h2>
+        {% if is_manager %}
+        <button @click="showInviteModal = true"
+                class="btn-opacity px-5 py-2 text-sm font-medium rounded-full cursor-pointer transition-colors"
+                style="background: var(--primary); color: white;">
+            Add Member
+        </button>
+        {% endif %}
+    </div>
+
+    <!-- Active Members -->
+    <div style="background: var(--surface-0); border: 1px solid var(--border); border-radius: var(--radius-xl); overflow: hidden;" class="mb-8">
+        <div class="px-6 py-4" style="border-bottom: 1px solid var(--border);">
+            <h3 class="text-sm font-semibold" style="color: var(--text-primary);">Active Members ({{ ws_memberships|length }})</h3>
+        </div>
+        <div id="ws-members-list">
+            {% for wm in ws_memberships %}
+            <div class="flex items-center gap-4 px-6 py-4" style="border-bottom: 1px solid var(--border);" id="wm-{{ wm.id }}">
+                <!-- Avatar -->
+                <div class="w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0 text-sm font-semibold text-white"
+                     style="background: var(--primary);">
+                    {{ wm.user.first_name|first|upper }}{{ wm.user.last_name|first|upper }}
+                </div>
+                <!-- Info -->
+                <div class="flex-1 min-w-0">
+                    <p class="text-sm font-medium truncate" style="color: var(--text-primary);">
+                        {{ wm.user.get_full_name|default:wm.user.email }}
+                        {% if wm.user == current_user %}<span class="text-xs ml-1" style="color: var(--text-tertiary);">(you)</span>{% endif %}
+                    </p>
+                    <p class="text-xs truncate" style="color: var(--text-tertiary);">{{ wm.user.email }}</p>
+                </div>
+                <!-- Role selector -->
+                {% if is_manager and wm.user != current_user %}
+                <form hx-post="{% url 'workspaces:workspace_members' workspace_id=workspace.id %}"
+                      hx-swap="none">
+                    {% csrf_token %}
+                    <input type="hidden" name="action" value="update_role">
+                    <input type="hidden" name="membership_id" value="{{ wm.id }}">
+                    <select name="ws_role" onchange="this.form.requestSubmit()"
+                            class="input-focus text-xs font-semibold cursor-pointer"
+                            style="padding: 4px 28px 4px 10px; border-radius: 8px; color: var(--text-secondary); background: var(--surface-1); border: 1px solid var(--border); appearance: none; background-image: url(&quot;data:image/svg+xml,%3Csvg width='10' height='6' viewBox='0 0 10 6' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1L5 5L9 1' stroke='%2378716C' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E&quot;); background-repeat: no-repeat; background-position: right 6px center; outline: none;">
+                        {% for value, label in workspace_role_choices %}
+                        <option value="{{ value }}" {% if wm.workspace_role == value %}selected{% endif %}>{{ label }}</option>
+                        {% endfor %}
+                    </select>
+                </form>
+                {% else %}
+                <span class="text-xs font-medium px-2.5 py-1 rounded-full"
+                      style="background: var(--neutral-100); color: var(--text-secondary);">
+                    {{ wm.get_workspace_role_display }}
+                </span>
+                {% endif %}
+                <!-- Remove button -->
+                {% if is_manager and wm.user != current_user %}
+                <div x-data="{ confirm: false }">
+                    <form hx-post="{% url 'workspaces:workspace_members' workspace_id=workspace.id %}"
+                          hx-target="#wm-{{ wm.id }}"
+                          hx-swap="outerHTML"
+                          x-ref="removeForm">
+                        {% csrf_token %}
+                        <input type="hidden" name="action" value="remove">
+                        <input type="hidden" name="membership_id" value="{{ wm.id }}">
+                        <button type="button"
+                                @click="if (!confirm) { confirm = true; setTimeout(() => confirm = false, 2500) } else { $refs.removeForm.requestSubmit() }"
+                                :title="confirm ? 'Click again to confirm' : 'Remove from workspace'"
+                                class="w-8 h-8 rounded-full flex items-center justify-center transition-all cursor-pointer"
+                                :style="confirm ? 'background: rgba(239,68,68,0.1);' : 'background: transparent;'">
+                            <svg class="w-4 h-4 transition-colors"
+                                 :stroke="confirm ? 'rgb(239,68,68)' : 'var(--text-tertiary)'"
+                                 fill="none" viewBox="0 0 24 24" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                            </svg>
+                        </button>
+                    </form>
+                </div>
+                {% endif %}
+            </div>
+            {% empty %}
+            <div class="px-6 py-8 text-center">
+                <p class="text-sm" style="color: var(--text-tertiary);">No members yet.</p>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- Pending Invitations -->
+    {% if is_manager %}
+    <div style="background: var(--surface-0); border: 1px solid var(--border); border-radius: var(--radius-xl); overflow: hidden;">
+        <div class="px-6 py-4" style="border-bottom: 1px solid var(--border);">
+            <h3 class="text-sm font-semibold" style="color: var(--text-primary);">Pending Invitations</h3>
+        </div>
+        <div id="ws-invitations-list">
+            {% for invite in pending_invites %}
+            {% include "workspaces/partials/ws_invite_row.html" %}
+            {% empty %}
+            <div class="px-6 py-8 text-center" id="ws-no-invites-placeholder">
+                <p class="text-sm" style="color: var(--text-tertiary);">No pending invitations.</p>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Invite Modal -->
+    {% if is_manager %}
+    <template x-teleport="body">
+        <div x-show="showInviteModal" x-transition.opacity
+             class="fixed inset-0 z-50 flex items-center justify-center"
+             style="background: rgba(0,0,0,0.4);">
+            <div @click.outside="showInviteModal = false"
+                 x-show="showInviteModal"
+                 x-transition
+                 class="w-full max-w-md rounded-xl shadow-xl flex flex-col"
+                 style="background: var(--surface-0);">
+
+                <!-- Header -->
+                <div class="flex items-center justify-between px-6 py-4 flex-shrink-0" style="border-bottom: 1px solid var(--border);">
+                    <h3 class="text-base font-semibold" style="color: var(--text-primary);">Add Member to {{ workspace.name }}</h3>
+                    <button @click="showInviteModal = false" class="cursor-pointer" style="color: var(--text-tertiary);">
+                        <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                    </button>
+                </div>
+
+                <!-- Form -->
+                <form x-init="$nextTick(() => htmx.process($el))"
+                      hx-post="{% url 'workspaces:workspace_members' workspace_id=workspace.id %}"
+                      hx-target="#ws-invitations-list"
+                      hx-swap="beforeend"
+                      hx-on:htmx:after-request="if(event.detail.successful){ showInviteModal = false; document.getElementById('ws-no-invites-placeholder')?.remove(); }"
+                      hx-on:htmx:response-error="document.getElementById('ws-invite-error').innerHTML = event.detail.xhr.responseText"
+                      class="px-6 py-5 space-y-5">
+                    {% csrf_token %}
+                    <input type="hidden" name="action" value="invite">
+
+                    <!-- Email -->
+                    <div>
+                        <label class="block text-sm font-medium mb-1.5" style="color: var(--text-primary);">Email Address</label>
+                        <input type="email" name="email" required placeholder="colleague@example.com"
+                               class="input-focus w-full px-4 py-2.5 text-sm rounded-lg outline-none transition-all"
+                               style="border: 1px solid var(--border); color: var(--text-primary); background: var(--surface-1);">
+                    </div>
+
+                    <!-- Role -->
+                    <div>
+                        <label class="block text-sm font-medium mb-1.5" style="color: var(--text-primary);">Role in {{ workspace.name }}</label>
+                        <select name="ws_role"
+                                class="input-focus w-full px-4 py-2.5 text-sm rounded-lg outline-none"
+                                style="border: 1px solid var(--border); color: var(--text-primary); background: var(--surface-1);">
+                            {% for value, label in workspace_role_choices %}
+                            <option value="{{ value }}" {% if value == "editor" %}selected{% endif %}>{{ label }}</option>
+                            {% endfor %}
+                        </select>
+                        <p class="text-xs mt-1.5" style="color: var(--text-tertiary);">
+                            They'll only have access to <strong>{{ workspace.name }}</strong> — not other workspaces.
+                        </p>
+                    </div>
+
+                    <!-- Error -->
+                    <div id="ws-invite-error"></div>
+
+                    <!-- Actions -->
+                    <div class="flex justify-end gap-3 pt-1">
+                        <button type="button" @click="showInviteModal = false"
+                                class="btn-neutral px-5 py-2 text-sm font-medium rounded-full cursor-pointer transition-colors"
+                                style="background: var(--neutral-100); color: var(--text-primary);">
+                            Cancel
+                        </button>
+                        <button type="submit"
+                                class="btn-opacity px-5 py-2 text-sm font-medium rounded-full cursor-pointer transition-colors"
+                                style="background: var(--primary); color: white;">
+                            Send Invite
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </template>
+    {% endif %}
+
+</div>
+{% endblock %}
