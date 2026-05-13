@@ -328,8 +328,8 @@ _GOOGLE_CREDENTIALS = {
     "client_secret": env("PLATFORM_GOOGLE_CLIENT_SECRET", default=""),
 }
 _INSTAGRAM_LOGIN_CREDENTIALS = {
-    "app_id": env("PLATFORM_INSTAGRAM_APP_ID", default=""),
-    "app_secret": env("PLATFORM_INSTAGRAM_APP_SECRET", default=""),
+    "app_id": env("PLATFORM_INSTAGRAM_LOGIN_APP_ID", default="") or env("PLATFORM_INSTAGRAM_APP_ID", default=""),
+    "app_secret": env("PLATFORM_INSTAGRAM_LOGIN_APP_SECRET", default="") or env("PLATFORM_INSTAGRAM_APP_SECRET", default=""),
 }
 _LINKEDIN_LEGACY_CLIENT_ID = env("PLATFORM_LINKEDIN_CLIENT_ID", default="")
 _LINKEDIN_LEGACY_CLIENT_SECRET = env("PLATFORM_LINKEDIN_CLIENT_SECRET", default="")
