@@ -338,6 +338,7 @@ class PlatformPost(models.Model):
         SCHEDULED = "scheduled", "Scheduled"
         PUBLISHING = "publishing", "Publishing"
         PUBLISHED = "published", "Published"
+        READY_TO_POST = "ready_to_post", "Ready to Post"
         FAILED = "failed", "Failed"
 
     # Valid state transitions (from → set of allowed targets). Mirrors the old
@@ -352,7 +353,8 @@ class PlatformPost(models.Model):
         "changes_requested": {"pending_review", "draft"},
         "rejected": {"draft", "pending_review"},
         "scheduled": {"publishing", "draft"},
-        "publishing": {"published", "failed", "scheduled"},  # scheduled = retry
+        "publishing": {"published", "failed", "scheduled", "ready_to_post"},
+        "ready_to_post": {"published", "draft"},  # worker can mark done or reset
         "failed": {"publishing", "draft", "scheduled"},
         "published": set(),  # terminal
     }
@@ -367,6 +369,7 @@ class PlatformPost(models.Model):
         "scheduled": "blue",
         "publishing": "indigo",
         "published": "green",
+        "ready_to_post": "purple",
         "partially_published": "yellow",  # only used by Post-level aggregate
         "failed": "red",
     }

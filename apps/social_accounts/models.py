@@ -51,6 +51,11 @@ class SocialAccount(models.Model):
     last_health_check_at = models.DateTimeField(blank=True, null=True)
     last_error = models.TextField(blank=True, default="")
 
+    # Virtual accounts are not connected via OAuth — workers manage them manually.
+    # Publishing to a virtual account marks the post as READY_TO_POST instead of
+    # making a live API call.
+    is_virtual = models.BooleanField(default=False)
+
     connected_at = models.DateTimeField(auto_now_add=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)

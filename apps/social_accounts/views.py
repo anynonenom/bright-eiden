@@ -779,3 +779,82 @@ def _create_or_update_account(
         create_default_queue_and_slots(account)
 
     return account
+
+
+# ------------------------------------------------------------------
+# Virtual Account
+# ------------------------------------------------------------------
+
+
+@login_required
+@require_permission("manage_social_accounts")
+def create_virtual_account(request, workspace_id):
+    """Create a virtual (non-OAuth) social account for manual posting."""
+    from apps.calendar.services import create_default_queue_and_slots
+
+    platform_choices = [
+        (value, label)
+        for value, label in PlatformCredential.Platform.choices
+    ]
+
+    if request.method == "GET":
+        return render(
+            request,
+            "social_accounts/virtual_connect.html",
+            {
+                "workspace_id": workspace_id,
+                "platform_choices": platform_choices,
+            },
+        )
+
+    platform = request.POST.get("platform", "").strip()
+    account_name = request.POST.get("account_name", "").strip()
+    account_handle = request.POST.get("account_handle", "").strip()
+
+    if not platform or not account_name:
+        messages.error(request, "Platform and account name are required.")
+        return render(
+            request,
+            "social_accounts/virtual_connect.html",
+            {
+                "workspace_id": workspace_id,
+                "platform_choices": platform_choices,
+                "form_data": request.POST,
+            },
+        )
+
+    if platform not in dict(PlatformCredential.Platform.choices):
+        messages.error(request, "Invalid platform selected.")
+        return render(
+            request,
+            "social_accounts/virtual_connect.html",
+            {
+                "workspace_id": workspace_id,
+                "platform_choices": platform_choices,
+                "form_data": request.POST,
+            },
+        )
+
+    # Use a unique ID so multiple virtual accounts per platform are allowed
+    import uuid as _uuid
+    virtual_id = f"virtual-{_uuid.uuid4().hex[:12]}"
+
+    account, created = SocialAccount.objects.get_or_create(
+        workspace_id=workspace_id,
+        platform=platform,
+        account_platform_id=virtual_id,
+        defaults={
+            "account_name": account_name,
+            "account_handle": account_handle,
+            "is_virtual": True,
+            "connection_status": SocialAccount.ConnectionStatus.CONNECTED,
+        },
+    )
+
+    if created:
+        create_default_queue_and_slots(account)
+        messages.success(request, f"{account_name} ({account.get_platform_display()}) added as a virtual account.")
+    else:
+        messages.info(request, "This virtual account already exists.")
+
+    return redirect("social_accounts:list", workspace_id=workspace_id)

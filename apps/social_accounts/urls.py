@@ -38,6 +38,11 @@ urlpatterns = [
         views.select_account,
         name="select_account",
     ),
+    path(
+        "<uuid:workspace_id>/connect/virtual/",
+        views.create_virtual_account,
+        name="create_virtual",
+    ),
     # Per-account actions
     path(
         "<uuid:workspace_id>/<uuid:account_id>/reconnect/",

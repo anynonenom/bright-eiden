@@ -207,6 +207,13 @@ class PublishEngine:
             self._schedule_retry(platform_post, error_msg)
             return {"success": False, "error": error_msg}
 
+        # Virtual accounts skip the API — mark ready for manual posting
+        if account.is_virtual:
+            platform_post.status = PlatformPost.Status.READY_TO_POST
+            platform_post.published_at = timezone.now()
+            platform_post.save()
+            return {"success": True, "virtual": True}
+
         try:
             # Get the provider for this platform
             result = self._dispatch_to_provider(platform_post)

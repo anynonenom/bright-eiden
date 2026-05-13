@@ -669,12 +669,14 @@
                         </div>
                     </div>
                     <span class="sidebar-nav-label truncate flex-1 text-stone-400 opacity-60">{{ channel.account_name|default:channel.account_handle }}</span>
+                    {% if not channel.is_virtual %}
                     <form method="post" action="{% url 'social_accounts:reconnect' workspace_id=request.workspace.id account_id=channel.id %}" class="sidebar-nav-label">
                         {% csrf_token %}
                         <button type="submit" class="inline-flex items-center px-2 py-0.5 text-[11px] font-semibold rounded-full transition-colors cursor-pointer" style="color: var(--gold-dk); background: rgba(207,194,146,.15); font-family: var(--font-label); letter-spacing: 0.1em; text-transform: uppercase;" title="Reconnect {{ channel.account_name|default:channel.account_handle }}">
                             Reconnect
                         </button>
                     </form>
+                    {% endif %}
                 </div>
                 {% endfor %}
 
