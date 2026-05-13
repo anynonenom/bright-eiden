@@ -45,7 +45,8 @@ All members can view; action buttons shown conditionally based on can_approve pe
     <!-- Post list -->
     <div id="approval-list" class="space-y-3">
         {% for pp in platform_posts %}
-        <div class="bg-white rounded-xl border border-stone-200 p-4 hover:border-stone-300 transition-colors">
+        <div class="bg-white rounded-xl border border-stone-200 p-4 hover:border-stone-300 transition-colors cursor-pointer"
+             onclick="if(!event.target.closest('button,a,input,form')) window.location='{% url 'composer:compose_edit' workspace_id=workspace.id post_id=pp.post_id %}?account={{ pp.social_account_id }}'">
             <div class="flex items-center gap-3">
                 {% if can_approve %}
                 <input type="checkbox" :value="'{{ pp.post_id }}'" x-model="selectedPosts"
@@ -99,8 +100,8 @@ All members can view; action buttons shown conditionally based on can_approve pe
                     </a>
                     <p class="text-xs text-stone-400 mt-0.5">by {{ pp.post.author.display_name|default:"Unknown" }}</p>
                 </div>
-                {% if can_approve %}
                 <div class="flex items-center gap-2 flex-shrink-0">
+                    {% if can_approve %}
                     <form hx-post="{% url 'approvals:approve' workspace_id=workspace.id post_id=pp.post_id %}"
                           hx-target="#tab-content" hx-swap="innerHTML">
                         {% csrf_token %}
@@ -109,12 +110,19 @@ All members can view; action buttons shown conditionally based on can_approve pe
                             Approve
                         </button>
                     </form>
+                    {% endif %}
                     <a href="{% url 'composer:compose_edit' workspace_id=workspace.id post_id=pp.post_id %}?account={{ pp.social_account_id }}"
-                       class="px-3 py-1.5 text-xs font-semibold rounded-full border border-stone-200 text-stone-600 hover:border-stone-300 transition-colors">
-                        Review
+                       class="p-1.5 rounded-md text-stone-400 hover:text-stone-700 hover:bg-stone-100 transition-colors" title="Edit">
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/></svg>
                     </a>
+                    <form method="post" action="{% url 'composer:post_delete' workspace_id=workspace.id post_id=pp.post_id %}"
+                          onsubmit="return confirm('Delete this post?')">
+                        {% csrf_token %}
+                        <button type="submit" class="p-1.5 rounded-md text-stone-400 hover:text-red-600 hover:bg-red-50 transition-colors" title="Delete">
+                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4a1 1 0 011-1h4a1 1 0 011 1v2"/></svg>
+                        </button>
+                    </form>
                 </div>
-                {% endif %}
             </div>
         </div>
         {% empty %}
