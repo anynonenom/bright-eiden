@@ -451,19 +451,6 @@
         </template>
       </div>
 
-      <!-- Drop hint strip -->
-      <div x-show="!uploading" x-cloak
-           class="mx-5 mt-3 rounded-xl border-2 border-dashed px-4 py-2.5 flex items-center gap-3 cursor-pointer transition-colors"
-           :class="dragOver ? 'border-orange-400 bg-orange-50' : 'border-stone-200 hover:border-stone-300'"
-           @click="$refs.fileInput.click()">
-        <svg class="w-4 h-4 flex-shrink-0" style="color: var(--text-ghost);" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/>
-        </svg>
-        <p class="text-xs" style="color: var(--text-ghost);">
-          <span class="font-semibold" style="color: var(--text-secondary);">Click to upload</span>
-          &nbsp;or drag &amp; drop — images up to 20 MB, videos up to 1 GB
-        </p>
-      </div>
 
       <!-- Breadcrumb -->
       {% if current_folder_obj %}
