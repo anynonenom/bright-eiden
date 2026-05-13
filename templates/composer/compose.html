@@ -1201,19 +1201,31 @@
             </div>
             {% endif %}
 
-            <!-- Approval timeline -->
-            <h4 class="text-xs font-semibold text-stone-500 uppercase tracking-wider mb-2">Approval History</h4>
-            <div class="space-y-2 mb-4">
-                {% for action in approval_history %}
-                <div class="flex items-start gap-2">
-                    <div class="w-1.5 h-1.5 rounded-full mt-1.5 flex-shrink-0 {% if action.action == 'approved' %}bg-emerald-400{% elif action.action == 'rejected' %}bg-red-400{% elif action.action == 'changes_requested' %}bg-amber-400{% else %}bg-stone-300{% endif %}"></div>
-                    <div>
-                        <p class="text-xs text-stone-600"><span class="font-semibold">{{ action.user.display_name }}</span> {{ action.get_action_display|lower }}</p>
-                        {% if action.comment %}<p class="text-xs text-stone-400 mt-0.5">"{{ action.comment|truncatechars:80 }}"</p>{% endif %}
-                        <p class="text-[10px] text-stone-400">{{ action.created_at|timesince }} ago</p>
+            <!-- Approval timeline (collapsible) -->
+            <div x-data="{ open: false }" class="mb-4">
+                <button type="button" @click="open = !open"
+                        class="flex items-center justify-between w-full group">
+                    <h4 class="text-xs font-semibold text-stone-500 uppercase tracking-wider">
+                        Approval History
+                        <span class="ml-1.5 font-normal normal-case text-stone-400">({{ approval_history|length }})</span>
+                    </h4>
+                    <svg class="w-3.5 h-3.5 text-stone-400 transition-transform duration-200" :class="open && 'rotate-180'"
+                         fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/>
+                    </svg>
+                </button>
+                <div x-show="open" x-collapse x-cloak class="mt-2 space-y-2">
+                    {% for action in approval_history %}
+                    <div class="flex items-start gap-2">
+                        <div class="w-1.5 h-1.5 rounded-full mt-1.5 flex-shrink-0 {% if action.action == 'approved' %}bg-emerald-400{% elif action.action == 'rejected' %}bg-red-400{% elif action.action == 'changes_requested' %}bg-amber-400{% else %}bg-stone-300{% endif %}"></div>
+                        <div>
+                            <p class="text-xs text-stone-600"><span class="font-semibold">{{ action.user.display_name }}</span> {{ action.get_action_display|lower }}</p>
+                            {% if action.comment %}<p class="text-xs text-stone-400 mt-0.5">"{{ action.comment|truncatechars:80 }}"</p>{% endif %}
+                            <p class="text-[10px] text-stone-400">{{ action.created_at|timesince }} ago</p>
+                        </div>
                     </div>
+                    {% endfor %}
                 </div>
-                {% endfor %}
             </div>
 
             <!-- Comments -->
