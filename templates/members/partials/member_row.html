@@ -35,7 +35,21 @@
 
         <!-- Actions -->
         {% if is_admin and member.user.id != current_user.id %}
-        <div class="flex-shrink-0 relative">
+        <div class="flex-shrink-0 flex items-center gap-1 relative">
+            <!-- Trash (remove) -->
+            <form hx-post="{% url 'members:remove' membership_id=member.membership.id %}"
+                  hx-target="#member-{{ member.membership.id }}"
+                  hx-swap="delete"
+                  hx-confirm="Remove {{ member.user.display_name }} from the organization? This will also remove them from all workspaces.">
+                {% csrf_token %}
+                <button type="submit"
+                        class="p-1.5 rounded-lg transition-colors cursor-pointer"
+                        style="color: #DC2626;" title="Remove member">
+                    <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4a1 1 0 011-1h4a1 1 0 011 1v2"/></svg>
+                </button>
+            </form>
+
+            <!-- 3-dot menu -->
             <button @click="showActions = !showActions"
                     class="btn-neutral-100 p-1.5 rounded-lg transition-colors cursor-pointer"
                     style="color: var(--text-tertiary);">
@@ -79,18 +93,6 @@
                     Manage Workspaces
                 </button>
 
-                <!-- Remove Member -->
-                <form hx-post="{% url 'members:remove' membership_id=member.membership.id %}"
-                      hx-target="#member-{{ member.membership.id }}"
-                      hx-swap="delete"
-                      hx-confirm="Remove {{ member.user.display_name }} from the organization? This will also remove them from all workspaces.">
-                    {% csrf_token %}
-                    <button type="submit"
-                            class="btn-danger-soft-bg w-full text-left px-3 py-2 text-sm cursor-pointer transition-colors"
-                            style="color: #DC2626;">
-                        Remove from Organization
-                    </button>
-                </form>
             </div>
         </div>
         {% endif %}
