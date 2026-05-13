@@ -145,7 +145,11 @@
         color: var(--text-tertiary);
         cursor: pointer;
         transition: color 150ms, background 150ms;
-        z-index: 1;
+        z-index: 130;
+        pointer-events: auto;
+    }
+    .idea-modal-close svg {
+        pointer-events: none;
     }
     .idea-modal-close:hover {
         color: var(--text-primary);
@@ -564,7 +568,7 @@
     <div x-show="showCreateModal" x-cloak
          class="idea-modal-overlay"
          @click.self="closeCreateModal()"
-         @keydown.escape.window="closeCreateModal()">
+         @keydown.escape.window="if (!createGroupDropdownOpen && !createTagDropdownOpen && !emojiPickerOpen) closeCreateModal()">
         <div class="idea-modal" @click.stop>
             <!-- Close button -->
             <button type="button" class="idea-modal-close" @click="closeCreateModal()" title="Close">
@@ -760,7 +764,7 @@
     <div x-show="editingIdea" x-cloak
          class="idea-modal-overlay"
          @click.self="editingIdea = null"
-         @keydown.escape.window="editingIdea = null">
+         @keydown.escape.window="if (!editGroupDropdownOpen && !editTagDropdownOpen && !emojiPickerOpen) editingIdea = null">
         <div class="idea-modal" @click.stop>
             <!-- Close button -->
             <button type="button" class="idea-modal-close" @click="editingIdea = null" title="Close">
