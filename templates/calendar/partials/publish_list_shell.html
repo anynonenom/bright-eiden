@@ -13,17 +13,9 @@ Tab switching is HTMX partial swaps only - no full page reload.
                     @click="switchTab('queue')">
                 Queue {% if queue_count %}<span class="inline-flex items-center justify-center min-w-[20px] h-5 px-1.5 text-[11px] font-medium text-stone-500 bg-stone-100 rounded-full">{{ queue_count }}</span>{% endif %}
             </button>
-            <button class="publish-tab" :class="activeTab === 'drafts' && 'active'"
-                    @click="switchTab('drafts')">
-                Drafts {% if drafts_count %}<span class="inline-flex items-center justify-center min-w-[20px] h-5 px-1.5 text-[11px] font-medium text-stone-500 bg-stone-100 rounded-full">{{ drafts_count }}</span>{% endif %}
-            </button>
             <button class="publish-tab" :class="activeTab === 'approvals' && 'active'"
                     @click="switchTab('approvals')">
                 Approvals {% if approvals_count %}<span class="inline-flex items-center justify-center min-w-[20px] h-5 px-1.5 text-[11px] font-medium text-stone-500 bg-stone-100 rounded-full">{{ approvals_count }}</span>{% endif %}
-            </button>
-            <button class="publish-tab" :class="activeTab === 'sent' && 'active'"
-                    @click="switchTab('sent')">
-                Sent {% if sent_count %}<span class="inline-flex items-center justify-center min-w-[20px] h-5 px-1.5 text-[11px] font-medium text-stone-500 bg-stone-100 rounded-full">{{ sent_count }}</span>{% endif %}
             </button>
         </div>
 
