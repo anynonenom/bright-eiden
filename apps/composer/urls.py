@@ -63,6 +63,11 @@ urlpatterns = [
     path("templates/<uuid:template_id>/use/", views.use_template, name="use_template"),
     path("templates/picker/", views.template_picker, name="template_picker"),
     path("compose/<uuid:post_id>/save-as-template/", views.save_as_template, name="save_as_template"),
+    # Hashtag Sets
+    path("hashtags/", views.hashtag_set_list, name="hashtag_set_list"),
+    path("hashtags/create/", views.hashtag_set_create, name="hashtag_set_create"),
+    path("hashtags/<uuid:set_id>/delete/", views.hashtag_set_delete, name="hashtag_set_delete"),
+    path("hashtags/api/", views.hashtag_sets_api, name="hashtag_sets_api"),
     # CSV Import
     path("import/csv/", views.csv_upload, name="csv_upload"),
     path("import/csv/preview/", views.csv_preview, name="csv_preview"),

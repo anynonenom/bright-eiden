@@ -433,13 +433,60 @@
                             <span class="text-xs text-stone-400">Drag & drop or <span class="text-orange-500 font-medium">select files</span></span>
                         </div>
 
-                        <!-- Bottom bar: media library + char counter -->
+                        <!-- Bottom bar: media library + hashtags + char counter -->
                         <div class="flex items-center justify-between px-4 py-2 border-t border-stone-100">
+                            <div class="flex items-center gap-3">
                             <button type="button" @click="showMediaPicker = true"
                                     class="text-xs font-medium text-stone-400 hover:text-orange-600 transition-colors flex items-center gap-1.5 cursor-pointer">
                                 <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/></svg>
                                 Media Library
                             </button>
+                            <!-- Hashtag sets picker -->
+                            <div x-data="{
+                                open: false,
+                                sets: [],
+                                loaded: false,
+                                async load() {
+                                    if (this.loaded) return;
+                                    const r = await fetch('{% url 'composer:hashtag_sets_api' workspace_id=workspace.id %}');
+                                    const d = await r.json();
+                                    this.sets = d.sets || [];
+                                    this.loaded = true;
+                                },
+                                insert(text) {
+                                    caption = caption ? caption + '\n' + text : text;
+                                    this.open = false;
+                                }
+                            }" class="relative">
+                                <button type="button" @click="open = !open; load()"
+                                        class="text-xs font-medium text-stone-400 hover:text-orange-600 transition-colors flex items-center gap-1.5 cursor-pointer">
+                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5.25 8.25h15m-16.5 7.5h15m-1.8-13.5l-3.9 19.5m-2.1-19.5l-3.9 19.5"/></svg>
+                                    Hashtags
+                                </button>
+                                <div x-show="open" x-cloak @click.away="open = false"
+                                     class="absolute bottom-7 left-0 z-30 w-64 bg-white rounded-xl shadow-xl border border-stone-200 py-1.5 max-h-64 overflow-y-auto">
+                                    <template x-if="sets.length === 0 && loaded">
+                                        <div class="px-4 py-3 text-xs text-stone-400 text-center">
+                                            No hashtag sets yet.
+                                            <a href="{% url 'composer:hashtag_set_list' workspace_id=workspace.id %}" class="text-orange-500 hover:underline block mt-1">Create one →</a>
+                                        </div>
+                                    </template>
+                                    <template x-for="s in sets" :key="s.id">
+                                        <button type="button" @click="insert(s.text)"
+                                                class="w-full text-left px-4 py-2.5 hover:bg-stone-50 transition-colors">
+                                            <p class="text-xs font-semibold text-stone-700" x-text="s.name"></p>
+                                            <p class="text-[11px] text-stone-400 truncate mt-0.5" x-text="s.text"></p>
+                                        </button>
+                                    </template>
+                                    <div class="border-t border-stone-100 mt-1 pt-1">
+                                        <a href="{% url 'composer:hashtag_set_list' workspace_id=workspace.id %}"
+                                           class="block px-4 py-2 text-[11px] text-stone-400 hover:text-orange-500 transition-colors">
+                                            Manage hashtag sets →
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                            </div>
                             <span class="text-xs tabular-nums font-medium"
                                   :class="(() => { const min = Math.min(...selectedAccounts.map(id => charLimits[id]?.limit || 9999)); return caption.length > min ? 'text-red-500' : 'text-stone-400'; })()"
                                   x-text="(() => { const limits = selectedAccounts.map(id => charLimits[id]?.limit).filter(Boolean); const min = limits.length ? Math.min(...limits) : null; return min ? caption.length + ' / ' + min : caption.length; })()">

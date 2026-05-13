@@ -1,0 +1,71 @@
+{% extends "base.html" %}
+
+{% block title %}Hashtag Sets - {{ workspace.name }} - EIDEN GROUP{% endblock %}
+
+{% block page_header %}
+<div class="flex items-center justify-between mb-6">
+    <div>
+        <h1 class="text-base font-semibold text-stone-900" style="letter-spacing: -0.01em;">Hashtag Sets</h1>
+        <p class="text-sm text-stone-500 mt-1">Saved hashtag groups you can insert into captions with one click.</p>
+    </div>
+    <a href="{% url 'composer:compose' workspace_id=workspace.id %}" class="text-sm text-stone-500 hover:text-stone-700 flex items-center gap-1">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+        Back to Composer
+    </a>
+</div>
+{% endblock %}
+
+{% block content %}
+<div class="max-w-3xl space-y-6">
+
+    <!-- Create form -->
+    <div class="bg-white rounded-xl border border-stone-200 p-5">
+        <h2 class="text-sm font-semibold text-stone-800 mb-4">Add New Set</h2>
+        <form method="post" action="{% url 'composer:hashtag_set_create' workspace_id=workspace.id %}" class="space-y-3">
+            {% csrf_token %}
+            <div class="flex gap-3">
+                <input type="text" name="name" placeholder="Set name (e.g. Lifestyle, Tech, Brand)" required
+                       class="flex-1 px-3 py-2 text-sm border border-stone-200 rounded-lg focus:border-orange-400 focus:outline-none">
+            </div>
+            <div>
+                <textarea name="hashtags" rows="3" placeholder="#marketing #socialmedia #contentcreator" required
+                          class="w-full px-3 py-2 text-sm border border-stone-200 rounded-lg focus:border-orange-400 focus:outline-none font-mono resize-none"></textarea>
+                <p class="text-xs text-stone-400 mt-1">Separate hashtags with spaces or new lines. # is added automatically if missing.</p>
+            </div>
+            <button type="submit" class="inline-flex items-center gap-1.5 px-4 py-2 text-xs font-semibold text-white bg-orange-500 rounded-full hover:bg-orange-600 transition-colors">
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/></svg>
+                Save Set
+            </button>
+        </form>
+    </div>
+
+    <!-- Existing sets -->
+    <div class="space-y-3">
+        {% for hs in hashtag_sets %}
+        <div id="hashtag-set-{{ hs.id }}" class="bg-white rounded-xl border border-stone-200 p-4 group flex items-start justify-between gap-4">
+            <div class="min-w-0">
+                <p class="text-sm font-semibold text-stone-800 mb-1">{{ hs.name }}</p>
+                <p class="text-xs text-stone-500 font-mono break-words">{{ hs.as_text }}</p>
+                <p class="text-[11px] text-stone-400 mt-1.5">{{ hs.tags_list|length }} tags{% if hs.created_by %} · by {{ hs.created_by.name|default:hs.created_by.email }}{% endif %}</p>
+            </div>
+            <form hx-post="{% url 'composer:hashtag_set_delete' workspace_id=workspace.id set_id=hs.id %}"
+                  hx-target="#hashtag-set-{{ hs.id }}" hx-swap="outerHTML">
+                {% csrf_token %}
+                <button type="submit" class="opacity-0 group-hover:opacity-100 text-stone-300 hover:text-red-500 transition-all p-1 flex-shrink-0" onclick="return confirm('Delete this set?')">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                </button>
+            </form>
+        </div>
+        {% empty %}
+        <div class="text-center py-12 bg-white rounded-xl border border-stone-200">
+            <div class="w-10 h-10 rounded-full bg-stone-100 flex items-center justify-center mx-auto mb-3">
+                <svg class="w-5 h-5 text-stone-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M5.25 8.25h15m-16.5 7.5h15m-1.8-13.5l-3.9 19.5m-2.1-19.5l-3.9 19.5"/></svg>
+            </div>
+            <p class="text-sm font-medium text-stone-700">No hashtag sets yet</p>
+            <p class="text-xs text-stone-500 mt-1">Create your first set above.</p>
+        </div>
+        {% endfor %}
+    </div>
+
+</div>
+{% endblock %}

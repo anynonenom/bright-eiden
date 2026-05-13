@@ -29,6 +29,7 @@ from .forms import ContentCategoryForm, PostForm
 from .models import (
     ContentCategory,
     Feed,
+    HashtagSet,
     Idea,
     IdeaGroup,
     IdeaMedia,
@@ -3100,3 +3101,62 @@ def _render_explore(request, workspace, category):
             "curated_feeds": curated,
         },
     )
+
+
+# ------------------------------------------------------------------
+# Hashtag Sets
+# ------------------------------------------------------------------
+
+
+@login_required
+@require_permission("write_posts")
+def hashtag_set_list(request, workspace_id):
+    workspace = get_object_or_404(Workspace, id=workspace_id, organization=request.org)
+    sets = HashtagSet.objects.for_workspace(workspace_id).select_related("created_by")
+    return render(request, "composer/hashtag_sets.html", {
+        "workspace": workspace,
+        "hashtag_sets": sets,
+    })
+
+
+@login_required
+@require_permission("write_posts")
+@require_POST
+def hashtag_set_create(request, workspace_id):
+    workspace = get_object_or_404(Workspace, id=workspace_id, organization=request.org)
+    name = request.POST.get("name", "").strip()
+    hashtags = request.POST.get("hashtags", "").strip()
+    if not name or not hashtags:
+        messages.error(request, "Name and hashtags are required.")
+        return redirect("composer:hashtag_set_list", workspace_id=workspace_id)
+    HashtagSet.objects.create(
+        workspace=workspace,
+        name=name,
+        hashtags=hashtags,
+        created_by=request.user,
+    )
+    messages.success(request, f'Hashtag set "{name}" saved.')
+    return redirect("composer:hashtag_set_list", workspace_id=workspace_id)
+
+
+@login_required
+@require_permission("write_posts")
+@require_POST
+def hashtag_set_delete(request, workspace_id, set_id):
+    hs = get_object_or_404(HashtagSet, id=set_id, workspace__id=workspace_id)
+    hs.delete()
+    if request.headers.get("HX-Request"):
+        return HttpResponse("")
+    return redirect("composer:hashtag_set_list", workspace_id=workspace_id)
+
+
+@login_required
+@require_permission("write_posts")
+def hashtag_sets_api(request, workspace_id):
+    """Return hashtag sets as JSON for the composer picker."""
+    sets = HashtagSet.objects.for_workspace(workspace_id).values("id", "name", "hashtags")
+    data = []
+    for s in sets:
+        hs = HashtagSet(name=s["name"], hashtags=s["hashtags"])
+        data.append({"id": str(s["id"]), "name": s["name"], "text": hs.as_text()})
+    return JsonResponse({"sets": data})

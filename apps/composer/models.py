@@ -624,6 +624,47 @@ class PostTemplate(models.Model):
         return self.name
 
 
+class HashtagSet(models.Model):
+    """Saved group of hashtags for quick insertion into captions."""
+
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    workspace = models.ForeignKey(
+        "workspaces.Workspace",
+        on_delete=models.CASCADE,
+        related_name="hashtag_sets",
+    )
+    name = models.CharField(max_length=100)
+    hashtags = models.TextField(
+        help_text="Space or newline-separated hashtags. Each should start with #.",
+    )
+    created_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    objects = WorkspaceScopedManager()
+
+    class Meta:
+        db_table = "composer_hashtag_set"
+        ordering = ["name"]
+
+    def __str__(self):
+        return self.name
+
+    def tags_list(self) -> list[str]:
+        """Return cleaned list of hashtag strings."""
+        import re
+        tags = re.split(r"[\s,]+", self.hashtags)
+        return [t if t.startswith("#") else f"#{t}" for t in tags if t]
+
+    def as_text(self) -> str:
+        return " ".join(self.tags_list())
+
+
 class CSVImportJob(models.Model):
     """Tracks a bulk CSV import job for posts."""
 
