@@ -50,6 +50,15 @@ Context: week_days, week_slots, workspace.
                 {% endif %}
                 {% endwith %}
                 <span class="truncate">{{ pp.post.title|default:pp.post.caption_snippet|truncatechars:28 }}</span>
+                {% if pp.status == "pending_review" or pp.status == "pending_client" %}
+                <span class="flex-shrink-0 w-1.5 h-1.5 rounded-full bg-amber-500 ml-auto" title="Pending approval"></span>
+                {% elif pp.status == "approved" %}
+                <span class="flex-shrink-0 w-1.5 h-1.5 rounded-full bg-teal-600 ml-auto" title="Approved"></span>
+                {% elif pp.status == "changes_requested" %}
+                <span class="flex-shrink-0 w-1.5 h-1.5 rounded-full bg-orange-500 ml-auto" title="Changes requested"></span>
+                {% elif pp.status == "rejected" %}
+                <span class="flex-shrink-0 w-1.5 h-1.5 rounded-full bg-red-500 ml-auto" title="Rejected"></span>
+                {% endif %}
             </a>
             {% endfor %}
         </div>
