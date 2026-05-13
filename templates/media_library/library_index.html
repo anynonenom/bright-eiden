@@ -1,142 +1,144 @@
 {% extends "base.html" %}
 {% load static %}
 
-{% block title %}Media Library - {{ workspace.name }}{% endblock %}
+{% block title %}Media Library — {{ workspace.name }} — EIDEN GROUP{% endblock %}
 
 {% block extra_head %}
 <style>
-  /* ── Media Library — Premium Dark Design ── */
-
-  /* Nav row (All Media / Starred / Folders) */
-  .ml-nav-row {
+  /* ── Layout ── */
+  .ml-layout {
     display: flex;
-    align-items: center;
-    gap: 0.375rem;
-    padding: 0.5rem 1.25rem;
-    background: var(--surface-0, #FFF);
-    border-bottom: 1px solid var(--border, #E7E5E4);
+    height: calc(100vh - 56px);
+    overflow: hidden;
+  }
+
+  /* ── Left sidebar ── */
+  .ml-sidebar {
+    width: 220px;
     flex-shrink: 0;
-    flex-wrap: wrap;
-    position: sticky;
-    top: 44px;
-    z-index: 9;
+    border-right: 1px solid var(--border, #E7E5E4);
+    background: var(--surface-0, #FFF);
+    display: flex;
+    flex-direction: column;
+    overflow-y: auto;
   }
-  .ml-nav-item {
-    display: inline-flex;
+  .ml-sidebar-section {
+    padding: 16px 12px 8px;
+  }
+  .ml-sidebar-label {
+    font-size: 0.65rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--text-ghost, #A8A29E);
+    padding: 0 8px;
+    margin-bottom: 4px;
+  }
+  .ml-sidebar-item {
+    display: flex;
     align-items: center;
-    gap: 0.375rem;
-    padding: 0.3rem 0.75rem;
-    border-radius: 999px;
+    gap: 8px;
+    padding: 7px 10px;
+    border-radius: 8px;
     font-size: 0.8125rem;
     font-weight: 500;
     color: var(--text-secondary, #57534E);
     text-decoration: none;
-    transition: background 140ms ease, color 140ms ease;
-    border: 1px solid transparent;
-  }
-  .ml-nav-item:hover {
-    background: var(--neutral-100, #F5F5F4);
-    color: var(--text-primary, #1C1917);
-  }
-  .ml-nav-item.active {
-    background: var(--forest, #122620);
-    color: #fff;
-    border-color: transparent;
-  }
-  .ml-nav-item svg { flex-shrink: 0; opacity: 0.7; }
-  .ml-nav-item.active svg { opacity: 1; }
-  .ml-nav-divider {
-    width: 1px;
-    height: 1.125rem;
-    background: var(--border, #E7E5E4);
-    margin: 0 0.25rem;
-  }
-  /* Folder items in nav row */
-  .ml-folder-item {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.375rem;
-    padding: 0.3rem 0.75rem;
-    border-radius: 999px;
-    font-size: 0.8125rem;
-    font-weight: 500;
-    color: var(--text-secondary, #57534E);
-    text-decoration: none;
-    transition: background 140ms ease, color 140ms ease;
-    border: 1px solid transparent;
-    white-space: nowrap;
-  }
-  .ml-folder-item:hover { background: var(--neutral-100, #F5F5F4); color: var(--text-primary, #1C1917); }
-  .ml-folder-item.active { background: var(--forest, #122620); color: #fff; }
-  .ml-folder-group { display: contents; }
-  .ml-new-folder-btn {
-    width: 1.5rem; height: 1.5rem;
-    display: flex; align-items: center; justify-content: center;
-    border-radius: 0.375rem;
-    color: rgba(255,255,255,0.4);
+    transition: background 130ms, color 130ms;
     cursor: pointer;
-    transition: background 150ms ease, color 150ms ease;
-    background: transparent;
-    border: none;
   }
-  .ml-new-folder-btn:hover {
-    background: rgba(255,255,255,0.1);
-    color: rgba(255,255,255,0.9);
+  .ml-sidebar-item:hover { background: var(--neutral-100, #F5F5F4); color: var(--text-primary, #1C1917); }
+  .ml-sidebar-item.active { background: var(--primary); color: #fff; }
+  .ml-sidebar-item.active svg { opacity: 1; }
+  .ml-sidebar-item svg { opacity: 0.6; flex-shrink: 0; }
+  .ml-folder-row {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 8px;
+    border-radius: 8px;
+    font-size: 0.8rem;
+    color: var(--text-secondary, #57534E);
+    text-decoration: none;
+    transition: background 130ms;
+    cursor: pointer;
+    group: true;
+  }
+  .ml-folder-row:hover { background: var(--neutral-100, #F5F5F4); }
+  .ml-folder-row.active { background: var(--primary); color: #fff; }
+  .ml-folder-row:hover .ml-folder-del,
+  .ml-folder-row.active .ml-folder-del { opacity: 1; }
+  .ml-folder-del { opacity: 0; flex-shrink: 0; transition: opacity 130ms; }
+  .ml-new-folder-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 8px;
+    border-radius: 8px;
+    font-size: 0.8rem;
+    color: var(--text-tertiary, #78716C);
+    background: none;
+    border: none;
+    cursor: pointer;
+    width: 100%;
+    transition: color 130ms;
+  }
+  .ml-new-folder-row:hover { color: var(--primary); }
+
+  /* ── Main area ── */
+  .ml-main {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    background: var(--canvas, #FAFAF9);
   }
 
-  /* Toolbar */
+  /* ── Toolbar ── */
   .ml-toolbar {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+    padding: 10px 20px;
     background: var(--surface-0, #FFF);
     border-bottom: 1px solid var(--border, #E7E5E4);
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    gap: 0.625rem;
-    padding: 0.625rem 1.25rem;
-    border-top-right-radius: 0.75rem;
-    position: sticky;
-    top: 0;
-    z-index: 10;
     flex-shrink: 0;
   }
   .ml-search-wrap {
     position: relative;
     flex: 1;
-    min-width: 160px;
-    max-width: 22rem;
+    min-width: 140px;
+    max-width: 320px;
   }
   .ml-search-wrap svg {
     position: absolute;
-    left: 0.75rem;
+    left: 10px;
     top: 50%;
     transform: translateY(-50%);
-    width: 0.875rem;
-    height: 0.875rem;
+    width: 14px;
+    height: 14px;
     color: var(--text-ghost, #A8A29E);
     pointer-events: none;
   }
   .ml-search {
     width: 100%;
-    padding: 0.4375rem 0.875rem 0.4375rem 2.25rem;
+    padding: 7px 12px 7px 32px;
     font-size: 0.8125rem;
     border-radius: 9999px;
     border: 1.5px solid var(--border, #E7E5E4);
     background: var(--canvas, #FAFAF9);
     color: var(--text-primary, #1C1917);
     outline: none;
-    transition: border-color 150ms ease, box-shadow 150ms ease;
+    transition: border-color 150ms, box-shadow 150ms;
   }
-  .ml-search:focus {
-    border-color: var(--teal, #2D9E8F);
-    box-shadow: 0 0 0 3px var(--primary-ring, #FED7AA);
-    background: #FFF;
-  }
+  .ml-search:focus { border-color: var(--primary); box-shadow: 0 0 0 3px var(--primary-ring, #FED7AA); background: #FFF; }
 
-  /* Filter pills */
-  .ml-filter-pill {
-    font-size: 0.75rem;
+  /* filter pills */
+  .ml-pill {
+    font-size: 0.73rem;
     font-weight: 600;
-    padding: 0.3125rem 0.875rem;
+    padding: 5px 12px;
     border-radius: 9999px;
     border: 1.5px solid var(--border, #E7E5E4);
     background: transparent;
@@ -144,622 +146,339 @@
     cursor: pointer;
     white-space: nowrap;
     text-decoration: none;
-    transition: all 140ms ease;
+    transition: all 140ms;
     line-height: 1;
   }
-  .ml-filter-pill:hover {
-    border-color: var(--text-ghost, #A8A29E);
-    color: var(--text-primary, #1C1917);
-  }
-  .ml-filter-pill.active {
-    background: var(--teal, #2D9E8F);
-    color: #FFF;
-    border-color: var(--teal, #2D9E8F);
-  }
+  .ml-pill:hover { border-color: var(--text-ghost); color: var(--text-primary); }
+  .ml-pill.active { background: var(--primary); color: #FFF; border-color: var(--primary); }
 
-  /* View toggle */
-  .ml-view-toggle {
-    display: flex;
-    border: 1.5px solid var(--border, #E7E5E4);
-    border-radius: 0.5rem;
-    overflow: hidden;
-  }
-  .ml-view-btn {
-    padding: 0.375rem 0.5rem;
-    background: transparent;
-    border: none;
-    cursor: pointer;
-    color: var(--text-ghost, #A8A29E);
-    transition: background 140ms ease, color 140ms ease;
-    display: flex;
-    align-items: center;
-  }
-  .ml-view-btn:hover { color: var(--text-secondary, #57534E); }
-  .ml-view-btn.active {
-    background: var(--surface-1, #FAFAF9);
-    color: var(--text-primary, #1C1917);
-  }
+  /* view toggle */
+  .ml-view-toggle { display: flex; border: 1.5px solid var(--border); border-radius: 8px; overflow: hidden; }
+  .ml-view-btn { padding: 6px 8px; background: transparent; border: none; cursor: pointer; color: var(--text-ghost); transition: background 140ms, color 140ms; display: flex; align-items: center; }
+  .ml-view-btn:hover { color: var(--text-secondary); }
+  .ml-view-btn.active { background: var(--surface-1); color: var(--text-primary); }
 
-  /* Sort select */
-  .ml-sort-select {
-    font-size: 0.75rem;
-    padding: 0.375rem 1.75rem 0.375rem 0.625rem;
-    border: 1.5px solid var(--border, #E7E5E4);
-    border-radius: 0.5rem;
-    background-image: url("data:image/svg+xml,%3Csvg width='10' height='6' viewBox='0 0 10 6' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1L5 5L9 1' stroke='%2378716C' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
-    background-repeat: no-repeat;
-    background-position: right 0.5rem center;
-    background-color: transparent;
-    color: var(--text-secondary, #57534E);
-    appearance: none;
-    outline: none;
-    cursor: pointer;
-  }
-  .ml-sort-select:focus {
-    border-color: var(--teal, #2D9E8F);
-    box-shadow: 0 0 0 3px var(--primary-ring, #FED7AA);
-  }
-
-  /* Upload button */
   .ml-upload-btn {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.375rem;
-    padding: 0.4375rem 1rem;
-    font-size: 0.8125rem;
-    font-weight: 700;
-    border-radius: 9999px;
-    border: none;
-    background: var(--teal, #2D9E8F);
-    color: #FFF;
-    cursor: pointer;
-    transition: opacity 150ms ease, transform 120ms ease, box-shadow 150ms ease;
-    box-shadow: 0 1px 4px rgba(45,158,143,0.25);
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 7px 16px; font-size: 0.8125rem; font-weight: 700;
+    border-radius: 9999px; border: none;
+    background: var(--primary); color: #FFF;
+    cursor: pointer; transition: opacity 150ms, transform 120ms;
     white-space: nowrap;
   }
-  .ml-upload-btn:hover {
-    opacity: 0.92;
-    box-shadow: 0 4px 14px rgba(45,158,143,0.35);
-    transform: translateY(-1px);
-  }
-  .ml-upload-btn:active { transform: translateY(0); opacity: 1; }
+  .ml-upload-btn:hover { opacity: 0.9; transform: translateY(-1px); }
 
-  /* Asset cards — grid view */
+  /* ── Scroll area ── */
+  .ml-scroll { flex: 1; overflow-y: auto; padding: 20px; }
+
+  /* ── Asset cards ── */
   .ml-asset-card {
     background: #FFF;
     border: 1px solid var(--border, #E7E5E4);
-    border-radius: 0.875rem;
+    border-radius: 12px;
     overflow: hidden;
     cursor: pointer;
-    transition: box-shadow 180ms ease, transform 180ms ease, border-color 180ms ease;
+    transition: box-shadow 180ms, transform 180ms, border-color 180ms;
     position: relative;
   }
   .ml-asset-card:hover {
-    box-shadow: 0 8px 30px rgba(23,20,18,0.11), 0 2px 8px rgba(23,20,18,0.07);
+    box-shadow: 0 8px 28px rgba(23,20,18,0.10);
     border-color: transparent;
     transform: translateY(-2px);
   }
-  .ml-card-thumb {
-    width: 100%;
-    padding-bottom: 62%;
-    position: relative;
-    background: linear-gradient(135deg, #F5F5F4 0%, #EAEAE8 100%);
-    overflow: hidden;
-  }
-  .ml-card-thumb img,
-  .ml-card-thumb video {
-    position: absolute;
-    inset: 0;
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-  }
-  .ml-card-thumb-icon {
-    position: absolute;
-    inset: 0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
-  .ml-card-body {
-    padding: 0.625rem 0.75rem 0.75rem;
-  }
-  .ml-card-name {
-    font-size: 0.8125rem;
-    font-weight: 600;
-    color: var(--text-primary, #1C1917);
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    line-height: 1.3;
-    margin-bottom: 0.3rem;
-  }
-  .ml-card-meta {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 0.25rem;
-  }
-  .ml-card-size {
-    font-size: 0.6875rem;
-    color: var(--text-ghost, #A8A29E);
-  }
 
-  /* Type badges */
+  /* type badge */
   .ml-type-badge {
-    font-size: 0.5625rem;
-    font-weight: 800;
-    text-transform: uppercase;
-    letter-spacing: 0.07em;
-    padding: 0.1875rem 0.4375rem;
-    border-radius: 0.3125rem;
-    line-height: 1;
-  }
-  .ml-badge-image  { background: #EFF6FF; color: #2563EB; }
-  .ml-badge-video  { background: #F5F3FF; color: #7C3AED; }
-  .ml-badge-gif    { background: #ECFDF5; color: #059669; }
-  .ml-badge-doc    { background: #FFF7ED; color: #C2410C; }
-  .ml-badge-other  { background: #F9FAFB; color: #6B7280; }
-
-  /* Starred tint */
-  .ml-starred-card .ml-card-thumb { background: linear-gradient(135deg, #FEF9C3 0%, #FEF3C7 100%); }
-  .ml-star-icon {
-    position: absolute;
-    top: 0.5rem;
-    right: 0.5rem;
-    z-index: 2;
-    color: var(--teal, #2D9E8F);
-    filter: drop-shadow(0 1px 2px rgba(0,0,0,0.2));
+    font-size: 0.5625rem; font-weight: 800;
+    text-transform: uppercase; letter-spacing: 0.07em;
+    padding: 3px 6px; border-radius: 5px; line-height: 1;
   }
 
-  /* Card actions overlay */
-  .ml-card-actions {
-    position: absolute;
-    top: 0.5rem;
-    left: 0.5rem;
-    z-index: 2;
-    display: flex;
-    gap: 0.25rem;
-    opacity: 0;
-    transition: opacity 160ms ease;
+  /* shimmer */
+  .ml-shimmer {
+    background: linear-gradient(90deg, #F5F5F4 25%, #EAEAE8 50%, #F5F5F4 75%);
+    background-size: 200% 100%;
+    animation: shimmer 1.5s infinite;
   }
-  .ml-asset-card:hover .ml-card-actions { opacity: 1; }
-  .ml-card-action-btn {
-    width: 1.75rem;
-    height: 1.75rem;
-    border-radius: 0.375rem;
-    background: rgba(0,0,0,0.55);
-    backdrop-filter: blur(6px);
-    border: none;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: #FFF;
-    transition: background 130ms ease;
-  }
-  .ml-card-action-btn:hover { background: rgba(0,0,0,0.75); }
+  @keyframes shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+  .ml-thumb-placeholder { background: linear-gradient(135deg, #F5F5F4 0%, #EAEAE8 100%); }
 
-  /* List view */
+  /* list row */
   .ml-list-row {
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-    padding: 0.5rem 0.75rem;
-    border-radius: 0.625rem;
-    cursor: pointer;
-    transition: background 130ms ease;
+    display: flex; align-items: center; gap: 10px;
+    padding: 9px 12px; border-radius: 8px;
+    cursor: pointer; transition: background 120ms;
     border-bottom: 1px solid var(--border, #E7E5E4);
   }
   .ml-list-row:last-child { border-bottom: none; }
-  .ml-list-row:hover { background: var(--surface-1, #FAFAF9); }
-  .ml-list-thumb {
-    width: 2.5rem;
-    height: 2.5rem;
-    border-radius: 0.5rem;
-    object-fit: cover;
-    background: var(--surface-2, #F5F5F4);
-    flex-shrink: 0;
-    overflow: hidden;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
-  .ml-list-thumb img { width: 100%; height: 100%; object-fit: cover; }
-  .ml-list-name {
-    flex: 1;
-    min-width: 0;
-    font-size: 0.8125rem;
-    font-weight: 500;
-    color: var(--text-primary, #1C1917);
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
-  .ml-list-detail {
-    font-size: 0.6875rem;
-    color: var(--text-ghost, #A8A29E);
-    white-space: nowrap;
-  }
-  .ml-list-actions {
-    display: flex;
-    gap: 0.25rem;
-    opacity: 0;
-    transition: opacity 130ms ease;
-  }
-  .ml-list-row:hover .ml-list-actions { opacity: 1; }
-  .ml-list-action-btn {
-    width: 1.625rem;
-    height: 1.625rem;
-    border-radius: 0.375rem;
-    background: transparent;
-    border: 1px solid var(--border, #E7E5E4);
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: var(--text-secondary, #57534E);
-    transition: background 130ms ease, border-color 130ms ease;
-  }
-  .ml-list-action-btn:hover {
-    background: var(--surface-2, #F5F5F4);
-    border-color: var(--text-ghost, #A8A29E);
-  }
+  .ml-list-row:hover { background: var(--surface-1); }
 
-  /* Empty state */
-  .ml-empty {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    padding: 4rem 1.5rem;
-    text-align: center;
-  }
-  .ml-empty-icon {
-    width: 5rem;
-    height: 5rem;
-    border-radius: 1.25rem;
-    background: var(--surface-1, #FAFAF9);
-    border: 1.5px dashed var(--border, #E7E5E4);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin-bottom: 1.25rem;
-    color: var(--text-ghost, #A8A29E);
-  }
-  .ml-empty h3 {
-    font-size: 1rem;
-    font-weight: 700;
-    color: var(--text-primary, #1C1917);
-    margin-bottom: 0.375rem;
-  }
-  .ml-empty p {
-    font-size: 0.8125rem;
-    color: var(--text-secondary, #57534E);
-    max-width: 22rem;
-    line-height: 1.5;
-    margin-bottom: 1.25rem;
-  }
-
-  /* Dropzone */
-  .ml-dropzone-inline {
-    border: 2px dashed var(--border, #E7E5E4);
-    border-radius: 0.875rem;
-    transition: border-color 160ms ease, background 160ms ease;
-  }
-  .ml-dropzone-inline.drag-over {
-    border-color: var(--teal, #2D9E8F);
-    background: #FFF7ED;
-  }
-
-  /* Full-page drag overlay */
+  /* drag overlay */
   .ml-drag-overlay {
-    position: fixed;
-    inset: 0;
-    z-index: 60;
-    background: rgba(249,115,22,0.08);
+    position: fixed; inset: 0; z-index: 60;
+    background: rgba(249,115,22,0.06);
     backdrop-filter: blur(2px);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border: 3px dashed var(--teal, #2D9E8F);
+    display: flex; align-items: center; justify-content: center;
+    border: 3px dashed var(--primary);
     pointer-events: none;
   }
-  .ml-drag-overlay-inner {
-    background: #FFF;
-    border-radius: 1.25rem;
-    padding: 2rem 3rem;
-    text-align: center;
-    box-shadow: 0 20px 60px rgba(23,20,18,0.18);
-  }
 
-  /* Upload progress */
-  .ml-progress-bar {
-    height: 3px;
-    border-radius: 9999px;
-    background: var(--surface-2, #F5F5F4);
-    overflow: hidden;
-    margin-top: 0.25rem;
-  }
-  .ml-progress-fill {
-    height: 100%;
-    background: var(--teal, #2D9E8F);
-    border-radius: 9999px;
-    transition: width 120ms ease;
-  }
-
-  /* Detail panel */
-  .ml-detail-overlay {
-    background: rgba(23,20,18,0.35);
-    backdrop-filter: blur(4px);
-  }
-  .ml-detail-panel {
-    background: var(--surface-0, #FFF);
-    box-shadow: -8px 0 40px rgba(23,20,18,0.14);
-    border-left: 1px solid var(--border, #E7E5E4);
-  }
-  .ml-detail-close {
-    width: 2rem;
-    height: 2rem;
-    border-radius: 0.5rem;
-    background: var(--surface-1, #FAFAF9);
-    border: 1px solid var(--border, #E7E5E4);
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: var(--text-secondary, #57534E);
-    transition: background 130ms ease;
-  }
-  .ml-detail-close:hover { background: var(--surface-2, #F5F5F4); }
-
-  /* Upload queue panel */
+  /* upload panel */
   .ml-upload-panel {
-    background: var(--surface-0, #FFF);
-    border: 1px solid var(--border, #E7E5E4);
-    border-radius: 0.875rem;
-    overflow: hidden;
-    margin: 0.75rem 1.25rem;
-    box-shadow: 0 2px 12px rgba(23,20,18,0.07);
+    margin: 0 20px 12px;
+    background: var(--surface-0); border: 1px solid var(--border);
+    border-radius: 10px; overflow: hidden;
+    box-shadow: 0 2px 10px rgba(23,20,18,0.06);
   }
-  .ml-upload-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 0.625rem 0.875rem;
-    background: var(--surface-1, #FAFAF9);
-    border-bottom: 1px solid var(--border, #E7E5E4);
-    font-size: 0.75rem;
-    font-weight: 700;
-    color: var(--text-secondary, #57534E);
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
+  .ml-progress-bar { height: 3px; border-radius: 9999px; background: var(--surface-2); overflow: hidden; margin-top: 3px; }
+  .ml-progress-fill { height: 100%; background: var(--primary); border-radius: 9999px; transition: width 120ms; }
+
+  /* empty */
+  .ml-empty { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 60px 24px; text-align: center; }
+  .ml-empty-icon { width: 72px; height: 72px; border-radius: 18px; background: var(--surface-1); border: 1.5px dashed var(--border); display: flex; align-items: center; justify-content: center; margin-bottom: 18px; color: var(--text-ghost); }
+
+  /* detail panel */
+  .ml-detail-overlay { background: rgba(23,20,18,0.3); backdrop-filter: blur(3px); }
+  .ml-detail-panel { background: var(--surface-0); box-shadow: -8px 0 40px rgba(23,20,18,0.12); border-left: 1px solid var(--border); }
+
+  /* folder tree items (used in _folder_tree.html) */
+  .ml-folder-item {
+    display: flex; align-items: center; gap: 6px;
+    padding: 5px 8px; border-radius: 7px;
+    font-size: 0.8rem; color: var(--text-secondary, #57534E);
+    text-decoration: none; transition: background 120ms, color 120ms;
+    cursor: pointer;
   }
-  .ml-upload-item {
-    display: flex;
-    align-items: center;
-    gap: 0.625rem;
-    padding: 0.5rem 0.875rem;
-    border-bottom: 1px solid var(--border, #E7E5E4);
-  }
-  .ml-upload-item:last-child { border-bottom: none; }
-  .ml-upload-ext {
-    width: 2rem;
-    height: 2rem;
-    border-radius: 0.4375rem;
-    background: var(--surface-2, #F5F5F4);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 0.5625rem;
-    font-weight: 800;
-    color: var(--text-tertiary, #78716C);
-    text-transform: uppercase;
-    flex-shrink: 0;
+  .ml-folder-item:hover { background: var(--neutral-100, #F5F5F4); color: var(--text-primary); }
+  .ml-folder-item.active { background: var(--primary); color: #fff; }
+  .ml-folder-item.active svg { opacity: 1; }
+
+  /* folder create inline input */
+  .ml-folder-input {
+    flex: 1; font-size: 0.8rem; padding: 4px 8px;
+    border: 1.5px solid var(--primary); border-radius: 6px;
+    outline: none; background: #fff; color: var(--text-primary);
+    min-width: 0;
   }
 
-  /* Starred section heading */
-  .ml-section-heading {
-    display: flex;
-    align-items: center;
-    gap: 0.375rem;
-    font-size: 0.6875rem;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.08em;
-    color: var(--text-ghost, #A8A29E);
-    padding: 0 0.25rem;
-    margin-bottom: 0.75rem;
-  }
-
+  /* breadcrumb */
+  .ml-breadcrumb { display: flex; align-items: center; gap: 4px; font-size: 0.8rem; color: var(--text-tertiary); margin-bottom: 16px; }
+  .ml-breadcrumb a { color: var(--text-secondary); text-decoration: none; }
+  .ml-breadcrumb a:hover { color: var(--text-primary); }
 </style>
 {% endblock %}
 
-{% block page_title %}Media Library{% endblock %}
+{% block page_header %}{% endblock %}
 
 {% block content %}
-<div x-data="mediaLibrary()" class="-m-3 sm:-m-4 lg:-m-6 -mb-3 sm:-mb-4 lg:-mb-6">
+<div x-data="mediaLibrary()" class="-m-3 sm:-m-4 lg:-m-6 flex flex-col" style="height: calc(100vh - 56px);">
 
   <!-- Full-page drag overlay -->
   <div x-show="dragOver" x-cloak class="ml-drag-overlay">
-    <div class="ml-drag-overlay-inner">
-      <svg class="w-12 h-12 mx-auto mb-3" style="color: var(--teal, #2D9E8F);" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <div class="bg-white rounded-2xl shadow-2xl px-12 py-8 text-center">
+      <svg class="w-14 h-14 mx-auto mb-3" style="color: var(--primary);" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/>
       </svg>
-      <p class="text-base font-bold" style="color: var(--text-primary, #1C1917);">Drop to upload</p>
-      <p class="text-sm mt-1" style="color: var(--text-secondary, #57534E);">Release to add files to your library</p>
+      <p class="text-base font-bold" style="color: var(--text-primary);">Drop files to upload</p>
     </div>
   </div>
 
-  <!-- ═══════ MAIN CONTENT ═══════ -->
-  <div @dragover.prevent="dragOver = true"
+  <div class="ml-layout flex-1"
+       @dragover.prevent="dragOver = true"
        @dragleave.self.prevent="dragOver = false"
        @drop.prevent="handleDrop($event)">
 
-    <!-- ── Toolbar ── -->
-    <div class="ml-toolbar">
-
-      <!-- Search -->
-      <div class="ml-search-wrap">
-        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
-        </svg>
-        <input type="search"
-               name="q"
-               value="{{ query }}"
-               placeholder="Search media…"
-               class="ml-search"
-               hx-get="{% url 'media_library:index' workspace_id=workspace.id %}{% if current_folder %}?folder={{ current_folder }}{% endif %}"
-               hx-trigger="keyup changed delay:400ms"
-               hx-target="#asset-grid"
-               hx-include="[name='q']">
-      </div>
-
-      <!-- Type filter pills -->
-      <div class="flex items-center gap-1 overflow-x-auto flex-nowrap">
-        <a href="{% url 'media_library:index' workspace_id=workspace.id %}{% if current_folder %}?folder={{ current_folder }}{% endif %}"
-           class="ml-filter-pill {% if not current_type %}active{% endif %}">All</a>
-        {% for type_val, type_label in file_types %}
-        <a href="{% url 'media_library:index' workspace_id=workspace.id %}?type={{ type_val }}{% if current_folder %}&folder={{ current_folder }}{% endif %}"
-           class="ml-filter-pill {% if current_type == type_val %}active{% endif %}">{{ type_label }}</a>
-        {% endfor %}
-      </div>
-
-      <div class="flex-1 hidden sm:block"></div>
-
-      <!-- Sort -->
-      <select name="sort"
-              class="ml-sort-select"
-              hx-get="{% url 'media_library:index' workspace_id=workspace.id %}{% if current_folder %}?folder={{ current_folder }}{% endif %}"
-              hx-trigger="change"
-              hx-target="#asset-grid"
-              hx-include="[name='q'], [name='sort']">
-        <option value="-date"  {% if current_sort == '-date'  %}selected{% endif %}>Newest first</option>
-        <option value="date"   {% if current_sort == 'date'   %}selected{% endif %}>Oldest first</option>
-        <option value="name"   {% if current_sort == 'name'   %}selected{% endif %}>Name A–Z</option>
-        <option value="-name"  {% if current_sort == '-name'  %}selected{% endif %}>Name Z–A</option>
-        <option value="-size"  {% if current_sort == '-size'  %}selected{% endif %}>Largest first</option>
-        <option value="size"   {% if current_sort == 'size'   %}selected{% endif %}>Smallest first</option>
-      </select>
-
-      <!-- View toggle -->
-      <div class="ml-view-toggle">
-        <button @click="viewMode = 'grid'"
-                :class="viewMode === 'grid' ? 'active' : ''"
-                class="ml-view-btn" title="Grid view">
-          <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20">
-            <path d="M5 3a2 2 0 00-2 2v2a2 2 0 002 2h2a2 2 0 002-2V5a2 2 0 00-2-2H5zM5 11a2 2 0 00-2 2v2a2 2 0 002 2h2a2 2 0 002-2v-2a2 2 0 00-2-2H5zM11 5a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V5zM11 13a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"/>
-          </svg>
-        </button>
-        <button @click="viewMode = 'list'"
-                :class="viewMode === 'list' ? 'active' : ''"
-                class="ml-view-btn" title="List view">
-          <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20">
-            <path fill-rule="evenodd" d="M3 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z" clip-rule="evenodd"/>
-          </svg>
-        </button>
-      </div>
+    <!-- ══════════════════ LEFT SIDEBAR ══════════════════ -->
+    <aside class="ml-sidebar">
 
       <!-- Upload button -->
-      <button @click="$refs.fileInput.click()" class="ml-upload-btn">
-        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/>
-        </svg>
-        Upload
-      </button>
-      <input type="file" x-ref="fileInput" @change="handleFiles($event.target.files)" multiple
-             accept="{{ accepted_file_types }}" class="hidden">
-    </div>
-
-    <!-- ── Nav row ── -->
-    <div class="ml-nav-row">
-      <a href="{% url 'media_library:index' workspace_id=workspace.id %}"
-         class="ml-nav-item {% if not current_folder and not is_starred %}active{% endif %}">
-        <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M4 6a2 2 0 012-2h2l2 2h6a2 2 0 012 2v2M4 6v10a2 2 0 002 2h12a2 2 0 002-2V10a2 2 0 00-2-2H4z"/>
-        </svg>
-        All Media
-      </a>
-      <a href="{% url 'media_library:index' workspace_id=workspace.id %}?starred=1"
-         class="ml-nav-item {% if is_starred %}active{% endif %}">
-        <svg width="14" height="14" fill="{% if is_starred %}currentColor{% else %}none{% endif %}" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"/>
-        </svg>
-        Starred
-      </a>
-      <div class="ml-nav-divider"></div>
-      {% for folder in folders %}
-      <a href="{% url 'media_library:index' workspace_id=workspace.id %}?folder={{ folder.id }}"
-         class="ml-nav-item {% if current_folder == folder.id|slugify %}active{% endif %}">
-        <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"/>
-        </svg>
-        {{ folder.name }}
-      </a>
-      {% endfor %}
-      <button @click="showNewFolder = !showNewFolder" class="ml-nav-item cursor-pointer" style="border:none;background:transparent;">
-        <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M12 4v16m8-8H4"/>
-        </svg>
-        New Folder
-      </button>
-      <div x-show="showNewFolder" x-cloak class="ml-2">
-        {% include "media_library/_folder_form.html" %}
+      <div class="p-3 pb-0">
+        <button @click="$refs.fileInput.click()"
+                class="ml-upload-btn w-full justify-center">
+          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/>
+          </svg>
+          Upload Files
+        </button>
+        <input type="file" x-ref="fileInput" @change="handleFiles($event.target.files)" multiple
+               accept="{{ accepted_file_types }}" class="hidden">
       </div>
-    </div>
 
-    <!-- ── Upload progress panel ── -->
-    <div x-show="uploading" x-cloak class="ml-upload-panel">
-      <div class="ml-upload-header">
-        <span>Uploading <span x-text="uploadQueue.length"></span> file(s)</span>
-        <svg class="w-3 h-3 animate-spin" style="color: var(--teal, #2D9E8F);" fill="none" viewBox="0 0 24 24">
-          <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-          <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
-        </svg>
+      <!-- Navigation -->
+      <div class="ml-sidebar-section">
+        <p class="ml-sidebar-label">Library</p>
+        <a href="{% url 'media_library:index' workspace_id=workspace.id %}"
+           class="ml-sidebar-item {% if not current_folder and not is_starred %}active{% endif %}">
+          <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/>
+          </svg>
+          All Media
+          {% if total_assets %}<span class="ml-auto text-xs font-semibold opacity-60">{{ total_assets }}</span>{% endif %}
+        </a>
+        <a href="{% url 'media_library:index' workspace_id=workspace.id %}?starred=1"
+           class="ml-sidebar-item {% if is_starred %}active{% endif %}">
+          <svg width="16" height="16" fill="{% if is_starred %}currentColor{% else %}none{% endif %}" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"/>
+          </svg>
+          Starred
+        </a>
       </div>
-      <template x-for="(file, i) in uploadQueue" :key="i">
-        <div class="ml-upload-item">
-          <div class="ml-upload-ext">
-            <span x-text="file.name.split('.').pop().toUpperCase().slice(0,3)"></span>
-          </div>
-          <div class="flex-1 min-w-0">
-            <p class="text-xs font-medium truncate" style="color: var(--text-primary, #1C1917);" x-text="file.name"></p>
-            <div class="ml-progress-bar">
-              <div class="ml-progress-fill" :style="'width: ' + (file.progress || 0) + '%'"></div>
-            </div>
-          </div>
-          <template x-if="file.status === 'complete'">
-            <svg class="w-4 h-4 flex-shrink-0 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/>
-            </svg>
-          </template>
-          <template x-if="file.status === 'error'">
-            <span class="text-xs font-semibold text-red-500 flex-shrink-0" x-text="file.error || 'Failed'"></span>
-          </template>
+
+      <!-- Folders -->
+      <div class="ml-sidebar-section flex-1">
+        <p class="ml-sidebar-label">Folders</p>
+
+        <div id="folder-tree">
+          {% include "media_library/_folder_tree.html" with current_folder=current_folder %}
         </div>
-      </template>
-    </div>
 
-    <!-- ── Drop hint (when not uploading and not dragging) ── -->
-    <div x-show="!uploading && !dragOver" x-cloak
-         class="mx-3 sm:mx-4 lg:mx-5 mt-3">
-      <div class="ml-dropzone-inline px-5 py-3 flex items-center justify-center gap-3 cursor-pointer"
-           :class="{ 'drag-over': dragOver }"
+        <!-- New folder -->
+        <div x-data="{ creating: false, folderName: '' }" class="mt-1">
+          <button x-show="!creating" @click="creating = true; $nextTick(() => $refs.folderInput.focus())"
+                  class="ml-new-folder-row">
+            <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4v16m8-8H4"/></svg>
+            New Folder
+          </button>
+          <form x-show="creating" x-cloak
+                class="flex items-center gap-1 px-2 py-1"
+                hx-post="{% url 'media_library:folder_create' workspace_id=workspace.id %}"
+                hx-target="#folder-tree"
+                hx-swap="innerHTML"
+                @htmx:after-request="creating = false; folderName = ''"
+                @submit.prevent="if(folderName.trim()) { $el.requestSubmit() }"
+                @keydown.escape.window="creating = false; folderName = ''">
+            {% csrf_token %}
+            <input type="text" name="name" x-ref="folderInput" x-model="folderName"
+                   placeholder="Folder name"
+                   class="ml-folder-input"
+                   required>
+            <button type="submit"
+                    class="w-7 h-7 flex items-center justify-center rounded-md flex-shrink-0 transition-colors cursor-pointer"
+                    style="background: var(--primary); color: white; border: none;">
+              <svg width="12" height="12" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+            </button>
+            <button type="button" @click="creating = false; folderName = ''"
+                    class="w-7 h-7 flex items-center justify-center rounded-md flex-shrink-0 transition-colors cursor-pointer"
+                    style="background: transparent; border: 1.5px solid var(--border); color: var(--text-tertiary);">
+              <svg width="12" height="12" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+            </button>
+          </form>
+        </div>
+      </div>
+    </aside>
+
+    <!-- ══════════════════ MAIN CONTENT ══════════════════ -->
+    <div class="ml-main">
+
+      <!-- Toolbar -->
+      <div class="ml-toolbar">
+        <!-- Search -->
+        <div class="ml-search-wrap">
+          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+          </svg>
+          <input type="search" name="q" value="{{ query }}" placeholder="Search media…"
+                 class="ml-search"
+                 hx-get="{% url 'media_library:index' workspace_id=workspace.id %}{% if current_folder %}?folder={{ current_folder }}{% endif %}"
+                 hx-trigger="keyup changed delay:400ms"
+                 hx-target="#asset-grid"
+                 hx-include="[name='q']">
+        </div>
+
+        <!-- Type pills -->
+        <div class="flex items-center gap-1 overflow-x-auto flex-nowrap">
+          <a href="{% url 'media_library:index' workspace_id=workspace.id %}{% if current_folder %}?folder={{ current_folder }}{% endif %}"
+             class="ml-pill {% if not current_type %}active{% endif %}">All</a>
+          {% for type_val, type_label in file_types %}
+          <a href="{% url 'media_library:index' workspace_id=workspace.id %}?type={{ type_val }}{% if current_folder %}&folder={{ current_folder }}{% endif %}"
+             class="ml-pill {% if current_type == type_val %}active{% endif %}">{{ type_label }}</a>
+          {% endfor %}
+        </div>
+
+        <div class="flex-1 hidden sm:block"></div>
+
+        <!-- Sort -->
+        <select name="sort" class="text-xs px-3 py-1.5 rounded-lg outline-none cursor-pointer"
+                style="border: 1.5px solid var(--border); background: transparent; color: var(--text-secondary); appearance: none; padding-right: 28px; background-image: url('data:image/svg+xml,%3Csvg width=&quot;10&quot; height=&quot;6&quot; viewBox=&quot;0 0 10 6&quot; fill=&quot;none&quot; xmlns=&quot;http://www.w3.org/2000/svg&quot;%3E%3Cpath d=&quot;M1 1L5 5L9 1&quot; stroke=&quot;%2378716C&quot; stroke-width=&quot;1.5&quot; stroke-linecap=&quot;round&quot; stroke-linejoin=&quot;round&quot;/%3E%3C/svg%3E'); background-repeat: no-repeat; background-position: right 8px center;"
+                hx-get="{% url 'media_library:index' workspace_id=workspace.id %}{% if current_folder %}?folder={{ current_folder }}{% endif %}"
+                hx-trigger="change" hx-target="#asset-grid"
+                hx-include="[name='q'],[name='sort']">
+          <option value="-date"  {% if current_sort == '-date'  %}selected{% endif %}>Newest first</option>
+          <option value="date"   {% if current_sort == 'date'   %}selected{% endif %}>Oldest first</option>
+          <option value="name"   {% if current_sort == 'name'   %}selected{% endif %}>Name A–Z</option>
+          <option value="-name"  {% if current_sort == '-name'  %}selected{% endif %}>Name Z–A</option>
+          <option value="-size"  {% if current_sort == '-size'  %}selected{% endif %}>Largest</option>
+          <option value="size"   {% if current_sort == 'size'   %}selected{% endif %}>Smallest</option>
+        </select>
+
+        <!-- View toggle -->
+        <div class="ml-view-toggle">
+          <button @click="viewMode = 'grid'" :class="viewMode === 'grid' ? 'active' : ''" class="ml-view-btn" title="Grid">
+            <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20"><path d="M5 3a2 2 0 00-2 2v2a2 2 0 002 2h2a2 2 0 002-2V5a2 2 0 00-2-2H5zM5 11a2 2 0 00-2 2v2a2 2 0 002 2h2a2 2 0 002-2v-2a2 2 0 00-2-2H5zM11 5a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V5zM11 13a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"/></svg>
+          </button>
+          <button @click="viewMode = 'list'" :class="viewMode === 'list' ? 'active' : ''" class="ml-view-btn" title="List">
+            <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M3 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z" clip-rule="evenodd"/></svg>
+          </button>
+        </div>
+      </div>
+
+      <!-- Upload progress -->
+      <div x-show="uploading" x-cloak class="ml-upload-panel mx-5 mt-3">
+        <div class="flex items-center justify-between px-3.5 py-2.5"
+             style="background: var(--surface-1); border-bottom: 1px solid var(--border); font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-secondary);">
+          <span>Uploading <span x-text="uploadQueue.length"></span> file(s)…</span>
+          <svg class="w-3 h-3 animate-spin" style="color: var(--primary);" fill="none" viewBox="0 0 24 24">
+            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+          </svg>
+        </div>
+        <template x-for="(file, i) in uploadQueue" :key="i">
+          <div class="flex items-center gap-2.5 px-3.5 py-2.5" style="border-bottom: 1px solid var(--border);">
+            <div class="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 text-xs font-bold"
+                 style="background: var(--surface-2); color: var(--text-tertiary);"
+                 x-text="file.name.split('.').pop().toUpperCase().slice(0,3)"></div>
+            <div class="flex-1 min-w-0">
+              <p class="text-xs font-medium truncate" style="color: var(--text-primary);" x-text="file.name"></p>
+              <div class="ml-progress-bar"><div class="ml-progress-fill" :style="'width: ' + (file.progress || 0) + '%'"></div></div>
+            </div>
+            <template x-if="file.status === 'complete'">
+              <svg class="w-4 h-4 flex-shrink-0 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
+            </template>
+            <template x-if="file.status === 'error'">
+              <span class="text-xs font-semibold text-red-500 flex-shrink-0" x-text="file.error || 'Failed'"></span>
+            </template>
+          </div>
+        </template>
+      </div>
+
+      <!-- Drop hint strip -->
+      <div x-show="!uploading" x-cloak
+           class="mx-5 mt-3 rounded-xl border-2 border-dashed px-4 py-2.5 flex items-center gap-3 cursor-pointer transition-colors"
+           :class="dragOver ? 'border-orange-400 bg-orange-50' : 'border-stone-200 hover:border-stone-300'"
            @click="$refs.fileInput.click()">
-        <svg class="w-4 h-4 flex-shrink-0" style="color: var(--text-ghost, #A8A29E);" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <svg class="w-4 h-4 flex-shrink-0" style="color: var(--text-ghost);" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/>
         </svg>
-        <p class="text-xs" style="color: var(--text-ghost, #A8A29E);">
-          <span class="font-semibold" style="color: var(--text-secondary, #57534E);">Click to upload</span>
+        <p class="text-xs" style="color: var(--text-ghost);">
+          <span class="font-semibold" style="color: var(--text-secondary);">Click to upload</span>
           &nbsp;or drag &amp; drop — images up to 20 MB, videos up to 1 GB
         </p>
       </div>
-    </div>
 
-    <!-- ── Asset grid / list ── -->
-    <div class="px-3 sm:px-4 lg:px-5 py-4">
-      <div id="asset-grid">
-        {% include "media_library/_asset_grid.html" %}
+      <!-- Breadcrumb -->
+      {% if current_folder_obj %}
+      <div class="ml-breadcrumb mx-5 mt-4">
+        <a href="{% url 'media_library:index' workspace_id=workspace.id %}">All Media</a>
+        <svg width="12" height="12" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+        <span style="color: var(--text-primary); font-weight: 600;">{{ current_folder_obj.name }}</span>
+      </div>
+      {% endif %}
+
+      <!-- Asset grid -->
+      <div class="flex-1 overflow-y-auto px-5 pt-4 pb-6">
+        <div id="asset-grid">
+          {% include "media_library/_asset_grid.html" %}
+        </div>
       </div>
     </div>
   </div>
@@ -768,8 +487,6 @@
   <div x-show="detailOpen" x-cloak
        class="fixed inset-0 z-50 flex justify-end"
        @keydown.escape.window="detailOpen = false">
-
-    <!-- Backdrop -->
     <div class="ml-detail-overlay absolute inset-0" @click="detailOpen = false"
          x-show="detailOpen"
          x-transition:enter="transition ease-out duration-200"
@@ -778,8 +495,6 @@
          x-transition:leave="transition ease-in duration-150"
          x-transition:leave-start="opacity-100"
          x-transition:leave-end="opacity-0"></div>
-
-    <!-- Panel -->
     <div class="ml-detail-panel relative w-full sm:max-w-lg overflow-y-auto"
          x-show="detailOpen"
          x-transition:enter="transition ease-out duration-250"
@@ -789,7 +504,6 @@
          x-transition:leave-start="translate-x-0"
          x-transition:leave-end="translate-x-full"
          id="detail-panel">
-      <!-- Close button rendered inside panel content via HTMX -->
     </div>
   </div>
 
@@ -806,7 +520,6 @@ function mediaLibrary() {
     uploading: false,
     uploadQueue: [],
     detailOpen: false,
-    showNewFolder: false,
     currentFolder: '{{ current_folder|default:"" }}',
 
     handleFiles(files) {
@@ -817,9 +530,7 @@ function mediaLibrary() {
     handleDrop(event) {
       this.dragOver = false;
       const files = event.dataTransfer?.files;
-      if (files && files.length > 0) {
-        this.startUpload(Array.from(files));
-      }
+      if (files && files.length > 0) this.startUpload(Array.from(files));
     },
 
     startUpload(files) {
@@ -828,16 +539,8 @@ function mediaLibrary() {
         alert(`Maximum ${maxFiles} files per upload.`);
         files = files.slice(0, maxFiles);
       }
-
       this.uploading = true;
-      this.uploadQueue = files.map(f => ({
-        name: f.name,
-        size: f.size,
-        progress: 0,
-        status: 'pending',
-        error: null,
-        file: f
-      }));
+      this.uploadQueue = files.map(f => ({ name: f.name, size: f.size, progress: 0, status: 'pending', error: null, file: f }));
 
       let completed = 0;
       const total = this.uploadQueue.length;
@@ -846,17 +549,12 @@ function mediaLibrary() {
       this.uploadQueue.forEach((item, index) => {
         const formData = new FormData();
         formData.append('files', item.file);
-        if (this.currentFolder) {
-          formData.append('folder_id', this.currentFolder);
-        }
+        if (this.currentFolder) formData.append('folder_id', this.currentFolder);
 
         const xhr = new XMLHttpRequest();
         xhr.upload.addEventListener('progress', (e) => {
-          if (e.lengthComputable) {
-            this.uploadQueue[index].progress = Math.round((e.loaded / e.total) * 100);
-          }
+          if (e.lengthComputable) this.uploadQueue[index].progress = Math.round((e.loaded / e.total) * 100);
         });
-
         xhr.addEventListener('load', () => {
           completed++;
           if (xhr.status >= 200 && xhr.status < 300) {
@@ -866,25 +564,13 @@ function mediaLibrary() {
             this.uploadQueue[index].status = 'error';
             this.uploadQueue[index].error = 'Upload failed';
           }
-          if (completed === total) {
-            setTimeout(() => {
-              this.uploading = false;
-              this.uploadQueue = [];
-              htmx.trigger('#asset-grid', 'uploadsComplete');
-            }, 800);
-          }
+          if (completed === total) setTimeout(() => { this.uploading = false; this.uploadQueue = []; htmx.trigger('#asset-grid', 'uploadsComplete'); }, 800);
         });
-
         xhr.addEventListener('error', () => {
           completed++;
           this.uploadQueue[index].status = 'error';
           this.uploadQueue[index].error = 'Network error';
-          if (completed === total) {
-            setTimeout(() => {
-              this.uploading = false;
-              htmx.trigger('#asset-grid', 'uploadsComplete');
-            }, 800);
-          }
+          if (completed === total) setTimeout(() => { this.uploading = false; htmx.trigger('#asset-grid', 'uploadsComplete'); }, 800);
         });
 
         xhr.open('POST', '{% url "media_library:upload" workspace_id=workspace.id %}');
@@ -895,15 +581,10 @@ function mediaLibrary() {
 
     openDetail(assetId) {
       this.detailOpen = true;
-      htmx.ajax('GET',
-        '{% url "media_library:index" workspace_id=workspace.id %}' + assetId + '/',
-        { target: '#detail-panel', swap: 'innerHTML' }
-      );
+      htmx.ajax('GET', '{% url "media_library:index" workspace_id=workspace.id %}' + assetId + '/', { target: '#detail-panel', swap: 'innerHTML' });
     },
 
-    closeDetail() {
-      this.detailOpen = false;
-    }
+    closeDetail() { this.detailOpen = false; }
   }
 }
 </script>

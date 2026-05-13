@@ -106,18 +106,25 @@ def library_index(request, workspace_id):
             },
         )
 
+    # Resolve current folder object for breadcrumb
+    current_folder_obj = None
+    if folder_id:
+        current_folder_obj = MediaFolder.objects.filter(id=folder_id, workspace=workspace).first()
+
     context = {
         "workspace": workspace,
         "page": page,
         "folders": folders,
         "query": query,
         "current_folder": folder_id,
+        "current_folder_obj": current_folder_obj,
         "current_type": file_type,
         "current_sort": sort,
         "is_starred": starred == "1",
         "file_types": MediaAsset.MediaType.choices,
         "accepted_file_types": get_accepted_file_types(),
         "max_bulk_upload": getattr(settings, "MEDIA_LIBRARY_MAX_BULK_UPLOAD", 50),
+        "total_assets": paginator.count,
         "settings_active": "media",
     }
     return render(request, "media_library/library_index.html", context)
