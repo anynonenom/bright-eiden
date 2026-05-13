@@ -94,6 +94,12 @@
 
         <!-- Action buttons -->
         <div class="flex items-center gap-1.5 flex-shrink-0">
+            <!-- Edit post -->
+            <a href="{% url 'composer:compose_edit' workspace_id=workspace.id post_id=post.id %}"
+               class="w-8 h-8 flex items-center justify-center rounded-full border border-stone-200 text-stone-400 hover:text-stone-700 hover:border-stone-300 hover:bg-stone-50 transition-colors"
+               title="Edit post">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931z"/></svg>
+            </a>
             {% if post.status == 'pending_review' or post.status == 'pending_client' %}
             <!-- Approve -->
             <button hx-post="{% url 'approvals:approve' workspace_id=workspace.id post_id=post.id %}"
