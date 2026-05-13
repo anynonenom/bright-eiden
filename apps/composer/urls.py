@@ -68,6 +68,8 @@ urlpatterns = [
     path("hashtags/create/", views.hashtag_set_create, name="hashtag_set_create"),
     path("hashtags/<uuid:set_id>/delete/", views.hashtag_set_delete, name="hashtag_set_delete"),
     path("hashtags/api/", views.hashtag_sets_api, name="hashtag_sets_api"),
+    # Feed → Idea / Compose
+    path("feed/save-idea/", views.feed_save_idea, name="feed_save_idea"),
     # CSV Import
     path("import/csv/", views.csv_upload, name="csv_upload"),
     path("import/csv/preview/", views.csv_preview, name="csv_preview"),

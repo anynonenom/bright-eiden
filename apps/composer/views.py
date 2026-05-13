@@ -310,6 +310,8 @@ def compose(request, workspace_id, post_id=None):
         template_data = _resolve_template_data(request.GET.get("template"), workspace)
         if template_data and template_data.get("caption"):
             initial["caption"] = template_data["caption"]
+        elif request.GET.get("prefill_caption"):
+            initial["caption"] = request.GET["prefill_caption"]
         form = PostForm(initial=initial)
         selected_account_ids = []
         media_attachments = []
@@ -3160,3 +3162,47 @@ def hashtag_sets_api(request, workspace_id):
         hs = HashtagSet(name=s["name"], hashtags=s["hashtags"])
         data.append({"id": str(s["id"]), "name": s["name"], "text": hs.as_text()})
     return JsonResponse({"sets": data})
+
+
+# ------------------------------------------------------------------
+# Feed → Save as Idea
+# ------------------------------------------------------------------
+
+
+@login_required
+@require_permission("write_posts")
+@require_POST
+def feed_save_idea(request, workspace_id):
+    workspace = get_object_or_404(Workspace, id=workspace_id, organization=request.org)
+    title = request.POST.get("title", "").strip()[:255]
+    description = request.POST.get("description", "").strip()
+    source_url = request.POST.get("source_url", "").strip()
+
+    if not title:
+        if request.headers.get("HX-Request"):
+            return HttpResponse("Title is required.", status=400)
+        messages.error(request, "Title is required.")
+        return redirect("composer:create_landing", workspace_id=workspace_id)
+
+    group = IdeaGroup.objects.for_workspace(workspace.id).order_by("position").first()
+
+    # Prepend source link to description
+    full_description = description
+    if source_url:
+        full_description = f"{source_url}\n\n{description}".strip()
+
+    Idea.objects.create(
+        workspace=workspace,
+        author=request.user,
+        title=title,
+        description=full_description,
+        group=group,
+    )
+
+    if request.headers.get("HX-Request"):
+        return HttpResponse(
+            '<div class="flex items-center gap-1.5 text-xs font-semibold text-teal-700 bg-teal-50 border border-teal-200 rounded-full px-3 py-1.5">Saved to Ideas ✓</div>',
+            status=200,
+        )
+    messages.success(request, f'Idea "{title}" saved.')
+    return redirect("composer:create_landing", workspace_id=workspace_id)
