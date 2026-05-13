@@ -456,10 +456,6 @@ def asset_delete(request, workspace_id, asset_id):
         pk=asset_id,
     )
 
-    # Shared assets cannot be deleted from workspace context
-    if asset.is_shared:
-        return JsonResponse({"error": "Cannot delete shared assets from workspace context"}, status=403)
-
     try:
         delete_asset(asset)
     except ProtectedAssetError as e:
