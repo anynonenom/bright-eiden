@@ -4,8 +4,8 @@ import json
 
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse, JsonResponse
-from django.shortcuts import get_object_or_404, render
-from django.views.decorators.http import require_GET, require_POST
+from django.shortcuts import get_object_or_404, redirect, render
+from django.views.decorators.http import require_GET, require_POST, require_http_methods
 
 from apps.composer.models import Post, PostVersion
 from apps.members.decorators import require_permission, require_workspace_role
@@ -129,10 +129,12 @@ def org_approval_queue(request):
 
 @login_required
 @require_permission("approve_posts")
-@require_POST
+@require_http_methods(["GET", "POST"])
 def approve(request, workspace_id, post_id):
     """Approve a post."""
     workspace = _get_workspace(request, workspace_id)
+    if request.method == "GET":
+        return redirect("approvals:queue", workspace_id=workspace_id)
     post = get_object_or_404(Post, id=post_id, workspace=workspace)
     comment_text = request.POST.get("comment", "")
 
@@ -162,11 +164,15 @@ def approve(request, workspace_id, post_id):
 
 @login_required
 @require_permission("approve_posts")
-@require_POST
+@require_http_methods(["GET", "POST"])
 def request_changes_view(request, workspace_id, post_id):
     """Request changes on a post."""
     workspace = _get_workspace(request, workspace_id)
     post = get_object_or_404(Post, id=post_id, workspace=workspace)
+
+    if request.method == "GET":
+        return redirect("approvals:queue", workspace_id=workspace_id)
+
     comment_text = request.POST.get("comment", "")
 
     try:
@@ -194,10 +200,12 @@ def request_changes_view(request, workspace_id, post_id):
 
 @login_required
 @require_permission("approve_posts")
-@require_POST
+@require_http_methods(["GET", "POST"])
 def reject(request, workspace_id, post_id):
     """Reject a post."""
     workspace = _get_workspace(request, workspace_id)
+    if request.method == "GET":
+        return redirect("approvals:queue", workspace_id=workspace_id)
     post = get_object_or_404(Post, id=post_id, workspace=workspace)
     comment_text = request.POST.get("comment", "")
 
