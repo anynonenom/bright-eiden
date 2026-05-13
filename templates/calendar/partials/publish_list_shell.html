@@ -8,10 +8,14 @@ Tab switching is HTMX partial swaps only - no full page reload.
     <!-- Tabs + Filters row -->
     <div class="flex flex-wrap items-center justify-between pb-0 -mx-3 sm:-mx-4 lg:-mx-6 px-3 sm:px-4 lg:px-6 gap-y-2" style="border-bottom: 1px solid #D8CFBA;">
         <!-- Left: tabs -->
-        <div class="flex items-center gap-1 -mb-px overflow-x-auto flex-nowrap">
+        <div class="flex items-center gap-1 -mb-px">
             <button class="publish-tab" :class="activeTab === 'queue' && 'active'"
                     @click="switchTab('queue')">
                 Queue {% if queue_count %}<span class="inline-flex items-center justify-center min-w-[20px] h-5 px-1.5 text-[11px] font-medium text-stone-500 bg-stone-100 rounded-full">{{ queue_count }}</span>{% endif %}
+            </button>
+            <button class="publish-tab" :class="activeTab === 'drafts' && 'active'"
+                    @click="switchTab('drafts')">
+                Drafts {% if drafts_count %}<span class="inline-flex items-center justify-center min-w-[20px] h-5 px-1.5 text-[11px] font-medium text-stone-500 bg-stone-100 rounded-full">{{ drafts_count }}</span>{% endif %}
             </button>
             <button class="publish-tab" :class="activeTab === 'approvals' && 'active'"
                     @click="switchTab('approvals')">
