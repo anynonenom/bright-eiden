@@ -48,7 +48,7 @@ def approval_queue(request, workspace_id):
         .filter(**base_filter)
         .distinct()
         .select_related("author")
-        .prefetch_related("platform_posts__social_account", "media_attachments__media_asset")
+        .prefetch_related("platform_posts__social_account", "media_attachments__media_asset", "approval_stages__assigned_to")
         .order_by("scheduled_at", "-created_at")
     )
 

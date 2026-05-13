@@ -315,6 +315,11 @@ class Post(models.Model):
         return self.caption[:100] + "…"
 
     @property
+    def current_approval_stage(self):
+        """Return the first pending custom approval stage, or None."""
+        return self.approval_stages.filter(status="pending").order_by("order").first()
+
+    @property
     def platform_posts_summary(self):
         """Summary of target platforms."""
         return list(self.platform_posts.values_list("social_account__platform", flat=True))

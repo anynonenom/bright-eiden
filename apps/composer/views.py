@@ -467,6 +467,7 @@ def compose(request, workspace_id, post_id=None):
         "post_comments": post_comments,
         "pending_assets": pending_assets,
         "all_tags": all_tags,
+        "workspace_members": WorkspaceMembership.objects.filter(workspace=workspace).select_related("user"),
     }
     return render(request, "composer/compose.html", context)
 
@@ -643,7 +644,14 @@ def save_post(request, workspace_id, post_id=None):
         _save_version(post, request.user)
         from apps.approvals.services import submit_for_review
 
-        submit_for_review(post, request.user, workspace)
+        stages_raw = request.POST.get("stages_json", "")
+        stages = None
+        if stages_raw:
+            try:
+                stages = json.loads(stages_raw)
+            except (ValueError, TypeError):
+                stages = None
+        submit_for_review(post, request.user, workspace, stages=stages)
         if request.htmx:
             return HttpResponse(
                 status=204,

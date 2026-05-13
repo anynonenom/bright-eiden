@@ -22,12 +22,6 @@ All members can view; action buttons shown conditionally based on can_approve pe
                 {% if status_filter == 'pending_review' %}style="background: var(--primary);"{% endif %}>
             Pending Review <span class="ml-1 opacity-75">{{ pending_review_count }}</span>
         </button>
-        <button hx-get="{% url 'calendar:publish_tab_approvals' workspace_id=workspace.id %}?approval_status=pending_client"
-                hx-target="#tab-content" hx-swap="innerHTML"
-                class="px-3.5 py-1.5 text-[0.8125rem] font-medium rounded-full transition-colors {% if status_filter == 'pending_client' %}text-white{% else %}text-stone-600 hover:bg-stone-100{% endif %}"
-                {% if status_filter == 'pending_client' %}style="background: var(--primary);"{% endif %}>
-            Pending Client <span class="ml-1 opacity-75">{{ pending_client_count }}</span>
-        </button>
         <button hx-get="{% url 'calendar:publish_tab_approvals' workspace_id=workspace.id %}?approval_status=approved"
                 hx-target="#tab-content" hx-swap="innerHTML"
                 class="px-3.5 py-1.5 text-[0.8125rem] font-medium rounded-full transition-colors {% if status_filter == 'approved' %}text-white{% else %}text-stone-600 hover:bg-stone-100{% endif %}"

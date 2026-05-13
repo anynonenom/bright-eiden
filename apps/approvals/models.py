@@ -118,6 +118,49 @@ class PostComment(models.Model):
         return self.deleted_at is not None
 
 
+class PostApprovalStage(models.Model):
+    """A named stage in a custom per-post approval pipeline."""
+
+    class Status(models.TextChoices):
+        PENDING = "pending", "Pending"
+        APPROVED = "approved", "Approved"
+        CHANGES_REQUESTED = "changes_requested", "Changes Requested"
+
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    post = models.ForeignKey(
+        "composer.Post",
+        on_delete=models.CASCADE,
+        related_name="approval_stages",
+    )
+    name = models.CharField(max_length=100)
+    order = models.PositiveIntegerField()
+    assigned_to = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name="assigned_approval_stages",
+    )
+    status = models.CharField(max_length=20, choices=Status.choices, default=Status.PENDING)
+    approved_at = models.DateTimeField(null=True, blank=True)
+    approved_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name="approved_stages",
+    )
+    comment = models.TextField(blank=True, default="")
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        db_table = "approvals_post_approval_stage"
+        ordering = ["order"]
+
+    def __str__(self):
+        return f"Stage {self.order}: {self.name} ({self.status}) for post {self.post_id}"
+
+
 class ApprovalReminder(models.Model):
     """Tracks reminder count per post per approval stage."""
 

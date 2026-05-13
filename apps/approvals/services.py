@@ -19,7 +19,7 @@ from apps.members.models import WorkspaceMembership
 from apps.notifications.engine import notify
 from apps.notifications.models import EventType
 
-from .models import ApprovalAction, ApprovalReminder
+from .models import ApprovalAction, ApprovalReminder, PostApprovalStage
 
 logger = logging.getLogger(__name__)
 
@@ -77,8 +77,14 @@ def _record_action(post, platform_post, user, action, comment=""):
 # ---------------------------------------------------------------------------
 
 
-def submit_for_review(target, user, workspace):
-    """Submit a post (or single platform post) for internal review."""
+def submit_for_review(target, user, workspace, stages=None):
+    """Submit a post (or single platform post) for internal review.
+
+    ``stages`` is an optional list of dicts: [{name, assigned_to_id}, ...] in
+    desired order. When provided, custom :class:`PostApprovalStage` rows are
+    created and only the first-stage assignee is notified. When omitted the
+    historic behaviour (notify every reviewer) applies.
+    """
     post, targets, is_bundled = _resolve_targets(
         target, eligible_from_states={"draft", "changes_requested", "rejected"}
     )
@@ -103,21 +109,42 @@ def submit_for_review(target, user, workspace):
             defaults={"reminder_count": 0, "last_reminder_at": None, "escalated": False},
         )
 
-    # Notify all reviewers (members with approve_posts permission)
-    reviewers = WorkspaceMembership.objects.filter(workspace=workspace).select_related("user", "custom_role")
-    for membership in reviewers:
-        perms = membership.effective_permissions
-        if perms.get("approve_posts", False) and membership.user != user:
+        if stages:
+            PostApprovalStage.objects.filter(post=post).delete()
+            for i, stage_data in enumerate(stages):
+                PostApprovalStage.objects.create(
+                    post=post,
+                    name=stage_data["name"],
+                    order=i + 1,
+                    assigned_to_id=stage_data.get("assigned_to_id") or None,
+                )
+
+    if stages:
+        first_stage = PostApprovalStage.objects.filter(post=post).order_by("order").first()
+        if first_stage and first_stage.assigned_to and first_stage.assigned_to != user:
             notify(
-                user=membership.user,
+                user=first_stage.assigned_to,
                 event_type=EventType.POST_SUBMITTED,
-                title="Post submitted for review",
-                body=f'{user.display_name} submitted a post for your review: "{post.caption_snippet}"',
-                data={
-                    "post_id": str(post.id),
-                    "workspace_id": str(workspace.id),
-                },
+                title=f'Review needed: {first_stage.name}',
+                body=f'{user.display_name} is waiting on your review "{post.caption_snippet}"',
+                data={"post_id": str(post.id), "workspace_id": str(workspace.id)},
             )
+    else:
+        # Notify all reviewers (members with approve_posts permission)
+        reviewers = WorkspaceMembership.objects.filter(workspace=workspace).select_related("user", "custom_role")
+        for membership in reviewers:
+            perms = membership.effective_permissions
+            if perms.get("approve_posts", False) and membership.user != user:
+                notify(
+                    user=membership.user,
+                    event_type=EventType.POST_SUBMITTED,
+                    title="Post submitted for review",
+                    body=f'{user.display_name} submitted a post for your review: "{post.caption_snippet}"',
+                    data={
+                        "post_id": str(post.id),
+                        "workspace_id": str(workspace.id),
+                    },
+                )
 
     return post
 
@@ -125,25 +152,47 @@ def submit_for_review(target, user, workspace):
 def approve_post(target, user, workspace, comment=""):
     """Approve a post or single platform post.
 
-    If the workspace runs the two-stage internal+client flow and we're moving
-    out of ``pending_review``, the target hops to ``approved`` and then to
-    ``pending_client`` (the same behaviour as before, just per-target).
+    When the post has custom :class:`PostApprovalStage` rows the approval
+    advances to the next pending stage rather than fully approving immediately.
+    Once all stages are cleared the post is fully approved.
     """
+    from django.utils import timezone
+
     post, targets, is_bundled = _resolve_targets(
         target, eligible_from_states={"pending_review", "pending_client", "draft", "rejected", "changes_requested"}
     )
 
-    two_stage = workspace.approval_workflow_mode == "required_internal_and_client"
+    # --- Custom stage pipeline ---
+    current_stage = PostApprovalStage.objects.filter(post=post, status="pending").order_by("order").first()
+    if current_stage:
+        with transaction.atomic():
+            current_stage.status = PostApprovalStage.Status.APPROVED
+            current_stage.approved_at = timezone.now()
+            current_stage.approved_by = user
+            current_stage.comment = comment
+            current_stage.save()
+            _record_action(post, None, user, ApprovalAction.ActionType.APPROVED, comment)
+
+        next_stage = PostApprovalStage.objects.filter(post=post, status="pending").order_by("order").first()
+        if next_stage:
+            if next_stage.assigned_to and next_stage.assigned_to != user:
+                notify(
+                    user=next_stage.assigned_to,
+                    event_type=EventType.POST_SUBMITTED,
+                    title=f'Your review needed: {next_stage.name}',
+                    body=f'Stage "{current_stage.name}" was cleared — your review is up: "{post.caption_snippet}"',
+                    data={"post_id": str(post.id), "workspace_id": str(workspace.id)},
+                )
+            return post
+        # All stages done — fall through to full approval below
+
+    # --- Standard approval ---
     moved = []
-    advanced_to_client = False
     with transaction.atomic():
         for pp in targets:
-            from_pending_review = pp.status == "pending_review"
             if not _transition_or_skip(pp, "approved"):
                 continue
             moved.append(pp)
-            if two_stage and from_pending_review and _transition_or_skip(pp, "pending_client"):
-                advanced_to_client = True
 
         if not moved:
             return post
@@ -153,14 +202,6 @@ def approve_post(target, user, workspace, comment=""):
         else:
             for pp in moved:
                 _record_action(post, pp, user, ApprovalAction.ActionType.APPROVED, comment)
-
-        if advanced_to_client:
-            ApprovalReminder.objects.update_or_create(
-                post=post,
-                stage="pending_client",
-                defaults={"reminder_count": 0, "last_reminder_at": None, "escalated": False},
-            )
-            _notify_clients(post, workspace)
 
     if post.author and post.author != user:
         notify(
