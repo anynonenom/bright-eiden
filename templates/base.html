@@ -639,7 +639,7 @@
                         {% else %}
                         <div class="w-7 h-7 rounded-full bg-stone-200 flex items-center justify-center text-[11px] font-semibold text-stone-500">{{ channel.account_name|default:channel.account_handle|make_list|first|upper }}</div>
                         {% endif %}
-                        <div class="absolute -bottom-0.5 -right-0.5 w-4 h-4 bg-white rounded-full flex items-center justify-center">
+                        <div class="absolute -bottom-0.5 -right-0.5 w-4 h-4 rounded-full flex items-center justify-center {% if channel.platform == 'threads' %}bg-black{% else %}bg-white{% endif %}">
                             {% include "partials/_platform_icon.html" with platform=channel.platform size="sm" %}
                         </div>
                     </div>
@@ -658,7 +658,7 @@
                         {% else %}
                         <div class="w-7 h-7 rounded-full bg-stone-200 flex items-center justify-center text-[11px] font-semibold text-stone-500">{{ channel.account_name|default:channel.account_handle|make_list|first|upper }}</div>
                         {% endif %}
-                        <div class="absolute -bottom-0.5 -right-0.5 w-4 h-4 bg-white rounded-full flex items-center justify-center">
+                        <div class="absolute -bottom-0.5 -right-0.5 w-4 h-4 rounded-full flex items-center justify-center {% if channel.platform == 'threads' %}bg-black{% else %}bg-white{% endif %}">
                             {% include "partials/_platform_icon.html" with platform=channel.platform size="sm" %}
                         </div>
                     </div>
