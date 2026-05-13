@@ -852,6 +852,10 @@ def create_virtual_account(request, workspace_id):
     )
 
     if created:
+        avatar_file = request.FILES.get("avatar")
+        if avatar_file:
+            account.avatar = avatar_file
+            account.save(update_fields=["avatar"])
         create_default_queue_and_slots(account)
         messages.success(request, f"{account_name} ({account.get_platform_display()}) added as a virtual account.")
     else:

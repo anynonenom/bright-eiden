@@ -32,6 +32,7 @@ class SocialAccount(models.Model):
     account_name = models.CharField(max_length=255)
     account_handle = models.CharField(max_length=255, blank=True, default="")
     avatar_url = models.URLField(max_length=2000, blank=True, default="")
+    avatar = models.ImageField(upload_to="social_accounts/avatars/%Y/%m/", blank=True)
     follower_count = models.IntegerField(default=0)
 
     # Encrypted OAuth tokens

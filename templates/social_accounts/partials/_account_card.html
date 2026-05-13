@@ -7,7 +7,9 @@ Usage: {% include "social_accounts/partials/_account_card.html" with account=acc
     <div class="flex items-start gap-4">
         <!-- Avatar -->
         <div class="flex-shrink-0">
-            {% if account.avatar_url %}
+            {% if account.avatar %}
+            <img src="{{ account.avatar.url }}" alt="{{ account.account_name|default:account.account_handle }}" class="w-11 h-11 rounded-full object-cover ring-2 ring-stone-100">
+            {% elif account.avatar_url %}
             <img src="{{ account.avatar_url }}" alt="{{ account.account_name|default:account.account_handle }}" class="w-11 h-11 rounded-full object-cover ring-2 ring-stone-100">
             {% else %}
             <div class="w-11 h-11 rounded-full bg-stone-100 flex items-center justify-center text-stone-400">
