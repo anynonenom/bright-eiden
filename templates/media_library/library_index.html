@@ -273,7 +273,12 @@
 {% block page_header %}{% endblock %}
 
 {% block content %}
-<div x-data="mediaLibrary()" class="-m-3 sm:-m-4 lg:-m-6 flex flex-col" style="height: calc(100vh - 56px);">
+<div x-data="mediaLibrary()" class="flex flex-col" style="margin: -1rem; height: calc(100vh - 56px);">
+<style>
+  /* Break out of base.html's padded main container */
+  main { padding: 0 !important; overflow: hidden !important; }
+  main > div { overflow: hidden !important; }
+</style>
 
   <!-- Full-page drag overlay -->
   <div x-show="dragOver" x-cloak class="ml-drag-overlay">
