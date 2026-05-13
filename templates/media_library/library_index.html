@@ -299,18 +299,6 @@
     <!-- ══════════════════ LEFT SIDEBAR ══════════════════ -->
     <aside class="ml-sidebar">
 
-      <!-- Upload button -->
-      <div class="p-3 pb-0 pl-4">
-        <button @click="$refs.fileInput.click()"
-                class="ml-upload-btn w-full justify-center">
-          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/>
-          </svg>
-          Upload Files
-        </button>
-        <input type="file" x-ref="fileInput" @change="handleFiles($event.target.files)" multiple
-               accept="{{ accepted_file_types }}" class="hidden">
-      </div>
 
       <!-- Navigation -->
       <div class="ml-sidebar-section">
@@ -418,6 +406,16 @@
           <option value="-size"  {% if current_sort == '-size'  %}selected{% endif %}>Largest</option>
           <option value="size"   {% if current_sort == 'size'   %}selected{% endif %}>Smallest</option>
         </select>
+
+        <!-- Upload button -->
+        <button @click="$refs.fileInput.click()" class="ml-upload-btn">
+          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/>
+          </svg>
+          Upload
+        </button>
+        <input type="file" x-ref="fileInput" @change="handleFiles($event.target.files)" multiple
+               accept="{{ accepted_file_types }}" class="hidden">
 
         <!-- View toggle -->
         <div class="ml-view-toggle">
