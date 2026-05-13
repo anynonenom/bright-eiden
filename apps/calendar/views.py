@@ -50,7 +50,7 @@ def _slots_updated_response(account_id):
     """Return a 204 response with an HX-Trigger header for slot grid refresh."""
     return HttpResponse(
         status=204,
-        headers={"HX-Trigger": json.dumps({"slotsUpdated": {"accountId": str(account_id)}})},
+        headers={"HX-Trigger": f"slotsUpdated-{account_id}"},
     )
 
 
