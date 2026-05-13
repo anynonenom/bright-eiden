@@ -1268,74 +1268,86 @@
     <div x-show="showStageBuilder" x-cloak
          @keydown.escape.window="showStageBuilder = false"
          class="fixed inset-0 flex items-center justify-center z-50 px-4"
-         style="background: rgba(0,0,0,0.4);">
-        <div @click.stop class="bg-white rounded-2xl shadow-2xl w-full max-w-lg flex flex-col" style="max-height: 85vh;">
+         style="background: rgba(0,0,0,0.5);">
+        <div @click.stop class="bg-white rounded-2xl shadow-2xl w-full max-w-md flex flex-col" style="max-height: 80vh;">
+
             <!-- Header -->
-            <div class="flex items-center justify-between px-6 py-4 border-b border-stone-100">
-                <div>
-                    <h2 class="text-base font-semibold text-stone-900">Approval Stages</h2>
-                    <p class="text-xs text-stone-400 mt-0.5">Add stages in order — each must be approved before the next begins.</p>
+            <div class="flex items-center justify-between px-5 py-4 border-b border-stone-100">
+                <div class="flex items-center gap-2.5">
+                    <div class="w-8 h-8 rounded-lg flex items-center justify-center" style="background: var(--primary-50, #FFF7ED);">
+                        <svg class="w-4 h-4" style="color: var(--primary);" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                    </div>
+                    <div>
+                        <h2 class="text-sm font-semibold text-stone-900">Approval Stages</h2>
+                        <p class="text-xs text-stone-400">Each stage must be approved before the next begins</p>
+                    </div>
                 </div>
-                <button type="button" @click="showStageBuilder = false" class="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-stone-100 text-stone-400 hover:text-stone-600 transition-colors">
+                <button type="button" @click="showStageBuilder = false"
+                        class="w-7 h-7 flex items-center justify-center rounded-lg hover:bg-stone-100 text-stone-400 transition-colors">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
                 </button>
             </div>
 
             <!-- Stages list -->
-            <div class="flex-1 overflow-y-auto px-6 py-4 space-y-3">
+            <div class="overflow-y-auto px-5 py-4" style="flex: 1;">
                 <template x-for="(stage, idx) in stageBuilderStages" :key="idx">
-                    <div class="flex items-center gap-3 p-3 rounded-xl border border-stone-200 bg-stone-50">
-                        <!-- Step number -->
-                        <div class="w-7 h-7 rounded-full flex items-center justify-center flex-shrink-0 text-xs font-bold text-white"
-                             style="background: var(--primary);" x-text="idx + 1"></div>
-
-                        <!-- Name input -->
-                        <div class="flex-1 min-w-0">
-                            <input type="text"
-                                   x-model="stage.name"
-                                   placeholder="Stage name (e.g. Design Review)"
-                                   class="w-full text-sm px-3 py-1.5 border border-stone-200 rounded-lg focus:outline-none focus:ring-2 focus:border-transparent bg-white"
-                                   style="--tw-ring-color: var(--primary);">
+                    <div class="mb-3">
+                        <!-- Stage card -->
+                        <div class="rounded-xl border-2 border-stone-200 bg-white overflow-hidden">
+                            <!-- Card header with step number -->
+                            <div class="flex items-center justify-between px-4 py-2.5 border-b border-stone-100" style="background: #F8F7F4;">
+                                <div class="flex items-center gap-2">
+                                    <span class="w-5 h-5 rounded-full text-[11px] font-bold text-white flex items-center justify-center" style="background: var(--primary);" x-text="idx + 1"></span>
+                                    <span class="text-xs font-semibold text-stone-500 uppercase tracking-wide">Stage <span x-text="idx + 1"></span></span>
+                                </div>
+                                <button type="button" @click="stageBuilderStages.splice(idx, 1)"
+                                        x-show="stageBuilderStages.length > 1"
+                                        class="text-xs text-stone-400 hover:text-red-500 transition-colors font-medium">
+                                    Remove
+                                </button>
+                            </div>
+                            <!-- Card body -->
+                            <div class="p-3 space-y-2">
+                                <input type="text"
+                                       x-model="stage.name"
+                                       placeholder="Stage name  (e.g. Design Review, Manager Sign-off…)"
+                                       class="w-full text-sm px-3 py-2 rounded-lg border border-stone-300 text-stone-800 placeholder-stone-400 focus:outline-none focus:border-orange-400 focus:ring-2 focus:ring-orange-100 bg-white">
+                                <select x-model="stage.assigned_to_id"
+                                        class="w-full text-sm px-3 py-2 rounded-lg border border-stone-300 text-stone-700 bg-white focus:outline-none focus:border-orange-400 focus:ring-2 focus:ring-orange-100 cursor-pointer">
+                                    <option value="">Assign to anyone with approval access</option>
+                                    {% for m in workspace_members %}
+                                    <option value="{{ m.user.id }}">{{ m.user.get_full_name|default:m.user.email }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
                         </div>
-
-                        <!-- Assignee dropdown -->
-                        <select x-model="stage.assigned_to_id"
-                                class="text-sm px-2 py-1.5 border border-stone-200 rounded-lg focus:outline-none bg-white text-stone-700 flex-shrink-0"
-                                style="max-width: 160px;">
-                            <option value="">Anyone</option>
-                            {% for m in workspace_members %}
-                            <option value="{{ m.user.id }}">{{ m.user.get_full_name|default:m.user.email }}</option>
-                            {% endfor %}
-                        </select>
-
-                        <!-- Remove -->
-                        <button type="button" @click="stageBuilderStages.splice(idx, 1)"
-                                x-show="stageBuilderStages.length > 1"
-                                class="w-7 h-7 flex items-center justify-center rounded-lg hover:bg-red-50 text-stone-300 hover:text-red-400 transition-colors flex-shrink-0">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
-                        </button>
+                        <!-- Connector arrow -->
+                        <div x-show="idx < stageBuilderStages.length - 1" class="flex justify-center py-1">
+                            <svg class="w-4 h-4 text-stone-300" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/></svg>
+                        </div>
                     </div>
                 </template>
 
-                <!-- Add stage -->
+                <!-- Add stage button -->
                 <button type="button"
-                        @click="stageBuilderStages.push({ name: '', assigned_to_id: '', assigned_to_name: '' })"
-                        class="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl border border-dashed border-stone-300 text-sm text-stone-400 hover:text-stone-600 hover:border-stone-400 hover:bg-stone-50 transition-colors">
+                        @click="stageBuilderStages.push({ name: '', assigned_to_id: '' })"
+                        class="w-full flex items-center justify-center gap-2 py-3 rounded-xl text-sm font-medium text-stone-500 hover:text-stone-700 transition-colors"
+                        style="border: 2px dashed #D6D3D1;">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/></svg>
-                    Add Stage
+                    Add another stage
                 </button>
             </div>
 
             <!-- Footer -->
-            <div class="flex items-center justify-end gap-3 px-6 py-4 border-t border-stone-100">
+            <div class="flex items-center justify-between px-5 py-4 border-t border-stone-100 bg-stone-50 rounded-b-2xl">
                 <button type="button" @click="showStageBuilder = false"
-                        class="px-4 py-2 text-sm font-medium text-stone-600 hover:bg-stone-100 rounded-lg transition-colors">
+                        class="px-4 py-2 text-sm font-medium text-stone-500 hover:text-stone-700 hover:bg-stone-100 rounded-lg transition-colors">
                     Cancel
                 </button>
                 <button type="button"
                         @click="
                             const validStages = stageBuilderStages.filter(s => s.name.trim());
-                            if (!validStages.length) { alert('Add at least one stage name.'); return; }
+                            if (!validStages.length) { alert('Please name at least one stage.'); return; }
                             const payload = validStages.map(s => ({ name: s.name.trim(), assigned_to_id: s.assigned_to_id || null }));
                             document.getElementById('stages-json-input').value = JSON.stringify(payload);
                             showStageBuilder = false;
