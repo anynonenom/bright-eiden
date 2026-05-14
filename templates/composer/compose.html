@@ -383,55 +383,10 @@
                 </template>
 
                 <!-- Caption with inline media -->
-                <div x-data="{ showTemplatePicker: false }">
+                <div>
                     <div class="flex items-center justify-between mb-2">
                         <label class="text-sm font-semibold text-stone-500 uppercase tracking-wider"
                                x-text="captionLabel">Caption</label>
-                        <div class="flex items-center gap-2 relative">
-                            {% if post and is_edit %}
-                            <div x-data="{ showSaveTemplate: false }">
-                                <button type="button" @click="showSaveTemplate = !showSaveTemplate"
-                                        class="text-xs font-semibold py-1.5 px-3 rounded-full border border-stone-200 text-stone-500 hover:border-stone-300 hover:text-stone-700 transition-colors flex items-center gap-1">
-                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4"/></svg>
-                                    Save as Template
-                                </button>
-                                <div x-show="showSaveTemplate" x-cloak x-transition
-                                     @click.outside="showSaveTemplate = false"
-                                     class="absolute z-50 mt-1 right-0 p-3 bg-white rounded-xl shadow-lg ring-1 ring-stone-200 w-72 max-w-[calc(100vw-2rem)]">
-                                    <div x-data="{ tplName: '', tplDesc: '' }">
-                                        <input type="text" x-model="tplName" placeholder="Template name…"
-                                               class="form-input w-full text-sm mb-2">
-                                        <textarea x-model="tplDesc" placeholder="Description (optional)…" rows="2"
-                                                  class="form-input w-full text-xs mb-2"></textarea>
-                                        <button type="button" class="btn-brand text-xs py-1.5 px-3 w-full"
-                                                :disabled="!tplName.trim()"
-                                                @click="if (!tplName.trim()) return;
-                                                    fetch('{% url 'composer:save_as_template' workspace_id=workspace.id post_id=post.id %}', {
-                                                        method: 'POST',
-                                                        headers: { 'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value, 'Content-Type': 'application/x-www-form-urlencoded' },
-                                                        body: 'template_name=' + encodeURIComponent(tplName) + '&template_description=' + encodeURIComponent(tplDesc)
-                                                    }).then(() => { showSaveTemplate = false; tplName = ''; tplDesc = ''; });">
-                                            Save Template
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
-                            {% endif %}
-                            <button type="button" @click="showTemplatePicker = !showTemplatePicker"
-                                    class="text-xs font-semibold py-1.5 px-3 rounded-full border border-stone-200 text-stone-500 hover:border-stone-300 hover:text-stone-700 transition-colors flex items-center gap-1">
-                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
-                                Use Template
-                            </button>
-                            <!-- Template picker modal -->
-                            <div x-show="showTemplatePicker" x-cloak x-transition
-                                 @click.outside="showTemplatePicker = false"
-                                 class="absolute z-50 top-full mt-1 right-0 bg-white rounded-xl shadow-lg ring-1 ring-stone-200 w-80 max-w-[calc(100vw-2rem)] max-h-80 overflow-y-auto"
-                                 hx-get="{% url 'composer:template_picker' workspace_id=workspace.id %}"
-                                 hx-trigger="intersect once"
-                                 hx-target="this">
-                                <div class="p-4 text-center text-xs text-stone-400">Loading templates…</div>
-                            </div>
-                        </div>
                     </div>
                     <div class="caption-wrap">
                         <textarea name="caption"
