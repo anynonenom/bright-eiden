@@ -313,7 +313,7 @@ def _get_tab_context(request, workspace, tab: str) -> dict:
         return {**base_ctx, "platform_posts": platform_posts[:200]}
 
     # approvals
-    approval_statuses = ["pending_review", "pending_client", "changes_requested", "rejected"]
+    approval_statuses = ["pending_review", "pending_client", "approved", "changes_requested", "rejected"]
     status_filter = request.GET.get("approval_status", "all")
     platform_posts = (
         PlatformPost.objects.filter(
