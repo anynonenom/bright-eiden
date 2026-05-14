@@ -105,7 +105,7 @@ Calendar grid scrolls beneath.
             Approved
         </span>
         {% for pp in approved_unscheduled %}
-        <a href="{% url 'composer:compose' workspace_id=workspace.id post_id=pp.post.id %}"
+        <a href="{% url 'composer:compose_edit' workspace_id=workspace.id post_id=pp.post.id %}"
            class="flex-shrink-0 flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-medium text-emerald-800 transition-colors"
            style="background: white; border: 1px solid #BBF7D0;"
            title="{{ pp.post.caption_snippet|default:'(no caption)' }}">
