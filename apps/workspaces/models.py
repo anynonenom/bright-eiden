@@ -29,7 +29,7 @@ class Workspace(models.Model):
     approval_workflow_mode = models.CharField(
         max_length=40,
         choices=ApprovalWorkflowMode.choices,
-        default=ApprovalWorkflowMode.NONE,
+        default=ApprovalWorkflowMode.REQUIRED_INTERNAL,
     )
     is_archived = models.BooleanField(default=False)
 
