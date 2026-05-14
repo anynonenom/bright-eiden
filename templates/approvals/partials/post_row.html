@@ -27,13 +27,26 @@
                 <span class="inline-flex items-center px-2 py-0.5 text-[0.6875rem] font-semibold rounded-full bg-red-50 text-red-700">Rejected</span>
                 {% endif %}
 
-                <!-- Current approval stage -->
-                {% if post.current_approval_stage %}
-                <span class="inline-flex items-center gap-1 px-2 py-0.5 text-[0.6875rem] font-semibold rounded-full bg-violet-50 text-violet-700">
-                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><circle cx="12" cy="12" r="10"/><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6l4 2"/></svg>
-                    {{ post.current_approval_stage.name }}{% if post.current_approval_stage.assigned_to %} · {{ post.current_approval_stage.assigned_to.get_full_name|default:post.current_approval_stage.assigned_to.email }}{% endif %}
-                </span>
+                <!-- Approval stages pipeline -->
+                {% with stages=post.approval_stages.all %}
+                {% if stages %}
+                <div class="flex items-center gap-1 flex-wrap">
+                    {% for stage in stages %}
+                    <span class="inline-flex items-center gap-1 px-2 py-0.5 text-[0.6875rem] font-semibold rounded-full
+                        {% if stage.status == 'approved' %}bg-emerald-50 text-emerald-700
+                        {% elif stage.status == 'changes_requested' %}bg-amber-50 text-amber-700
+                        {% elif post.current_approval_stage.id == stage.id %}bg-orange-50 text-orange-700
+                        {% else %}bg-stone-100 text-stone-400{% endif %}">
+                        {% if stage.status == 'approved' %}<svg class="w-2.5 h-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+                        {% elif post.current_approval_stage.id == stage.id %}<svg class="w-2.5 h-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+                        {% else %}<span class="w-2.5 h-2.5 flex items-center justify-center text-[8px]">{{ stage.order }}</span>{% endif %}
+                        {{ stage.name }}
+                    </span>
+                    {% if not forloop.last %}<span class="text-stone-300 text-xs">→</span>{% endif %}
+                    {% endfor %}
+                </div>
                 {% endif %}
+                {% endwith %}
 
                 <!-- Platform icons -->
                 <div class="flex gap-1">

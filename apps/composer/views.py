@@ -383,10 +383,12 @@ def compose(request, workspace_id, post_id=None):
     # Approval history and comments for existing posts
     approval_history = []
     post_comments = []
+    post_approval_stages = []
     if post:
-        from apps.approvals.models import ApprovalAction
+        from apps.approvals.models import ApprovalAction, PostApprovalStage
 
         approval_history = ApprovalAction.objects.filter(post=post).select_related("user").order_by("-created_at")[:10]
+        post_approval_stages = PostApprovalStage.objects.filter(post=post).select_related("assigned_to", "approved_by").order_by("order")
         from apps.approvals.comments import get_comments_for_post
 
         post_comments = get_comments_for_post(post, request.user)
@@ -464,6 +466,7 @@ def compose(request, workspace_id, post_id=None):
         "show_submit_button": show_submit_button,
         "show_resubmit_button": show_resubmit_button,
         "approval_history": approval_history,
+        "post_approval_stages": post_approval_stages,
         "post_comments": post_comments,
         "pending_assets": pending_assets,
         "all_tags": all_tags,
