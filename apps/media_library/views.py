@@ -748,8 +748,9 @@ def processing_status(request, workspace_id, asset_id):
         pk=asset_id,
     )
 
-    if request.htmx and asset.processing_status == MediaAsset.ProcessingStatus.COMPLETED:
-        # Return the completed asset card to replace the placeholder
+    if request.htmx:
+        # Always return the asset card — HTMX swaps outerHTML so raw JSON
+        # would be rendered as text. Card template handles all statuses.
         return render(
             request,
             "media_library/_asset_card.html",

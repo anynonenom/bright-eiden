@@ -6,6 +6,10 @@
      hx-get="{% url 'media_library:processing_status' workspace_id=workspace.id asset_id=asset.id %}"
      hx-trigger="every 3s"
      hx-swap="outerHTML"
+     {% endif %}
+     {% if asset.processing_status == 'failed' %}
+     hx-get="{% url 'media_library:processing_status' workspace_id=workspace.id asset_id=asset.id %}"
+     hx-trigger="none"
      {% endif %}>
 
   <!-- Thumbnail -->
