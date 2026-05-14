@@ -7,10 +7,24 @@ Context: media_attachments, post, workspace.
 <div class="media-thumb" draggable="true">
     {% if attachment.media_asset.is_video %}
     <video src="{{ attachment.media_asset.file.url }}#t=0.5" class="w-full h-full object-cover" muted preload="metadata"></video>
-    <div class="absolute inset-0 flex items-center justify-center pointer-events-none">
-        <div class="w-5 h-5 rounded-full bg-black/50 flex items-center justify-center">
-            <svg class="w-2.5 h-2.5 text-white ml-px" fill="currentColor" viewBox="0 0 20 20"><path d="M6.3 2.841A1.5 1.5 0 004 4.11V15.89a1.5 1.5 0 002.3 1.269l9.344-5.89a1.5 1.5 0 000-2.538L6.3 2.84z"/></svg>
+    <!-- Play button — click opens lightbox -->
+    <div class="absolute inset-0 flex items-center justify-center cursor-pointer"
+         onclick="event.stopPropagation(); document.getElementById('vp-{{ attachment.id }}').classList.remove('hidden')">
+        <div class="w-7 h-7 rounded-full bg-black/60 flex items-center justify-center hover:bg-black/80 transition-colors">
+            <svg class="w-3 h-3 text-white ml-0.5" fill="currentColor" viewBox="0 0 20 20"><path d="M6.3 2.841A1.5 1.5 0 004 4.11V15.89a1.5 1.5 0 002.3 1.269l9.344-5.89a1.5 1.5 0 000-2.538L6.3 2.84z"/></svg>
         </div>
+    </div>
+    <!-- Lightbox -->
+    <div id="vp-{{ attachment.id }}"
+         class="hidden fixed inset-0 z-[9999] bg-black/85 flex items-center justify-center"
+         onclick="this.classList.add('hidden'); this.querySelector('video').pause()">
+        <video src="{{ attachment.media_asset.file.url }}" controls autoplay
+               class="max-w-[90vw] max-h-[85vh] rounded-xl shadow-2xl"
+               onclick="event.stopPropagation()"></video>
+        <button class="absolute top-4 right-4 text-white/70 hover:text-white transition-colors"
+                onclick="document.getElementById('vp-{{ attachment.id }}').classList.add('hidden'); document.getElementById('vp-{{ attachment.id }}').querySelector('video').pause()">
+            <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+        </button>
     </div>
     {% elif attachment.media_asset.thumbnail %}
     <img src="{{ attachment.media_asset.thumbnail.url }}" alt="{{ attachment.alt_text|default:attachment.media_asset.filename }}">
