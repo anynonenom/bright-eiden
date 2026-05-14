@@ -7,29 +7,6 @@
 <div class="flex flex-wrap items-center justify-between gap-3 mb-4 lg:mb-[25px]">
     <h1 class="text-xl sm:text-2xl font-semibold" style="letter-spacing: -0.02em; color: var(--text-primary, #122620); font-family: 'Outfit', sans-serif; font-weight: 800;">Publish</h1>
 
-    <div class="flex items-center gap-3">
-        <!-- List / Calendar toggle -->
-        <div class="flex items-center rounded-full p-0.5" style="background: var(--neutral-100, #F4EBD0);" x-data="{ activeMode: '{{ mode|default:'calendar' }}' }">
-            <button class="view-btn{% if mode == 'list' %} active{% endif %}" :class="{ active: activeMode === 'list' }"
-                    @click="activeMode = 'list'"
-                    hx-get="{% url 'calendar:calendar' workspace_id=workspace.id %}?mode=list&tab={{ active_tab|default:'queue' }}&_switch_mode=1"
-                    hx-target="#publish-body"
-                    hx-swap="innerHTML"
-                    hx-push-url="{% url 'calendar:calendar' workspace_id=workspace.id %}?mode=list&tab={{ active_tab|default:'queue' }}">
-                <svg class="w-3.5 h-3.5 inline -mt-px mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 10h16M4 14h16M4 18h16"/></svg>
-                List
-            </button>
-            <button class="view-btn{% if mode == 'calendar' %} active{% endif %}" :class="{ active: activeMode === 'calendar' }"
-                    @click="activeMode = 'calendar'"
-                    hx-get="{% url 'calendar:calendar' workspace_id=workspace.id %}?mode=calendar&view={{ view_type|default:'month' }}&_switch_mode=1"
-                    hx-target="#publish-body"
-                    hx-swap="innerHTML"
-                    hx-push-url="{% url 'calendar:calendar' workspace_id=workspace.id %}?mode=calendar&view={{ view_type|default:'month' }}">
-                <svg class="w-3.5 h-3.5 inline -mt-px mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-                Calendar
-            </button>
-        </div>
-
     </div>
 </div>
 {% endblock %}
@@ -241,11 +218,7 @@
 
 {% block content %}
 <div id="publish-body" class="flex-1 flex flex-col min-h-0">
-    {% if mode == 'list' %}
-        {% include "calendar/partials/publish_list_shell.html" %}
-    {% else %}
-        {% include "calendar/partials/publish_calendar_shell.html" %}
-    {% endif %}
+    {% include "calendar/partials/publish_calendar_shell.html" %}
 </div>
 {% endblock %}
 
@@ -344,40 +317,6 @@ function calendarApp() {
                 rollback();
                 console.error('Reschedule failed', err);
             });
-        }
-    };
-}
-
-function publishList() {
-    return {
-        activeTab: '{{ active_tab|default:"queue" }}',
-        activeChannel: '',
-        activeTag: '',
-        displayTimezone: '{{ display_timezone|default:"UTC" }}',
-
-        tabUrls: {
-            queue: '{% url "calendar:publish_tab_queue" workspace_id=workspace.id %}',
-            drafts: '{% url "calendar:publish_tab_drafts" workspace_id=workspace.id %}',
-            approvals: '{% url "calendar:publish_tab_approvals" workspace_id=workspace.id %}',
-            sent: '{% url "calendar:publish_tab_sent" workspace_id=workspace.id %}',
-        },
-
-        init() {
-            window.addEventListener('post-deleted', () => this.reloadTab());
-        },
-
-        switchTab(tab) {
-            this.activeTab = tab;
-            this.reloadTab();
-        },
-
-        reloadTab() {
-            const params = new URLSearchParams();
-            if (this.activeChannel) params.set('channel', this.activeChannel);
-            if (this.activeTag) params.set('tag', this.activeTag);
-            if (this.displayTimezone) params.set('tz', this.displayTimezone);
-            const url = this.tabUrls[this.activeTab] + '?' + params.toString();
-            htmx.ajax('GET', url, {target: '#tab-content', swap: 'innerHTML'});
         }
     };
 }
