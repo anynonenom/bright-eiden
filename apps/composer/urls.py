@@ -57,19 +57,11 @@ urlpatterns = [
     path("categories/create/", views.category_create, name="category_create"),
     path("categories/<uuid:category_id>/edit/", views.category_edit, name="category_edit"),
     path("categories/<uuid:category_id>/delete/", views.category_delete, name="category_delete"),
-    # Post Templates
-    path("templates/", views.template_list, name="template_list"),
-    path("templates/<uuid:template_id>/delete/", views.template_delete, name="template_delete"),
-    path("templates/<uuid:template_id>/use/", views.use_template, name="use_template"),
-    path("templates/picker/", views.template_picker, name="template_picker"),
-    path("compose/<uuid:post_id>/save-as-template/", views.save_as_template, name="save_as_template"),
     # Hashtag Sets
     path("hashtags/", views.hashtag_set_list, name="hashtag_set_list"),
     path("hashtags/create/", views.hashtag_set_create, name="hashtag_set_create"),
     path("hashtags/<uuid:set_id>/delete/", views.hashtag_set_delete, name="hashtag_set_delete"),
     path("hashtags/api/", views.hashtag_sets_api, name="hashtag_sets_api"),
-    # Feed → Idea / Compose
-    path("feed/save-idea/", views.feed_save_idea, name="feed_save_idea"),
     # CSV Import
     path("import/csv/", views.csv_upload, name="csv_upload"),
     path("import/csv/preview/", views.csv_preview, name="csv_preview"),
@@ -77,9 +69,4 @@ urlpatterns = [
     # Tags
     path("tags/", views.tag_list, name="tag_list"),
     path("tags/create/", views.tag_create, name="tag_create"),
-    # Feeds
-    path("feeds/", views.feed_list, name="feed_list"),
-    path("feeds/add/", views.feed_add, name="feed_add"),
-    path("feeds/<uuid:feed_id>/delete/", views.feed_delete, name="feed_delete"),
-    path("feeds/explore/", views.feed_explore, name="feed_explore"),
 ]

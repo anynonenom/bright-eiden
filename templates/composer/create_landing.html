@@ -420,14 +420,6 @@
                     class="create-tab" :class="activeTab === 'ideas' && 'active'">
                 Ideas
             </button>
-            <button @click="activeTab = 'templates'"
-                    class="create-tab" :class="activeTab === 'templates' && 'active'">
-                Templates
-            </button>
-            <button @click="activeTab = 'feeds'"
-                    class="create-tab" :class="activeTab === 'feeds' && 'active'">
-                Feeds
-            </button>
         </div>
 
         <div class="flex items-center gap-3 ml-auto">
@@ -520,48 +512,6 @@
             </div>
         </div>
 
-        <!-- Templates tab -->
-        <div x-show="activeTab === 'templates'" x-cloak
-             class="overflow-y-auto -mx-6 -mb-6 px-6 pb-6"
-             style="max-height: calc(100vh - 160px);">
-            {% include "composer/partials/template_gallery.html" %}
-        </div>
-
-        <!-- Feeds tab -->
-        <div x-show="activeTab === 'feeds'" x-cloak
-             class="h-[calc(100vh-160px)] overflow-hidden"
-             @open-explore.window="showExploreModal = true; $nextTick(() => htmx.trigger(document.getElementById('explore-feeds-content'), 'load'))">
-            <div id="feeds-tab-content"
-                 class="h-full"
-                 hx-get="{% url 'composer:feed_list' workspace_id=workspace.id %}"
-                 hx-trigger="intersect once, feedsUpdated from:body"
-                 hx-swap="innerHTML">
-                {% include "composer/partials/feeds_tab.html" %}
-            </div>
-        </div>
-    </div>
-
-    <!-- Explore Feeds Modal -->
-    <div x-show="showExploreModal" x-cloak
-         class="fixed inset-0 z-[200] flex items-center justify-center"
-         @keydown.escape.window="showExploreModal = false">
-        <div class="fixed inset-0 bg-black/30" @click="showExploreModal = false"></div>
-        <div class="relative bg-white rounded-2xl shadow-xl w-full max-w-[720px] mx-4 max-h-[85vh] overflow-hidden" @click.stop>
-            <!-- Close button -->
-            <button @click="showExploreModal = false"
-                    class="absolute top-4 right-4 z-10 w-8 h-8 flex items-center justify-center text-stone-400 hover:text-stone-600 hover:bg-stone-100 rounded-full transition-all cursor-pointer">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-            </button>
-            <!-- Content loaded via HTMX -->
-            <div id="explore-feeds-content"
-                 hx-get="{% url 'composer:feed_explore' workspace_id=workspace.id %}"
-                 hx-trigger="load"
-                 hx-swap="innerHTML">
-                <div class="flex justify-center py-20">
-                    <div class="animate-spin w-6 h-6 border-2 border-stone-300 border-t-orange-500 rounded-full"></div>
-                </div>
-            </div>
-        </div>
     </div>
 
     <!-- Create Idea Modal -->
@@ -1142,7 +1092,6 @@ function kanbanBoard() {
         activeTab: '{{ tab }}',
         activeTag: '{{ active_tag|default_if_none:""|escapejs }}',
         showCreateModal: false,
-        showExploreModal: false,
         createGroupId: '',
         createSelectedGroup: '',
         createSelectedTags: [],
