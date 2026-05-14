@@ -4,9 +4,7 @@ Shows pending approval platform posts with filter sub-tabs. Loaded via HTMX into
 All members can view; action buttons shown conditionally based on can_approve permission.
 {% endcomment %}
 
-<div x-data="{ selectedPosts: [], showBulkBar: false }"
-     x-effect="showBulkBar = selectedPosts.length > 0"
-     {% if is_htmx %}class="tab-slide-in"{% endif %}>
+<div {% if is_htmx %}class="tab-slide-in"{% endif %}>
 
     <!-- Filter sub-tabs -->
     <div class="flex flex-wrap gap-1.5 mb-5">
@@ -137,40 +135,5 @@ All members can view; action buttons shown conditionally based on can_approve pe
 
     {% if can_approve %}
     <!-- Bulk action bar -->
-    <div x-show="showBulkBar" x-cloak
-         x-transition:enter="transition ease-out duration-200"
-         x-transition:enter-start="translate-y-full opacity-0"
-         x-transition:enter-end="translate-y-0 opacity-100"
-         x-transition:leave="transition ease-in duration-150"
-         x-transition:leave-start="translate-y-0 opacity-100"
-         x-transition:leave-end="translate-y-full opacity-0"
-         class="fixed bottom-6 left-1/2 -translate-x-1/2 z-40">
-        <div class="flex items-center gap-3 px-5 py-3 bg-stone-900 text-white rounded-2xl shadow-xl">
-            <span class="text-sm font-medium" x-text="selectedPosts.length + ' selected'"></span>
-            <div class="w-px h-5 bg-stone-700"></div>
-            <form hx-post="{% url 'approvals:bulk_action' workspace_id=workspace.id %}"
-                  hx-target="#tab-content"
-                  hx-swap="innerHTML"
-                  x-ref="bulkForm">
-                {% csrf_token %}
-                <template x-for="id in selectedPosts" :key="id">
-                    <input type="hidden" name="post_ids" :value="id">
-                </template>
-                <div class="flex items-center gap-2">
-                    <button type="submit" name="action" value="approve"
-                            class="px-3.5 py-1.5 text-[0.8125rem] font-semibold rounded-full bg-emerald-500 hover:bg-emerald-600 text-white transition-colors">
-                        Approve All
-                    </button>
-                    <button type="submit" name="action" value="reject"
-                            class="px-3.5 py-1.5 text-[0.8125rem] font-semibold rounded-full bg-red-500 hover:bg-red-600 text-white transition-colors">
-                        Reject All
-                    </button>
-                </div>
-            </form>
-            <button @click="selectedPosts = []" class="ml-1 text-stone-400 hover:text-white transition-colors">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
-            </button>
-        </div>
-    </div>
     {% endif %}
 </div>
