@@ -429,16 +429,28 @@ def _populate_calendar_context(request, workspace, view_type, target_date, conte
         _month_view_data(request, workspace, target_date, context)
 
 
+
 def _render_calendar_partial(request, workspace, view_type, target_date, context):
     """Render the appropriate calendar partial based on view type."""
+    # Inject approved_unscheduled before rendering so the shell can show the strip
+    context.setdefault(
+        "approved_unscheduled",
+        PlatformPost.objects.filter(
+            post__workspace_id=workspace.id,
+            status="approved",
+            scheduled_at__isnull=True,
+            post__scheduled_at__isnull=True,
+        )
+        .select_related("post__author", "post__category", "social_account")
+        .order_by("-post__updated_at")[:20],
+    )
+
     if view_type == "month":
         return _month_view(request, workspace, target_date, context)
     elif view_type == "week":
         return _week_view(request, workspace, target_date, context)
     elif view_type == "day":
         return _day_view(request, workspace, target_date, context)
-    elif view_type == "list":
-        return _list_view(request, workspace, target_date, context)
     return _month_view(request, workspace, target_date, context)
 
 
