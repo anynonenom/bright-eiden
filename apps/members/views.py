@@ -1,6 +1,7 @@
 """Views for team member management."""
 
 from django.contrib.auth.decorators import login_required
+from django.db.models import Count, Q
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
@@ -74,12 +75,17 @@ def member_list(request):
     ]
     workspace_role_choices = WorkspaceMembership.WorkspaceRole.choices
 
+    admin_members = [m for m in members_data if m["membership"].org_role in ("owner", "admin")]
+    regular_members = [m for m in members_data if m["membership"].org_role == "member"]
+
     return render(
         request,
         "members/list.html",
         {
             "settings_active": "members",
             "members_data": members_data,
+            "admin_members": admin_members,
+            "regular_members": regular_members,
             "pending_invites": pending_invites,
             "is_admin": is_admin,
             "org_workspaces": org_workspaces,
@@ -402,5 +408,84 @@ def manage_workspaces(request, membership_id):
             "membership": membership,
             "workspace_data": workspace_data,
             "workspace_role_choices": WorkspaceMembership.WorkspaceRole.choices,
+        },
+    )
+
+
+# ---------------------------------------------------------------------------
+# Member Activity Monitor
+# ---------------------------------------------------------------------------
+
+
+@login_required
+@require_org_role("admin")
+@require_GET
+def member_activity(request, membership_id):
+    """Show activity log for a specific member — posts created, submitted, actions taken."""
+    membership = get_object_or_404(OrgMembership, id=membership_id, organization=request.org)
+    member = membership.user
+    org = request.org
+
+    # Only look at workspaces that belong to this org
+    org_workspace_ids = list(
+        Workspace.objects.filter(organization=org, is_archived=False).values_list("id", flat=True)
+    )
+
+    from apps.approvals.models import ApprovalAction
+    from apps.composer.models import Post
+
+    # Summary counts
+    total_posts = Post.objects.filter(author=member, workspace_id__in=org_workspace_ids).count()
+    pending_posts = Post.objects.filter(
+        author=member,
+        workspace_id__in=org_workspace_ids,
+        platform_posts__status__in=["pending_review", "pending_client"],
+    ).distinct().count()
+    approved_posts = Post.objects.filter(
+        author=member,
+        workspace_id__in=org_workspace_ids,
+        platform_posts__status="approved",
+    ).distinct().count()
+    scheduled_posts = Post.objects.filter(
+        author=member,
+        workspace_id__in=org_workspace_ids,
+        platform_posts__status="scheduled",
+    ).distinct().count()
+
+    # Recent posts created by this member
+    recent_posts = (
+        Post.objects.filter(author=member, workspace_id__in=org_workspace_ids)
+        .select_related("workspace")
+        .prefetch_related("platform_posts__social_account")
+        .order_by("-created_at")[:20]
+    )
+
+    # Recent approval actions performed by this member
+    recent_actions = (
+        ApprovalAction.objects.filter(user=member, post__workspace_id__in=org_workspace_ids)
+        .select_related("post", "post__workspace")
+        .order_by("-created_at")[:20]
+    )
+
+    # Workspace memberships for this member in this org
+    ws_memberships = WorkspaceMembership.objects.filter(
+        user=member,
+        workspace_id__in=org_workspace_ids,
+    ).select_related("workspace")
+
+    return render(
+        request,
+        "members/activity.html",
+        {
+            "settings_active": "members",
+            "member": member,
+            "membership": membership,
+            "ws_memberships": ws_memberships,
+            "total_posts": total_posts,
+            "pending_posts": pending_posts,
+            "approved_posts": approved_posts,
+            "scheduled_posts": scheduled_posts,
+            "recent_posts": recent_posts,
+            "recent_actions": recent_actions,
         },
     )

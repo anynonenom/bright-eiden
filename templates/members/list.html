@@ -1,30 +1,50 @@
 {% extends "layouts/settings.html" %}
-{% block title %}Team Members - Settings - EIDEN GROUP{% endblock %}
+{% block title %}Team — Settings{% endblock %}
 {% block content %}
 <div x-data="{ showInviteModal: false }">
+
     <!-- Header -->
     <div class="flex items-center justify-between mb-6">
-        <h2 class="text-xl font-semibold" style="color: var(--text-primary);">Team Members</h2>
+        <div>
+            <h2 class="text-xl font-semibold" style="color: var(--text-primary);">Team</h2>
+            <p class="text-sm mt-0.5" style="color: var(--text-tertiary);">Manage who has access and which workspaces they work on.</p>
+        </div>
         {% if is_admin %}
         <button @click="showInviteModal = true"
-                class="btn-opacity px-5 py-2 text-sm font-medium rounded-full cursor-pointer transition-colors"
+                class="px-5 py-2 text-sm font-medium rounded-full cursor-pointer transition-colors"
                 style="background: var(--primary); color: white;">
-            Invite Team Member
+            Invite Member
         </button>
         {% endif %}
     </div>
 
-    <!-- Active Members -->
-    <div style="background: var(--surface-0); border: 1px solid var(--border); border-radius: var(--radius-xl);" class="mb-8">
-        <div class="px-6 py-4" style="border-bottom: 1px solid var(--border);">
-            <h3 class="text-sm font-semibold" style="color: var(--text-primary);">Members ({{ members_data|length }})</h3>
+    <!-- Owners & Admins -->
+    <div class="mb-6" style="background: var(--surface-0); border: 1px solid var(--border); border-radius: var(--radius-xl);">
+        <div class="px-6 py-3 flex items-center justify-between" style="border-bottom: 1px solid var(--border);">
+            <h3 class="text-xs font-semibold uppercase tracking-wider" style="color: var(--text-tertiary);">Owners &amp; Admins</h3>
+            <span class="text-xs px-2 py-0.5 rounded-full font-medium" style="background: #FEF3C7; color: #92400E;">Full access</span>
+        </div>
+        {% for member in admin_members %}
+        {% include "members/partials/member_row.html" %}
+        {% empty %}
+        <div class="px-6 py-6 text-center">
+            <p class="text-sm" style="color: var(--text-tertiary);">No owners or admins.</p>
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- Members -->
+    <div class="mb-6" style="background: var(--surface-0); border: 1px solid var(--border); border-radius: var(--radius-xl);">
+        <div class="px-6 py-3 flex items-center justify-between" style="border-bottom: 1px solid var(--border);">
+            <h3 class="text-xs font-semibold uppercase tracking-wider" style="color: var(--text-tertiary);">Members</h3>
+            <span class="text-xs px-2 py-0.5 rounded-full font-medium" style="background: var(--neutral-100); color: var(--text-secondary);">Workspace access only</span>
         </div>
         <div id="members-list">
-            {% for member in members_data %}
-                {% include "members/partials/member_row.html" %}
+            {% for member in regular_members %}
+            {% include "members/partials/member_row.html" %}
             {% empty %}
-            <div class="px-6 py-8 text-center">
-                <p class="text-sm" style="color: var(--text-tertiary);">No team members yet.</p>
+            <div class="px-6 py-6 text-center">
+                <p class="text-sm" style="color: var(--text-tertiary);">No members yet. Invite someone to get started.</p>
             </div>
             {% endfor %}
         </div>
@@ -33,8 +53,8 @@
     <!-- Pending Invitations -->
     {% if is_admin %}
     <div style="background: var(--surface-0); border: 1px solid var(--border); border-radius: var(--radius-xl); overflow: hidden;">
-        <div class="px-6 py-4" style="border-bottom: 1px solid var(--border);">
-            <h3 class="text-sm font-semibold" style="color: var(--text-primary);">Pending Invitations</h3>
+        <div class="px-6 py-3" style="border-bottom: 1px solid var(--border);">
+            <h3 class="text-xs font-semibold uppercase tracking-wider" style="color: var(--text-tertiary);">Pending Invitations</h3>
         </div>
         <div id="invitations-list">
             {% for invite in pending_invites %}

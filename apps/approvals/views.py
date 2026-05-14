@@ -1,19 +1,22 @@
 """Views for the Approval Workflow (F-2.2)."""
 
 import json
+import zoneinfo
+from datetime import datetime
 
 from django.contrib.auth.decorators import login_required
-from django.http import HttpResponse, JsonResponse
+from django.http import HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
+from django.utils import timezone
 from django.views.decorators.http import require_GET, require_POST, require_http_methods
 
-from apps.composer.models import Post, PostVersion
+from apps.composer.models import Post
 from apps.members.decorators import require_permission, require_workspace_role
 from apps.workspaces.models import Workspace
 
 from . import comments as comment_service
 from . import services
-from .models import PostApprovalStage, PostComment
+from .models import PostComment
 
 
 def _get_workspace(request, workspace_id):
@@ -38,95 +41,49 @@ def _get_workspace(request, workspace_id):
 @require_permission("approve_posts")
 @require_GET
 def approval_queue(request, workspace_id):
-    """Workspace-level approval queue showing pending posts."""
+    """Workspace-level approval queue showing posts by status."""
     workspace = _get_workspace(request, workspace_id)
 
-    status_filter = request.GET.get("status", "all")
-    base_filter = {"platform_posts__status__in": ["pending_review", "pending_client"]}
-    posts = (
-        Post.objects.for_workspace(workspace.id)
-        .filter(**base_filter)
-        .distinct()
-        .select_related("author")
-        .prefetch_related("platform_posts__social_account", "media_attachments__media_asset", "approval_stages__assigned_to")
-        .order_by("scheduled_at", "-created_at")
-    )
-
-    if status_filter == "pending_review":
-        posts = posts.filter(platform_posts__status="pending_review").distinct()
-    elif status_filter == "pending_client":
-        posts = posts.filter(platform_posts__status="pending_client").distinct()
-    elif status_filter == "my_stage":
-        posts = posts.filter(
-            approval_stages__status="pending",
-            approval_stages__assigned_to=request.user,
-        ).distinct()
+    status_filter = request.GET.get("status", "pending_review")
 
     from apps.composer.models import PlatformPost
 
+    base_qs = (
+        Post.objects.for_workspace(workspace.id)
+        .select_related("author")
+        .prefetch_related("platform_posts__social_account", "media_attachments__media_asset")
+    )
+
+    status_map = {
+        "pending_review": {"platform_posts__status__in": ["pending_review", "pending_client"]},
+        "approved": {"platform_posts__status": "approved"},
+        "changes_requested": {"platform_posts__status": "changes_requested"},
+        "rejected": {"platform_posts__status": "rejected"},
+    }
+    filter_kwargs = status_map.get(status_filter, {"platform_posts__status__in": ["pending_review", "pending_client"]})
+    order = "scheduled_at" if status_filter in ("pending_review", "approved") else "-created_at"
+    posts = base_qs.filter(**filter_kwargs).distinct().order_by(order)
+
     pp_qs = PlatformPost.objects.filter(post__workspace=workspace)
-    pending_review_count = pp_qs.filter(status="pending_review").values("post_id").distinct().count()
-    pending_client_count = pp_qs.filter(status="pending_client").values("post_id").distinct().count()
-    my_stage_count = PostApprovalStage.objects.filter(
-        post__workspace=workspace,
-        status="pending",
-        assigned_to=request.user,
-    ).values("post_id").distinct().count()
+    pending_review_count = pp_qs.filter(status__in=["pending_review", "pending_client"]).values("post_id").distinct().count()
+    approved_count = pp_qs.filter(status="approved").values("post_id").distinct().count()
+    changes_requested_count = pp_qs.filter(status="changes_requested").values("post_id").distinct().count()
+    rejected_count = pp_qs.filter(status="rejected").values("post_id").distinct().count()
 
     context = {
         "workspace": workspace,
         "posts": posts,
         "status_filter": status_filter,
         "pending_review_count": pending_review_count,
-        "pending_client_count": pending_client_count,
-        "my_stage_count": my_stage_count,
+        "approved_count": approved_count,
+        "changes_requested_count": changes_requested_count,
+        "rejected_count": rejected_count,
     }
 
     if request.htmx:
         return render(request, "approvals/partials/post_list.html", context)
 
     return render(request, "approvals/queue.html", context)
-
-
-@login_required
-@require_GET
-def org_approval_queue(request):
-    """Cross-workspace org-level approval queue (read-only)."""
-    org = request.org
-    if not org:
-        from django.core.exceptions import PermissionDenied
-
-        raise PermissionDenied("No organization found.")
-
-    # Only org admins/owners
-    if not request.org_membership or request.org_membership.org_role not in ("owner", "admin"):
-        from django.core.exceptions import PermissionDenied
-
-        raise PermissionDenied("Insufficient role.")
-
-    # Get all workspaces the user's org owns
-    workspaces = Workspace.objects.filter(organization=org, is_archived=False)
-
-    workspace_posts = []
-    for ws in workspaces:
-        pending = (
-            Post.objects.for_workspace(ws.id)
-            .filter(platform_posts__status__in=["pending_review", "pending_client"])
-            .distinct()
-            .select_related("author")
-            .prefetch_related("platform_posts__social_account")
-            .order_by("scheduled_at", "-created_at")
-        )
-        if pending.exists():
-            workspace_posts.append({"workspace": ws, "posts": pending})
-
-    return render(
-        request,
-        "approvals/org_queue.html",
-        {
-            "workspace_posts": workspace_posts,
-        },
-    )
 
 
 # ---------------------------------------------------------------------------
@@ -239,44 +196,54 @@ def reject(request, workspace_id, post_id):
     )
 
 
+# ---------------------------------------------------------------------------
+# Schedule
+# ---------------------------------------------------------------------------
+
+
 @login_required
 @require_permission("approve_posts")
 @require_POST
-def bulk_action(request, workspace_id):
-    """Bulk approve or reject posts."""
+def schedule_post(request, workspace_id, post_id):
+    """Schedule an approved post directly from the approval queue."""
     workspace = _get_workspace(request, workspace_id)
-    action = request.POST.get("action")
-    post_ids = request.POST.getlist("post_ids")
+    post = get_object_or_404(Post, id=post_id, workspace=workspace)
 
-    if not post_ids:
-        return HttpResponse("No posts selected.", status=400)
+    scheduled_date = request.POST.get("scheduled_date", "").strip()
+    scheduled_time = request.POST.get("scheduled_time", "").strip()
 
-    if action == "approve":
-        results = services.bulk_approve(post_ids, request.user, workspace)
-    elif action == "reject":
-        comment_text = request.POST.get("comment", "")
-        try:
-            results = services.bulk_reject(post_ids, request.user, workspace, comment_text)
-        except ValueError as e:
-            return HttpResponse(str(e), status=400)
-    else:
-        return HttpResponse("Invalid action.", status=400)
+    if not scheduled_date or not scheduled_time:
+        return HttpResponse("Date and time are required.", status=400)
 
-    success_count = sum(1 for _, success, _ in results if success)
+    try:
+        naive_dt = datetime.strptime(f"{scheduled_date} {scheduled_time}", "%Y-%m-%d %H:%M")
+    except ValueError:
+        return HttpResponse("Invalid date or time format.", status=400)
+
+    tz_name = getattr(workspace, "effective_timezone", None) or "UTC"
+    tz = zoneinfo.ZoneInfo(tz_name)
+    aware_dt = naive_dt.replace(tzinfo=tz)
+
+    if aware_dt <= timezone.now():
+        return HttpResponse("Scheduled time must be in the future.", status=400)
+
+    post.scheduled_at = aware_dt
+    post.save(update_fields=["scheduled_at", "updated_at"])
+
+    for pp in post.platform_posts.all():
+        if pp.status == "approved":
+            pp.scheduled_at = aware_dt
+            pp.status = "scheduled"
+            pp.save(update_fields=["status", "scheduled_at", "updated_at"])
 
     if request.htmx:
-        return HttpResponse(
-            status=204,
-            headers={
-                "HX-Trigger": json.dumps(
-                    {
-                        "bulkActionComplete": {"action": action, "count": success_count},
-                    }
-                )
-            },
+        return render(
+            request,
+            "approvals/partials/post_row.html",
+            {"post": post, "workspace": workspace},
         )
 
-    return JsonResponse({"results": [{"id": r[0], "success": r[1], "error": r[2]} for r in results]})
+    return HttpResponse(status=204)
 
 
 # ---------------------------------------------------------------------------
@@ -379,66 +346,3 @@ def delete_comment(request, workspace_id, post_id, comment_id):
     )
 
 
-# ---------------------------------------------------------------------------
-# Version Diff
-# ---------------------------------------------------------------------------
-
-
-@login_required
-@require_workspace_role("viewer")
-@require_GET
-def version_diff(request, workspace_id, post_id):
-    """Show diff between two post versions."""
-    workspace = _get_workspace(request, workspace_id)
-    post = get_object_or_404(Post, id=post_id, workspace=workspace)
-
-    versions = PostVersion.objects.filter(post=post).order_by("-version_number")
-
-    v1_num = request.GET.get("v1")
-    v2_num = request.GET.get("v2")
-
-    if v1_num and v2_num:
-        version_old = versions.filter(version_number=int(v1_num)).first()
-        version_new = versions.filter(version_number=int(v2_num)).first()
-    elif versions.count() >= 2:
-        version_new = versions[0]
-        version_old = versions[1]
-    else:
-        version_old = None
-        version_new = versions.first()
-
-    # Build diff data
-    diff_data = _build_diff(
-        version_old.snapshot if version_old else {},
-        version_new.snapshot if version_new else {},
-    )
-
-    context = {
-        "post": post,
-        "workspace": workspace,
-        "versions": versions,
-        "version_old": version_old,
-        "version_new": version_new,
-        "diff_data": diff_data,
-    }
-
-    if request.htmx:
-        return render(request, "approvals/partials/version_diff.html", context)
-
-    return render(request, "approvals/version_diff.html", context)
-
-
-def _build_diff(old_snapshot, new_snapshot):
-    """Build a structured diff between two version snapshots."""
-    diff = {
-        "caption_changed": old_snapshot.get("caption", "") != new_snapshot.get("caption", ""),
-        "caption_old": old_snapshot.get("caption", ""),
-        "caption_new": new_snapshot.get("caption", ""),
-        "media_changed": old_snapshot.get("media", []) != new_snapshot.get("media", []),
-        "media_old": old_snapshot.get("media", []),
-        "media_new": new_snapshot.get("media", []),
-        "platforms_changed": old_snapshot.get("platform_posts", []) != new_snapshot.get("platform_posts", []),
-        "platforms_old": old_snapshot.get("platform_posts", []),
-        "platforms_new": new_snapshot.get("platform_posts", []),
-    }
-    return diff

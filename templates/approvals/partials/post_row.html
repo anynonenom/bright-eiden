@@ -1,16 +1,7 @@
 {% load humanize %}
 <div id="post-row-{{ post.id }}" class="bg-white border border-stone-200 rounded-xl p-4 hover:shadow-md transition-all group"
-     x-data="{ expanded: false, showActions: false }">
+     x-data="{ expanded: false, showActions: false, showSchedule: false }">
     <div class="flex items-start gap-3">
-        <!-- Bulk select checkbox -->
-        <label class="flex items-center pt-1 cursor-pointer">
-            <input type="checkbox"
-                   :value="'{{ post.id }}'"
-                   x-model="selectedPosts"
-                   class="w-4 h-4 rounded border-stone-300 cursor-pointer"
-                   style="accent-color: var(--primary);">
-        </label>
-
         <!-- Post content -->
         <div class="flex-1 min-w-0">
             <div class="flex items-center gap-2 mb-1.5">
@@ -26,27 +17,6 @@
                 {% elif post.status == 'rejected' %}
                 <span class="inline-flex items-center px-2 py-0.5 text-[0.6875rem] font-semibold rounded-full bg-red-50 text-red-700">Rejected</span>
                 {% endif %}
-
-                <!-- Approval stages pipeline -->
-                {% with stages=post.approval_stages.all %}
-                {% if stages %}
-                <div class="flex items-center gap-1 flex-wrap">
-                    {% for stage in stages %}
-                    <span class="inline-flex items-center gap-1 px-2 py-0.5 text-[0.6875rem] font-semibold rounded-full
-                        {% if stage.status == 'approved' %}bg-emerald-50 text-emerald-700
-                        {% elif stage.status == 'changes_requested' %}bg-amber-50 text-amber-700
-                        {% elif post.current_approval_stage.id == stage.id %}bg-orange-50 text-orange-700
-                        {% else %}bg-stone-100 text-stone-400{% endif %}">
-                        {% if stage.status == 'approved' %}<svg class="w-2.5 h-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
-                        {% elif post.current_approval_stage.id == stage.id %}<svg class="w-2.5 h-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
-                        {% else %}<span class="w-2.5 h-2.5 flex items-center justify-center text-[8px]">{{ stage.order }}</span>{% endif %}
-                        {{ stage.name }}
-                    </span>
-                    {% if not forloop.last %}<span class="text-stone-300 text-xs">→</span>{% endif %}
-                    {% endfor %}
-                </div>
-                {% endif %}
-                {% endwith %}
 
                 <!-- Platform icons -->
                 <div class="flex gap-1">
@@ -97,11 +67,6 @@
                 </div>
                 {% endif %}
 
-                <!-- Version diff link -->
-                <a href="{% url 'approvals:version_diff' workspace_id=workspace.id post_id=post.id %}"
-                   class="text-[0.8125rem] font-medium hover:underline" style="color: var(--primary);">
-                    View Changes
-                </a>
             </div>
         </div>
 
@@ -127,9 +92,47 @@
                     class="px-3 py-1.5 text-[0.8125rem] font-semibold rounded-full border border-stone-200 text-stone-600 hover:bg-stone-50 transition-colors">
                 Review
             </button>
+            {% elif post.status == 'approved' %}
+            <!-- Schedule -->
+            <button @click="showSchedule = !showSchedule"
+                    class="px-3 py-1.5 text-[0.8125rem] font-semibold rounded-full border border-stone-200 text-stone-600 hover:bg-stone-50 transition-colors flex items-center gap-1.5">
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                Schedule
+            </button>
             {% endif %}
         </div>
     </div>
+
+    <!-- Inline schedule panel (approved posts) -->
+    {% if post.status == 'approved' %}
+    <div x-show="showSchedule" x-cloak x-collapse class="mt-3 pt-3 border-t border-stone-100">
+        <form hx-post="{% url 'approvals:schedule_post' workspace_id=workspace.id post_id=post.id %}"
+              hx-target="#post-row-{{ post.id }}"
+              hx-swap="outerHTML"
+              class="flex flex-wrap items-end gap-3">
+            <div>
+                <label class="block text-[0.75rem] font-medium text-stone-500 mb-1">Date</label>
+                <input type="date" name="scheduled_date" required
+                       class="px-3 py-1.5 text-sm border border-stone-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-300 focus:border-transparent">
+            </div>
+            <div>
+                <label class="block text-[0.75rem] font-medium text-stone-500 mb-1">Time</label>
+                <input type="time" name="scheduled_time" required
+                       class="px-3 py-1.5 text-sm border border-stone-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-300 focus:border-transparent">
+            </div>
+            <div class="flex gap-2">
+                <button type="submit"
+                        class="px-4 py-1.5 text-[0.8125rem] font-semibold rounded-full bg-emerald-500 hover:bg-emerald-600 text-white transition-colors">
+                    Confirm Schedule
+                </button>
+                <button type="button" @click="showSchedule = false"
+                        class="px-3 py-1.5 text-[0.8125rem] font-medium rounded-full text-stone-500 hover:bg-stone-100 transition-colors">
+                    Cancel
+                </button>
+            </div>
+        </form>
+    </div>
+    {% endif %}
 
     <!-- Review actions dropdown -->
     <div x-show="showActions" x-cloak x-collapse class="mt-3 pt-3 border-t border-stone-100">

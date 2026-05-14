@@ -1018,280 +1018,88 @@
                 </div>
                 <div class="mr-auto sm:hidden"></div>
 
-                <!-- Save Draft -->
+                <!-- Save -->
                 <button type="submit" name="action" value="save_draft"
-                        class="inline-flex items-center gap-1.5 px-2 sm:px-4 py-2 text-sm font-semibold text-stone-600 hover:text-stone-800 rounded-lg hover:bg-stone-100 transition-all duration-150 cursor-pointer flex-shrink-0">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4"/></svg>
-                    <span class="hidden sm:inline">Save Draft</span>
+                        class="inline-flex items-center gap-1.5 px-4 py-2 text-sm font-semibold text-stone-600 hover:text-stone-800 rounded-lg hover:bg-stone-100 transition-all duration-150 cursor-pointer flex-shrink-0">
+                    Save
                 </button>
 
+                <!-- Submit for Approval -->
                 {% if show_submit_button %}
-                <button type="button"
+                <button type="submit" name="action" value="submit_for_approval"
                         :disabled="selectedAccounts.length === 0"
                         :class="selectedAccounts.length === 0 && 'opacity-50 cursor-not-allowed'"
-                        @click="selectedAccounts.length > 0 && (showStageBuilder = true)"
-                        class="inline-flex items-center gap-1.5 px-2 sm:px-4 py-2 text-sm font-semibold text-orange-600 hover:text-orange-700 rounded-lg hover:bg-orange-50 transition-all duration-150 cursor-pointer flex-shrink-0">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                    <span class="hidden sm:inline">Submit for Approval</span>
-                    <span class="sm:hidden">For Approval</span>
+                        class="inline-flex items-center gap-1.5 px-4 py-2 text-sm font-semibold text-stone-700 rounded-lg border border-stone-300 hover:bg-stone-50 transition-all duration-150 cursor-pointer flex-shrink-0">
+                    Submit
                 </button>
-                <input type="hidden" name="stages_json" id="stages-json-input" value="">
+                <input type="hidden" name="stages_json" value="[]">
                 {% endif %}
 
                 {% if show_resubmit_button %}
                 <button type="submit" name="action" value="resubmit_for_approval"
                         :disabled="selectedAccounts.length === 0"
                         :class="selectedAccounts.length === 0 && 'opacity-50 cursor-not-allowed'"
-                        class="inline-flex items-center gap-1.5 px-2 sm:px-4 py-2 text-sm font-semibold text-orange-600 hover:text-orange-700 rounded-lg hover:bg-orange-50 transition-all duration-150 cursor-pointer flex-shrink-0">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182"/></svg>
-                    <span class="hidden sm:inline">Resubmit</span>
+                        class="inline-flex items-center gap-1.5 px-4 py-2 text-sm font-semibold text-stone-700 rounded-lg border border-stone-300 hover:bg-stone-50 transition-all duration-150 cursor-pointer flex-shrink-0">
+                    Resubmit
                 </button>
                 {% endif %}
 
-                <!-- Publish split-button -->
-                <div class="relative inline-flex flex-shrink-0" id="publish-anchor">
-                    <!-- Mode selector (left) -->
-                    <button type="button" id="publish-mode-btn"
+                <!-- Schedule -->
+                <div class="relative inline-flex flex-shrink-0" x-data="{ showSchedulePicker: false }" id="publish-anchor">
+                    <button type="button"
                             :disabled="selectedAccounts.length === 0"
                             :class="selectedAccounts.length === 0 && 'opacity-50 cursor-not-allowed'"
-                            class="inline-flex items-center gap-1.5 pl-2 sm:pl-3 pr-1.5 sm:pr-2 py-2 text-sm font-semibold text-orange-700 bg-orange-100 rounded-l-lg hover:bg-orange-200 border border-orange-200 border-r-0 transition-all duration-150 cursor-pointer">
-                        <svg id="publish-mode-icon" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                        <span id="publish-mode-label" class="hidden sm:inline">Next available</span>
-                        <svg class="w-3 h-3 opacity-60" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 9l-7 7-7-7"/></svg>
+                            @click="selectedAccounts.length > 0 && (showSchedulePicker = !showSchedulePicker)"
+                            class="inline-flex items-center gap-1.5 px-3 py-2 text-sm font-semibold text-stone-600 bg-stone-100 rounded-l-lg hover:bg-stone-200 border border-stone-200 border-r-0 transition-all duration-150 cursor-pointer">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                        <span class="hidden sm:inline" id="publish-mode-label">Set date and time</span>
                     </button>
-                    <!-- Action button (right) -->
-                    <button type="submit" id="publish-action-btn" name="action" value="add_to_queue"
+                    <button type="submit" id="publish-action-btn" name="action" value="schedule"
                             :disabled="selectedAccounts.length === 0"
                             :class="selectedAccounts.length === 0 && 'opacity-50 cursor-not-allowed'"
-                            class="inline-flex items-center gap-1.5 pl-3 sm:pl-4 pr-3 sm:pr-5 py-2 text-sm font-semibold text-white bg-orange-500 rounded-r-lg hover:bg-orange-600 border border-orange-500 hover:border-orange-600 shadow-sm transition-all duration-150 cursor-pointer">
-                        <span id="publish-action-label">Add to Queue</span>
+                            class="inline-flex items-center gap-1.5 px-4 py-2 text-sm font-semibold text-white rounded-r-lg border border-stone-900 shadow-sm transition-all duration-150 cursor-pointer"
+                            style="background: var(--primary);">
+                        Schedule Post
                     </button>
 
-                    <!-- Mode popover - positioned above -->
-                    <div id="publish-popover" class="hidden absolute bottom-full right-0 mb-2 w-72 max-w-[calc(100vw-2rem)] bg-white rounded-xl shadow-xl border border-stone-200/80" style="z-index: 50;">
-                            <!-- Main menu -->
-                            <div id="publish-menu" class="p-1.5">
-                                <!-- Next Available -->
-                                <button type="button" data-mode="add_to_queue" data-label="Next available" data-action-label="Add to Queue"
-                                        data-icon="clock"
-                                        class="publish-mode-option w-full flex items-start gap-3 px-3 py-2.5 rounded-lg hover:bg-stone-50 transition-colors text-left cursor-pointer">
-                                    <div class="w-8 h-8 rounded-lg bg-blue-50 flex items-center justify-center flex-shrink-0 mt-0.5">
-                                        <svg class="w-4 h-4 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                                    </div>
-                                    <div>
-                                        <div class="text-sm font-semibold text-stone-800">Next Available</div>
-                                        <div class="text-xs text-stone-400 mt-0.5">Place in next available slot</div>
-                                    </div>
-                                </button>
-
-                                <!-- Prioritise -->
-                                <button type="button" data-mode="add_to_queue_priority" data-label="Prioritise" data-action-label="Prioritise"
-                                        data-icon="priority"
-                                        class="publish-mode-option w-full flex items-start gap-3 px-3 py-2.5 rounded-lg hover:bg-stone-50 transition-colors text-left cursor-pointer">
-                                    <div class="w-8 h-8 rounded-lg bg-amber-50 flex items-center justify-center flex-shrink-0 mt-0.5">
-                                        <svg class="w-4 h-4 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4h13M3 8h9m-9 4h6m4 0l4-4m0 0l4 4m-4-4v12"/></svg>
-                                    </div>
-                                    <div>
-                                        <div class="text-sm font-semibold text-stone-800">Prioritise</div>
-                                        <div class="text-xs text-stone-400 mt-0.5">Add to top of queue</div>
-                                    </div>
-                                </button>
-
-                                <!-- Now -->
-                                <button type="button" data-mode="publish_now" data-label="Now" data-action-label="Publish Now"
-                                        data-icon="play"
-                                        class="publish-mode-option w-full flex items-start gap-3 px-3 py-2.5 rounded-lg hover:bg-stone-50 transition-colors text-left cursor-pointer">
-                                    <div class="w-8 h-8 rounded-lg bg-emerald-50 flex items-center justify-center flex-shrink-0 mt-0.5">
-                                        <svg class="w-4 h-4 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3l14 9-14 9V3z"/></svg>
-                                    </div>
-                                    <div>
-                                        <div class="text-sm font-semibold text-stone-800">Now</div>
-                                        <div class="text-xs text-stone-400 mt-0.5">Publish immediately</div>
-                                    </div>
-                                </button>
-
-                                <!-- Set Date and Time -->
-                                <button type="button" data-mode="schedule" data-label="Schedule" data-action-label="Schedule Post"
-                                        data-icon="calendar"
-                                        class="publish-mode-option w-full flex items-start gap-3 px-3 py-2.5 rounded-lg hover:bg-stone-50 transition-colors text-left cursor-pointer"
-                                        id="publish-schedule-btn">
-                                    <div class="w-8 h-8 rounded-lg bg-violet-50 flex items-center justify-center flex-shrink-0 mt-0.5">
-                                        <svg class="w-4 h-4 text-violet-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
-                                    </div>
-                                    <div>
-                                        <div class="text-sm font-semibold text-stone-800">Set Date and Time</div>
-                                        <div class="text-xs text-stone-400 mt-0.5">Choose a specific time</div>
-                                    </div>
-                                </button>
+                    <!-- Date/time picker popover -->
+                    <div x-show="showSchedulePicker" x-cloak @click.outside="showSchedulePicker = false"
+                         class="absolute bottom-full right-0 mb-2 w-64 bg-white rounded-xl shadow-xl border border-stone-200 p-4" style="z-index: 50;">
+                        <p class="text-sm font-semibold text-stone-800 mb-3">Schedule Post</p>
+                        <div class="space-y-3">
+                            <div>
+                                <label class="block text-xs font-medium text-stone-500 mb-1">Date</label>
+                                <input type="date" name="scheduled_date" class="form-datetime w-full" value="{{ form.scheduled_date.value|default:'' }}">
                             </div>
-
-                            <!-- Schedule sub-view -->
-                            <div id="publish-schedule-view" class="hidden p-4">
-                                <div class="flex items-center gap-2 mb-4">
-                                    <button type="button" id="publish-schedule-back" class="w-6 h-6 rounded-md hover:bg-stone-100 flex items-center justify-center transition-colors">
-                                        <svg class="w-4 h-4 text-stone-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
-                                    </button>
-                                    <span class="text-sm font-semibold text-stone-800">Schedule Post</span>
-                                </div>
-
-                                <div class="space-y-3">
-                                    <div>
-                                        <label class="block text-xs font-medium text-stone-500 mb-1">Date</label>
-                                        <input type="date" name="scheduled_date" class="form-datetime" value="{{ form.scheduled_date.value|default:'' }}">
-                                    </div>
-                                    <div>
-                                        <label class="block text-xs font-medium text-stone-500 mb-1">Time</label>
-                                        <input type="time" name="scheduled_time" class="form-datetime" value="{{ form.scheduled_time.value|default:'' }}">
-                                    </div>
-                                    <div class="text-xs text-stone-400 flex items-center gap-1">
-                                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                                        Timezone: {{ workspace.effective_timezone }}
-                                    </div>
-                                </div>
-
-                                <div id="schedule-error" class="hidden text-xs text-red-500 mt-1"></div>
-
-                                <button type="button" id="publish-schedule-confirm" class="mt-4 w-full py-2 text-sm font-semibold text-white bg-orange-500 rounded-lg hover:bg-orange-600 transition-colors cursor-pointer">
-                                    Set Schedule
-                                </button>
+                            <div>
+                                <label class="block text-xs font-medium text-stone-500 mb-1">Time</label>
+                                <input type="time" name="scheduled_time" class="form-datetime w-full" value="{{ form.scheduled_time.value|default:'' }}">
                             </div>
+                            <p class="text-xs text-stone-400">{{ workspace.effective_timezone }}</p>
+                        </div>
+                        <div id="schedule-error" class="hidden text-xs text-red-500 mt-1"></div>
                     </div>
                 </div>
-
-                <!-- Hidden fields for queue actions -->
-                <input type="hidden" name="queue_id" value="">
-                <input type="hidden" name="queue_priority" value="">
             </div>
         </form>
 
-        {% if post and post_approval_stages %}
-        <!-- Approval Stage Pipeline -->
-        <div class="mt-4 border-t border-stone-200 pt-4">
-            <p class="text-xs font-semibold uppercase tracking-wider text-stone-400 mb-3">Approval Stages</p>
-            <div class="space-y-2">
-                {% for stage in post_approval_stages %}
-                <div class="flex items-center gap-3">
-                    <!-- Step indicator -->
-                    <div class="flex-shrink-0 w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-bold
-                        {% if stage.status == 'approved' %}bg-emerald-100 text-emerald-700
-                        {% elif stage.status == 'changes_requested' %}bg-amber-100 text-amber-700
-                        {% else %}
-                            {% if post.current_approval_stage.id == stage.id %}bg-orange-100 text-orange-700
-                            {% else %}bg-stone-100 text-stone-400{% endif %}
-                        {% endif %}">
-                        {% if stage.status == 'approved' %}
-                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
-                        {% elif stage.status == 'changes_requested' %}
-                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v4m0 4h.01"/></svg>
-                        {% else %}
-                        {{ stage.order }}
-                        {% endif %}
-                    </div>
-                    <!-- Stage info -->
-                    <div class="flex-1 min-w-0">
-                        <div class="flex items-center gap-2">
-                            <span class="text-sm font-medium text-stone-700 truncate">{{ stage.name }}</span>
-                            {% if stage.status == 'approved' %}
-                            <span class="text-[10px] font-semibold px-1.5 py-0.5 rounded-full bg-emerald-50 text-emerald-700">Approved</span>
-                            {% elif stage.status == 'changes_requested' %}
-                            <span class="text-[10px] font-semibold px-1.5 py-0.5 rounded-full bg-amber-50 text-amber-700">Changes</span>
-                            {% elif post.current_approval_stage.id == stage.id %}
-                            <span class="text-[10px] font-semibold px-1.5 py-0.5 rounded-full bg-orange-50 text-orange-700">In Review</span>
-                            {% else %}
-                            <span class="text-[10px] font-semibold px-1.5 py-0.5 rounded-full bg-stone-100 text-stone-400">Waiting</span>
-                            {% endif %}
-                        </div>
-                        {% if stage.assigned_to %}
-                        <p class="text-xs text-stone-400 truncate">{{ stage.assigned_to.get_full_name|default:stage.assigned_to.email }}</p>
-                        {% endif %}
-                    </div>
-                </div>
-                {% if not forloop.last %}
-                <div class="ml-3 w-px h-3 bg-stone-200"></div>
-                {% endif %}
-                {% endfor %}
-            </div>
-        </div>
-        {% endif %}
-
         {% if post and approval_history %}
-        <!-- Approval History & Comments -->
+        <!-- Status banner -->
         <div class="mt-4 border-t border-stone-200 pt-4">
-            <!-- Status banner -->
             {% if post.status == 'pending_review' %}
-            <div class="flex items-center gap-2 px-3 py-2 rounded-lg bg-orange-50 border border-orange-100 mb-3">
+            <div class="flex items-center gap-2 px-3 py-2 rounded-lg bg-orange-50 border border-orange-100">
                 <svg class="w-4 h-4 text-orange-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                <span class="text-sm font-medium text-orange-700">Awaiting internal review</span>
+                <span class="text-sm font-medium text-orange-700">Awaiting review</span>
             </div>
             {% elif post.status == 'changes_requested' %}
-            <div class="flex items-center gap-2 px-3 py-2 rounded-lg bg-orange-50 border border-orange-100 mb-3">
+            <div class="flex items-center gap-2 px-3 py-2 rounded-lg bg-orange-50 border border-orange-100">
                 <svg class="w-4 h-4 text-orange-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931z"/></svg>
-                <span class="text-sm font-medium text-orange-700">Changes requested - edit and resubmit</span>
+                <span class="text-sm font-medium text-orange-700">Changes requested — edit and resubmit</span>
             </div>
             {% elif post.status == 'rejected' %}
-            <div class="flex items-center gap-2 px-3 py-2 rounded-lg bg-red-50 border border-red-100 mb-3">
+            <div class="flex items-center gap-2 px-3 py-2 rounded-lg bg-red-50 border border-red-100">
                 <svg class="w-4 h-4 text-red-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
-                <span class="text-sm font-medium text-red-700">Rejected - edit and resubmit or delete</span>
-            </div>
-            {% endif %}
-
-            <!-- Inline approval actions for reviewers -->
-            {% if can_approve and post.status == 'pending_review' %}
-            <div class="flex gap-2 mb-3" x-data="{ showReviewComment: false }">
-                <form method="post" action="{% url 'approvals:approve' workspace_id=workspace.id post_id=post.id %}" class="inline">
-                    {% csrf_token %}
-                    <button type="submit" class="px-3 py-1.5 text-xs font-semibold rounded-full bg-emerald-500 hover:bg-emerald-600 text-white transition-colors">Approve</button>
-                </form>
-                <button @click="showReviewComment = !showReviewComment" class="px-3 py-1.5 text-xs font-semibold rounded-full border border-stone-200 text-stone-600 hover:bg-stone-50 transition-colors">Request Changes</button>
-                <div x-show="showReviewComment" x-cloak class="absolute mt-9 z-10 bg-white rounded-lg shadow-lg border border-stone-200 p-3 w-80">
-                    <form method="post" action="{% url 'approvals:request_changes' workspace_id=workspace.id post_id=post.id %}">
-                        {% csrf_token %}
-                        <textarea name="comment" rows="2" required class="w-full px-2 py-1.5 text-sm border border-stone-200 rounded-lg resize-none" placeholder="What needs to change?"></textarea>
-                        <button type="submit" class="mt-2 px-3 py-1 text-xs font-semibold rounded-full bg-amber-500 text-white">Submit</button>
-                    </form>
-                </div>
-            </div>
-            {% endif %}
-
-            <!-- Approval timeline (collapsible) -->
-            <div x-data="{ open: false }" class="mb-4">
-                <button type="button" @click="open = !open"
-                        class="flex items-center justify-between w-full group">
-                    <h4 class="text-xs font-semibold text-stone-500 uppercase tracking-wider">
-                        Approval History
-                        <span class="ml-1.5 font-normal normal-case text-stone-400">({{ approval_history|length }})</span>
-                    </h4>
-                    <svg class="w-3.5 h-3.5 text-stone-400 transition-transform duration-200" :class="open && 'rotate-180'"
-                         fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/>
-                    </svg>
-                </button>
-                <div x-show="open" x-collapse x-cloak class="mt-2 space-y-2">
-                    {% for action in approval_history %}
-                    <div class="flex items-start gap-2">
-                        <div class="w-1.5 h-1.5 rounded-full mt-1.5 flex-shrink-0 {% if action.action == 'approved' %}bg-emerald-400{% elif action.action == 'rejected' %}bg-red-400{% elif action.action == 'changes_requested' %}bg-amber-400{% else %}bg-stone-300{% endif %}"></div>
-                        <div>
-                            <p class="text-xs text-stone-600"><span class="font-semibold">{{ action.user.display_name }}</span> {{ action.get_action_display|lower }}</p>
-                            {% if action.comment %}<p class="text-xs text-stone-400 mt-0.5">"{{ action.comment|truncatechars:80 }}"</p>{% endif %}
-                            <p class="text-[10px] text-stone-400">{{ action.created_at|timesince }} ago</p>
-                        </div>
-                    </div>
-                    {% endfor %}
-                </div>
-            </div>
-
-            <!-- Comments -->
-            {% if post_comments or post %}
-            <h4 class="text-xs font-semibold text-stone-500 uppercase tracking-wider mb-2">Comments</h4>
-            <div class="flex flex-col rounded-xl border border-stone-200 overflow-hidden bg-white">
-                <!-- Scrollable list -->
-                <div id="composer-comment-scroll" class="overflow-y-auto p-3 space-y-0" style="max-height: 300px;">
-                    {% include "approvals/partials/comment_list.html" with comments=post_comments post=post %}
-                </div>
-                <!-- Sticky input at bottom -->
-                <div class="border-t border-stone-100 p-3 bg-stone-50">
-                    {% include "approvals/partials/comment_form.html" with post=post workspace=workspace %}
-                </div>
+                <span class="text-sm font-medium text-red-700">Rejected</span>
             </div>
             {% endif %}
         </div>
@@ -1307,115 +1115,6 @@
              hx-include="#composer-form"
              hx-swap="innerHTML"
              style="display:none;"></div>
-    </div>
-
-    <!-- ════════════════════════════════════════════════════════════
-         RIGHT PANEL - Live Preview
-         ════════════════════════════════════════════════════════════ -->
-    <!-- ════════════════════════════════════════════════════════════
-         STAGE BUILDER MODAL
-         ════════════════════════════════════════════════════════════ -->
-    <div x-show="showStageBuilder" x-cloak
-         @keydown.escape.window="showStageBuilder = false"
-         class="fixed inset-0 flex items-center justify-center z-50 px-4"
-         style="background: rgba(0,0,0,0.5);">
-        <div @click.stop class="bg-white rounded-2xl shadow-2xl w-full max-w-md flex flex-col" style="max-height: 80vh;">
-
-            <!-- Header -->
-            <div class="flex items-center justify-between px-5 py-4 border-b border-stone-100">
-                <div class="flex items-center gap-2.5">
-                    <div class="w-8 h-8 rounded-lg flex items-center justify-center" style="background: var(--primary-50, #FFF7ED);">
-                        <svg class="w-4 h-4" style="color: var(--primary);" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                    </div>
-                    <div>
-                        <h2 class="text-sm font-semibold text-stone-900">Approval Stages</h2>
-                        <p class="text-xs text-stone-400">Each stage must be approved before the next begins</p>
-                    </div>
-                </div>
-                <button type="button" @click="showStageBuilder = false"
-                        class="w-7 h-7 flex items-center justify-center rounded-lg hover:bg-stone-100 text-stone-400 transition-colors">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
-                </button>
-            </div>
-
-            <!-- Stages list -->
-            <div class="overflow-y-auto px-5 py-4" style="flex: 1;">
-                <template x-for="(stage, idx) in stageBuilderStages" :key="idx">
-                    <div class="mb-3">
-                        <!-- Stage card -->
-                        <div class="rounded-xl border-2 border-stone-200 bg-white overflow-hidden">
-                            <!-- Card header with step number -->
-                            <div class="flex items-center justify-between px-4 py-2.5 border-b border-stone-100" style="background: #F8F7F4;">
-                                <div class="flex items-center gap-2">
-                                    <span class="w-5 h-5 rounded-full text-[11px] font-bold text-white flex items-center justify-center" style="background: var(--primary);" x-text="idx + 1"></span>
-                                    <span class="text-xs font-semibold text-stone-500 uppercase tracking-wide">Stage <span x-text="idx + 1"></span></span>
-                                </div>
-                                <button type="button" @click="stageBuilderStages.splice(idx, 1)"
-                                        x-show="stageBuilderStages.length > 1"
-                                        class="text-xs text-stone-400 hover:text-red-500 transition-colors font-medium">
-                                    Remove
-                                </button>
-                            </div>
-                            <!-- Card body -->
-                            <div class="p-3 space-y-2">
-                                <input type="text"
-                                       x-model="stage.name"
-                                       placeholder="Stage name  (e.g. Design Review, Manager Sign-off…)"
-                                       class="w-full text-sm px-3 py-2 rounded-lg border border-stone-300 text-stone-800 placeholder-stone-400 focus:outline-none focus:border-orange-400 focus:ring-2 focus:ring-orange-100 bg-white">
-                                <select x-model="stage.assigned_to_id"
-                                        class="w-full text-sm px-3 py-2 rounded-lg border border-stone-300 text-stone-700 bg-white focus:outline-none focus:border-orange-400 focus:ring-2 focus:ring-orange-100 cursor-pointer">
-                                    <option value="">Assign to anyone with approval access</option>
-                                    {% for m in workspace_members %}
-                                    <option value="{{ m.user.id }}">{{ m.user.get_full_name|default:m.user.email }}</option>
-                                    {% endfor %}
-                                </select>
-                            </div>
-                        </div>
-                        <!-- Connector arrow -->
-                        <div x-show="idx < stageBuilderStages.length - 1" class="flex justify-center py-1">
-                            <svg class="w-4 h-4 text-stone-300" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/></svg>
-                        </div>
-                    </div>
-                </template>
-
-                <!-- Add stage button -->
-                <button type="button"
-                        @click="stageBuilderStages.push({ name: '', assigned_to_id: '' })"
-                        class="w-full flex items-center justify-center gap-2 py-3 rounded-xl text-sm font-medium text-stone-500 hover:text-stone-700 transition-colors"
-                        style="border: 2px dashed #D6D3D1;">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/></svg>
-                    Add another stage
-                </button>
-            </div>
-
-            <!-- Footer -->
-            <div class="flex items-center justify-between px-5 py-4 border-t border-stone-100 bg-stone-50 rounded-b-2xl">
-                <button type="button" @click="showStageBuilder = false"
-                        class="px-4 py-2 text-sm font-medium text-stone-500 hover:text-stone-700 hover:bg-stone-100 rounded-lg transition-colors">
-                    Cancel
-                </button>
-                <button type="button"
-                        @click="
-                            const validStages = stageBuilderStages.filter(s => s.name.trim());
-                            if (!validStages.length) { alert('Please name at least one stage.'); return; }
-                            const payload = validStages.map(s => ({ name: s.name.trim(), assigned_to_id: s.assigned_to_id || null }));
-                            document.getElementById('stages-json-input').value = JSON.stringify(payload);
-                            showStageBuilder = false;
-                            $nextTick(() => {
-                                const btn = document.createElement('button');
-                                btn.type = 'submit'; btn.name = 'action'; btn.value = 'submit_for_approval';
-                                btn.style.display = 'none';
-                                document.getElementById('composer-form').appendChild(btn);
-                                btn.click();
-                                btn.remove();
-                            });
-                        "
-                        class="px-5 py-2 text-sm font-semibold text-white rounded-lg transition-colors"
-                        style="background: var(--primary);">
-                    Submit for Approval
-                </button>
-            </div>
-        </div>
     </div>
 
     <!-- Backdrop for mobile drawer -->
@@ -1626,8 +1325,6 @@ function composerApp() {
         thumbnailPickerAccId: null,
         thumbnailUploading: {},
         showPreviewPanel: false,
-        showStageBuilder: false,
-        stageBuilderStages: [{ name: '', assigned_to_id: '', assigned_to_name: '' }],
         showSaveToast: false,
         formError: '',
         lastSaved: null,
@@ -1832,7 +1529,7 @@ function composerApp() {
             const xhr = event.detail.xhr;
             if (event.detail.successful) {
                 const action = document.getElementById('publish-action-btn')?.value;
-                if (action === 'schedule' || action === 'publish_now' || action === 'add_to_queue' || action === 'add_to_queue_priority') {
+                if (action === 'schedule') {
                     // Redirect to calendar after scheduling/publishing/queuing
                     window.location.href = '{% url "calendar:calendar" workspace_id=workspace.id %}';
                     return;
@@ -2050,116 +1747,22 @@ async function removePendingMedia(assetId, url, btn) {
     }
 }
 
-/* ── Publish Split-Button (vanilla JS) ────────────────────────── */
-(function() {
-    const anchor = document.getElementById('publish-anchor');
-    const modeBtn = document.getElementById('publish-mode-btn');
-    const modeLabel = document.getElementById('publish-mode-label');
-    const modeIcon = document.getElementById('publish-mode-icon');
-    const actionBtn = document.getElementById('publish-action-btn');
-    const actionLabel = document.getElementById('publish-action-label');
-    const popover = document.getElementById('publish-popover');
-    const menu = document.getElementById('publish-menu');
-    const scheduleView = document.getElementById('publish-schedule-view');
-    const backBtn = document.getElementById('publish-schedule-back');
-    const scheduleConfirm = document.getElementById('publish-schedule-confirm');
-    if (!modeBtn || !popover) return;
-
-    // Icon SVG paths by key
-    const icons = {
-        play: '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3l14 9-14 9V3z"/>',
-        clock: '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z"/>',
-        priority: '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4h13M3 8h9m-9 4h6m4 0l4-4m0 0l4 4m-4-4v12"/>',
-        calendar: '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>',
-    };
-
-    function showPopover() { popover.classList.remove('hidden'); }
-    function hidePopover() { popover.classList.add('hidden'); showMenu(); }
-    function showMenu() { menu.classList.remove('hidden'); scheduleView.classList.add('hidden'); }
-    function showSchedule() { menu.classList.add('hidden'); scheduleView.classList.remove('hidden'); }
-
-    function setMode(mode, label, actionLabelText, iconKey) {
-        modeLabel.textContent = label;
-        actionLabel.textContent = actionLabelText;
-        actionBtn.value = mode;
-        if (icons[iconKey]) {
-            modeIcon.innerHTML = icons[iconKey];
-        }
+/* ── Schedule button: validate before submit ─────────────────── */
+document.getElementById('publish-action-btn')?.addEventListener('click', function(e) {
+    var dateVal = document.querySelector('input[name="scheduled_date"]')?.value;
+    var timeVal = document.querySelector('input[name="scheduled_time"]')?.value;
+    var errEl = document.getElementById('schedule-error');
+    if (!dateVal || !timeVal) {
+        e.preventDefault();
+        if (errEl) { errEl.textContent = 'Please select a date and time.'; errEl.classList.remove('hidden'); }
+        return;
     }
-
-    // Toggle popover on mode button click
-    modeBtn.addEventListener('click', function(e) {
-        e.stopPropagation();
-        popover.classList.contains('hidden') ? showPopover() : hidePopover();
-    });
-
-    // Mode option clicks
-    document.querySelectorAll('.publish-mode-option').forEach(function(opt) {
-        opt.addEventListener('click', function(e) {
-            e.stopPropagation();
-            var mode = opt.dataset.mode;
-            // Schedule option shows the sub-view instead of immediately selecting
-            if (mode === 'schedule') {
-                showSchedule();
-                return;
-            }
-            setMode(mode, opt.dataset.label, opt.dataset.actionLabel, opt.dataset.icon);
-            hidePopover();
-        });
-    });
-
-    // Schedule sub-view: back button
-    if (backBtn) {
-        backBtn.addEventListener('click', function(e) {
-            e.stopPropagation();
-            showMenu();
-        });
+    if (new Date(dateVal + 'T' + timeVal) <= new Date()) {
+        e.preventDefault();
+        if (errEl) { errEl.textContent = 'Scheduled time must be in the future.'; errEl.classList.remove('hidden'); }
+        return;
     }
-
-    // Schedule sub-view: confirm button sets mode to schedule and closes
-    if (scheduleConfirm) {
-        scheduleConfirm.addEventListener('click', function(e) {
-            e.stopPropagation();
-            var errEl = document.getElementById('schedule-error');
-            var dateVal = document.querySelector('input[name="scheduled_date"]').value;
-            var timeVal = document.querySelector('input[name="scheduled_time"]').value;
-            if (!dateVal || !timeVal) {
-                if (errEl) { errEl.textContent = 'Please select both a date and time.'; errEl.classList.remove('hidden'); }
-                return;
-            }
-            // Check if the selected datetime is in the past
-            var selected = new Date(dateVal + 'T' + timeVal);
-            if (selected <= new Date()) {
-                if (errEl) { errEl.textContent = 'Scheduled time must be in the future.'; errEl.classList.remove('hidden'); }
-                return;
-            }
-            if (errEl) { errEl.classList.add('hidden'); }
-            setMode('schedule', 'Set date and time', 'Schedule Post', 'calendar');
-            hidePopover();
-        });
-    }
-
-    // Close on outside click - use mousedown to avoid race with button click
-    // Exclude Flatpickr calendar dropdowns (appended to <body>)
-    document.addEventListener('mousedown', function(e) {
-        if (!popover.classList.contains('hidden') && !anchor.contains(e.target) && !e.target.closest('.flatpickr-calendar')) {
-            hidePopover();
-        }
-    });
-
-    document.addEventListener('keydown', function(e) {
-        if (e.key === 'Escape' && !popover.classList.contains('hidden')) {
-            hidePopover();
-        }
-    });
-
-    // If the composer was opened with a prefilled scheduled date/time
-    // (e.g. from the calendar "+" CTA), auto-switch to Schedule mode.
-    var schedDateInput = document.querySelector('input[name="scheduled_date"]');
-    var schedTimeInput = document.querySelector('input[name="scheduled_time"]');
-    if (schedDateInput && schedDateInput.value && schedTimeInput && schedTimeInput.value) {
-        setMode('schedule', 'Set date and time', 'Schedule Post', 'calendar');
-    }
-})();
+    if (errEl) errEl.classList.add('hidden');
+});
 </script>
 {% endblock %}

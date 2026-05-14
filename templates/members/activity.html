@@ -1,0 +1,158 @@
+{% extends "layouts/settings.html" %}
+{% load humanize %}
+{% block title %}{{ member.display_name }} — Activity{% endblock %}
+{% block content %}
+
+<!-- Header -->
+<div class="flex items-center gap-4 mb-6">
+    <a href="{% url 'members:list' %}"
+       class="flex items-center gap-1.5 text-sm font-medium transition-colors"
+       style="color: var(--text-tertiary);">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/></svg>
+        Team
+    </a>
+    <span style="color: var(--border);">/</span>
+    <span class="text-sm font-medium" style="color: var(--text-primary);">{{ member.display_name }}</span>
+</div>
+
+<div class="flex items-center gap-4 mb-6">
+    <div class="w-12 h-12 rounded-full flex items-center justify-center text-lg font-bold flex-shrink-0"
+         style="background: var(--neutral-200); color: var(--text-secondary);">
+        {{ member.display_name|first|upper }}
+    </div>
+    <div>
+        <h2 class="text-xl font-semibold" style="color: var(--text-primary);">{{ member.display_name }}</h2>
+        <p class="text-sm" style="color: var(--text-tertiary);">{{ member.email }}</p>
+    </div>
+    <div class="ml-auto flex items-center gap-2">
+        {% if membership.org_role == "owner" %}
+        <span class="text-xs font-medium px-2.5 py-1 rounded-full" style="background: #FEF3C7; color: #92400E;">Owner</span>
+        {% elif membership.org_role == "admin" %}
+        <span class="text-xs font-medium px-2.5 py-1 rounded-full" style="background: #DBEAFE; color: #1E40AF;">Admin</span>
+        {% else %}
+        <span class="text-xs font-medium px-2.5 py-1 rounded-full" style="background: var(--neutral-100); color: var(--text-secondary);">Member</span>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Workspace access -->
+{% if ws_memberships %}
+<div class="mb-6 p-4 rounded-xl" style="background: var(--surface-0); border: 1px solid var(--border);">
+    <p class="text-xs font-semibold uppercase tracking-wider mb-3" style="color: var(--text-tertiary);">Workspace Access</p>
+    <div class="flex flex-wrap gap-2">
+        {% for wm in ws_memberships %}
+        <span class="inline-flex items-center gap-1.5 text-sm px-3 py-1 rounded-full" style="background: var(--neutral-100); color: var(--text-secondary);">
+            {% if wm.workspace.icon %}
+            <img src="{{ wm.workspace.icon.url }}" alt="" class="w-4 h-4 rounded-full object-cover">
+            {% else %}
+            <span class="w-4 h-4 rounded-full flex items-center justify-center text-[10px] font-semibold" style="background: var(--neutral-200);">{{ wm.workspace.name|first|upper }}</span>
+            {% endif %}
+            {{ wm.workspace.name }}
+            <span class="text-xs opacity-60">· {{ wm.get_workspace_role_display }}</span>
+        </span>
+        {% endfor %}
+    </div>
+</div>
+{% endif %}
+
+<!-- Summary stats -->
+<div class="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">
+    <div class="p-4 rounded-xl text-center" style="background: var(--surface-0); border: 1px solid var(--border);">
+        <p class="text-2xl font-bold" style="color: var(--text-primary);">{{ total_posts }}</p>
+        <p class="text-xs mt-1" style="color: var(--text-tertiary);">Posts Created</p>
+    </div>
+    <div class="p-4 rounded-xl text-center" style="background: var(--surface-0); border: 1px solid var(--border);">
+        <p class="text-2xl font-bold text-orange-600">{{ pending_posts }}</p>
+        <p class="text-xs mt-1" style="color: var(--text-tertiary);">Pending Review</p>
+    </div>
+    <div class="p-4 rounded-xl text-center" style="background: var(--surface-0); border: 1px solid var(--border);">
+        <p class="text-2xl font-bold text-emerald-600">{{ approved_posts }}</p>
+        <p class="text-xs mt-1" style="color: var(--text-tertiary);">Approved</p>
+    </div>
+    <div class="p-4 rounded-xl text-center" style="background: var(--surface-0); border: 1px solid var(--border);">
+        <p class="text-2xl font-bold text-blue-600">{{ scheduled_posts }}</p>
+        <p class="text-xs mt-1" style="color: var(--text-tertiary);">Scheduled</p>
+    </div>
+</div>
+
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+
+    <!-- Recent posts -->
+    <div style="background: var(--surface-0); border: 1px solid var(--border); border-radius: var(--radius-xl);">
+        <div class="px-5 py-4" style="border-bottom: 1px solid var(--border);">
+            <h3 class="text-sm font-semibold" style="color: var(--text-primary);">Recent Posts</h3>
+        </div>
+        <div class="divide-y" style="border-color: var(--border);">
+            {% for post in recent_posts %}
+            <div class="px-5 py-3">
+                <div class="flex items-start justify-between gap-3">
+                    <div class="flex-1 min-w-0">
+                        <p class="text-sm truncate" style="color: var(--text-primary);">
+                            {{ post.caption_snippet|default:"(no caption)" }}
+                        </p>
+                        <div class="flex items-center gap-2 mt-1">
+                            <span class="text-xs" style="color: var(--text-tertiary);">{{ post.workspace.name }}</span>
+                            <span style="color: var(--border);">·</span>
+                            <span class="text-xs" style="color: var(--text-tertiary);">{{ post.created_at|timesince }} ago</span>
+                        </div>
+                    </div>
+                    <span class="flex-shrink-0 text-xs font-medium px-2 py-0.5 rounded-full
+                        {% if post.status == 'approved' %}bg-emerald-50 text-emerald-700
+                        {% elif post.status == 'pending_review' %}bg-orange-50 text-orange-700
+                        {% elif post.status == 'scheduled' %}bg-blue-50 text-blue-700
+                        {% elif post.status == 'rejected' %}bg-red-50 text-red-700
+                        {% elif post.status == 'changes_requested' %}bg-amber-50 text-amber-700
+                        {% else %}bg-stone-100 text-stone-500{% endif %}">
+                        {{ post.get_status_display }}
+                    </span>
+                </div>
+            </div>
+            {% empty %}
+            <div class="px-5 py-8 text-center">
+                <p class="text-sm" style="color: var(--text-tertiary);">No posts yet.</p>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- Recent actions (approval history) -->
+    <div style="background: var(--surface-0); border: 1px solid var(--border); border-radius: var(--radius-xl);">
+        <div class="px-5 py-4" style="border-bottom: 1px solid var(--border);">
+            <h3 class="text-sm font-semibold" style="color: var(--text-primary);">Recent Actions</h3>
+        </div>
+        <div class="divide-y" style="border-color: var(--border);">
+            {% for action in recent_actions %}
+            <div class="px-5 py-3 flex items-start gap-3">
+                <div class="w-2 h-2 rounded-full mt-1.5 flex-shrink-0
+                    {% if action.action == 'approved' %}bg-emerald-400
+                    {% elif action.action == 'rejected' %}bg-red-400
+                    {% elif action.action == 'changes_requested' %}bg-amber-400
+                    {% elif action.action == 'submitted' %}bg-orange-400
+                    {% else %}bg-stone-300{% endif %}">
+                </div>
+                <div class="flex-1 min-w-0">
+                    <p class="text-sm" style="color: var(--text-primary);">
+                        <span class="font-medium">{{ action.get_action_display }}</span>
+                        <span style="color: var(--text-tertiary);"> on </span>
+                        <span class="truncate">{{ action.post.caption_snippet|default:"post" }}</span>
+                    </p>
+                    <div class="flex items-center gap-2 mt-0.5">
+                        <span class="text-xs" style="color: var(--text-tertiary);">{{ action.post.workspace.name }}</span>
+                        <span style="color: var(--border);">·</span>
+                        <span class="text-xs" style="color: var(--text-tertiary);">{{ action.created_at|timesince }} ago</span>
+                    </div>
+                    {% if action.comment %}
+                    <p class="text-xs mt-1 italic" style="color: var(--text-tertiary);">"{{ action.comment|truncatechars:80 }}"</p>
+                    {% endif %}
+                </div>
+            </div>
+            {% empty %}
+            <div class="px-5 py-8 text-center">
+                <p class="text-sm" style="color: var(--text-tertiary);">No actions yet.</p>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
+</div>
+{% endblock %}
