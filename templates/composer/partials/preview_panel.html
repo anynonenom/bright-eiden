@@ -570,3 +570,36 @@ Context: previews (list of dicts with account, title, caption, first_comment, ch
            style="animation: slideUp 400ms 140ms cubic-bezier(0.16,1,0.3,1) both">Select a platform and start writing to see how your post will look</p>
     </div>
 {% endif %}
+
+<!-- Video lightbox for preview panel -->
+<div id="preview-video-lightbox"
+     class="hidden fixed inset-0 z-[9999] bg-black/85 flex items-center justify-center"
+     onclick="this.classList.add('hidden'); this.querySelector('video').pause();">
+    <video controls class="max-w-[90vw] max-h-[85vh] rounded-xl shadow-2xl" onclick="event.stopPropagation()"></video>
+    <button class="absolute top-4 right-4 text-white/70 hover:text-white transition-colors"
+            onclick="document.getElementById('preview-video-lightbox').classList.add('hidden'); document.getElementById('preview-video-lightbox').querySelector('video').pause();">
+        <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+    </button>
+</div>
+<script>
+(function() {
+    function initPreviewVideoClick() {
+        document.querySelectorAll('#preview-panel video').forEach(function(vid) {
+            if (vid.dataset.lightboxInit) return;
+            vid.dataset.lightboxInit = '1';
+            var parent = vid.parentElement;
+            parent.style.cursor = 'pointer';
+            parent.addEventListener('click', function() {
+                var lb = document.getElementById('preview-video-lightbox');
+                if (!lb) return;
+                var lbVid = lb.querySelector('video');
+                lbVid.src = vid.src.replace(/#t=[\d.]+$/, '');
+                lb.classList.remove('hidden');
+                lbVid.play();
+            });
+        });
+    }
+    document.addEventListener('htmx:afterSwap', initPreviewVideoClick);
+    initPreviewVideoClick();
+})();
+</script>
