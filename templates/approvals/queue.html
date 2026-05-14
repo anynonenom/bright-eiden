@@ -19,21 +19,21 @@
     </div>
 
     <!-- Filter tabs -->
-    <div class="flex gap-1.5 mb-5">
+    <div class="flex gap-1.5 mb-5 flex-wrap">
         <a href="{% url 'approvals:queue' workspace_id=workspace.id %}?status=all"
            class="px-3.5 py-1.5 text-[0.8125rem] font-medium rounded-full transition-colors {% if status_filter == 'all' %}text-white{% else %}text-stone-600 hover:bg-stone-100{% endif %}"
            {% if status_filter == 'all' %}style="background: var(--primary);"{% endif %}>
-            All <span class="ml-1 opacity-75">{{ pending_review_count|add:pending_client_count }}</span>
+            All <span class="ml-1 opacity-75">{{ pending_review_count }}</span>
+        </a>
+        <a href="{% url 'approvals:queue' workspace_id=workspace.id %}?status=my_stage"
+           class="px-3.5 py-1.5 text-[0.8125rem] font-medium rounded-full transition-colors {% if status_filter == 'my_stage' %}text-white{% else %}text-stone-600 hover:bg-stone-100{% endif %}"
+           {% if status_filter == 'my_stage' %}style="background: var(--primary);"{% endif %}>
+            My Stage {% if my_stage_count %}<span class="ml-1 inline-flex items-center justify-center w-4 h-4 text-[10px] font-bold rounded-full" style="background:rgba(255,255,255,0.3)">{{ my_stage_count }}</span>{% endif %}
         </a>
         <a href="{% url 'approvals:queue' workspace_id=workspace.id %}?status=pending_review"
            class="px-3.5 py-1.5 text-[0.8125rem] font-medium rounded-full transition-colors {% if status_filter == 'pending_review' %}text-white{% else %}text-stone-600 hover:bg-stone-100{% endif %}"
            {% if status_filter == 'pending_review' %}style="background: var(--primary);"{% endif %}>
             Pending Review <span class="ml-1 opacity-75">{{ pending_review_count }}</span>
-        </a>
-        <a href="{% url 'approvals:queue' workspace_id=workspace.id %}?status=pending_client"
-           class="px-3.5 py-1.5 text-[0.8125rem] font-medium rounded-full transition-colors {% if status_filter == 'pending_client' %}text-white{% else %}text-stone-600 hover:bg-stone-100{% endif %}"
-           {% if status_filter == 'pending_client' %}style="background: var(--primary);"{% endif %}>
-            Pending Client <span class="ml-1 opacity-75">{{ pending_client_count }}</span>
         </a>
     </div>
 

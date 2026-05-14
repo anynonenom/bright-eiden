@@ -13,7 +13,7 @@ from apps.workspaces.models import Workspace
 
 from . import comments as comment_service
 from . import services
-from .models import PostComment
+from .models import PostApprovalStage, PostComment
 
 
 def _get_workspace(request, workspace_id):
@@ -56,23 +56,30 @@ def approval_queue(request, workspace_id):
         posts = posts.filter(platform_posts__status="pending_review").distinct()
     elif status_filter == "pending_client":
         posts = posts.filter(platform_posts__status="pending_client").distinct()
+    elif status_filter == "my_stage":
+        posts = posts.filter(
+            approval_stages__status="pending",
+            approval_stages__assigned_to=request.user,
+        ).distinct()
 
     from apps.composer.models import PlatformPost
 
     pp_qs = PlatformPost.objects.filter(post__workspace=workspace)
     pending_review_count = pp_qs.filter(status="pending_review").values("post_id").distinct().count()
     pending_client_count = pp_qs.filter(status="pending_client").values("post_id").distinct().count()
-    counts = {
-        "pending_review_count": pending_review_count,
-        "pending_client_count": pending_client_count,
-    }
+    my_stage_count = PostApprovalStage.objects.filter(
+        post__workspace=workspace,
+        status="pending",
+        assigned_to=request.user,
+    ).values("post_id").distinct().count()
 
     context = {
         "workspace": workspace,
         "posts": posts,
         "status_filter": status_filter,
-        "pending_review_count": counts["pending_review_count"],
-        "pending_client_count": counts["pending_client_count"],
+        "pending_review_count": pending_review_count,
+        "pending_client_count": pending_client_count,
+        "my_stage_count": my_stage_count,
     }
 
     if request.htmx:
