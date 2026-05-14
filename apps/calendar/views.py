@@ -350,14 +350,9 @@ def _get_tab_context(request, workspace, tab: str) -> dict:
 
 @login_required
 def calendar_view(request, workspace_id):
-    """Main publish page - renders calendar or list mode."""
+    """Main publish page - always renders calendar mode."""
     workspace = _get_workspace(request, workspace_id)
-    has_connected_accounts = SocialAccount.objects.filter(
-        workspace=workspace,
-        connection_status=SocialAccount.ConnectionStatus.CONNECTED,
-    ).exists()
-    default_mode = "calendar" if has_connected_accounts else "list"
-    mode = request.GET.get("mode", default_mode)
+    mode = "calendar"
     active_tab = request.GET.get("tab", "queue")
     view_type = request.GET.get("view", "month")
     target_date = _parse_date(request.GET.get("date"))
@@ -415,32 +410,7 @@ def calendar_view(request, workspace_id):
         **publish_ctx,
     }
 
-    # For list mode: fetch the active tab's data so the shell can render the
-    # initial tab inline server-side (avoids a JS-triggered HTMX waterfall and
-    # the resulting content shift).
-    if mode == "list":
-        context.update(_get_tab_context(request, workspace, active_tab))
-        context["initial_tab_template"] = _TAB_TEMPLATES.get(active_tab, _TAB_TEMPLATES["queue"])
-        context["is_htmx"] = False
-
-    # HTMX partial: switching between list and calendar mode
-    # Only intercept when the toggle buttons explicitly request a mode switch
-    is_htmx = getattr(request, "htmx", False)
-    if is_htmx and request.GET.get("_switch_mode"):
-        if mode == "list":
-            return render(request, "calendar/partials/publish_list_shell.html", context)
-        else:
-            # Render the full calendar shell (toolbar + grid) for mode switch.
-            # We still need the calendar data populated in context first.
-            _populate_calendar_context(request, workspace, view_type, target_date, context)
-            return render(request, "calendar/partials/publish_calendar_shell.html", context)
-
-    # Full page or calendar HTMX partial (sub-view switching within calendar)
-    if mode == "calendar":
-        return _render_calendar_partial(request, workspace, view_type, target_date, context)
-
-    # Full page in list mode
-    return render(request, "calendar/calendar.html", context)
+    return _render_calendar_partial(request, workspace, view_type, target_date, context)
 
 
 def _populate_calendar_context(request, workspace, view_type, target_date, context):
