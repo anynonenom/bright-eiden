@@ -42,7 +42,12 @@ def dashboard(request):
         user.save(update_fields=["last_workspace_id"])
         return redirect("calendar:calendar", workspace_id=membership.workspace.id)
 
-    return render(request, "accounts/dashboard.html")
+    from apps.members.models import OrgMembership
+    is_org_admin = OrgMembership.objects.filter(
+        user=user,
+        org_role__in=(OrgMembership.OrgRole.OWNER, OrgMembership.OrgRole.ADMIN),
+    ).exists()
+    return render(request, "accounts/dashboard.html", {"is_org_admin": is_org_admin})
 
 
 @login_required
