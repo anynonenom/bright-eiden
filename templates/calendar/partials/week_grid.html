@@ -46,7 +46,7 @@ Context: week_days, week_slots, workspace.
                 {% elif first_media and not first_media.media_asset.is_video %}
                 <img src="{{ first_media.media_asset.file.url }}" alt="" class="w-5 h-5 rounded object-cover flex-shrink-0">
                 {% elif first_media and first_media.media_asset.is_video %}
-                <video src="{{ first_media.media_asset.file.url }}#t=0.5" class="w-5 h-5 rounded object-cover flex-shrink-0" muted preload="metadata"></video>
+                <video src="{{ first_media.media_asset.file.url }}" class="w-5 h-5 rounded object-cover flex-shrink-0" muted preload="metadata" onloadedmetadata="this.currentTime=0.5;this.pause()"></video>
                 {% endif %}
                 {% endwith %}
                 <span class="truncate">{{ pp.post.title|default:pp.post.caption_snippet|truncatechars:28 }}</span>

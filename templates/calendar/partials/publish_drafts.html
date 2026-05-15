@@ -29,7 +29,7 @@ Shows all draft platform posts in a table. Loaded via HTMX into #tab-content.
                         {% elif first_att.media_asset.media_type == 'image' or first_att.media_asset.media_type == 'gif' %}
                             <img src="{{ first_att.media_asset.file.url }}" alt="" class="w-full h-full object-cover">
                         {% else %}
-                            <video src="{{ first_att.media_asset.file.url }}#t=0.5" class="w-full h-full object-cover" muted preload="metadata"></video>
+                            <video src="{{ first_att.media_asset.file.url }}" class="w-full h-full object-cover" muted preload="metadata" onloadedmetadata="this.currentTime=0.5;this.pause()"></video>
                         {% endif %}
                         {% if first_att.media_asset.media_type == 'video' %}
                         <div class="absolute inset-0 flex items-center justify-center">
