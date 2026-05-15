@@ -313,7 +313,13 @@ def compose(request, workspace_id, post_id=None):
         elif request.GET.get("prefill_caption"):
             initial["caption"] = request.GET["prefill_caption"]
         form = PostForm(initial=initial)
-        selected_account_ids = []
+        # Pre-select all connected accounts so the preview shows immediately
+        selected_account_ids = list(
+            SocialAccount.objects.filter(
+                workspace=workspace,
+                connection_status=SocialAccount.ConnectionStatus.CONNECTED,
+            ).values_list("id", flat=True)
+        )
         media_attachments = []
         platform_extras = {}
 
