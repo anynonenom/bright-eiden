@@ -32,7 +32,9 @@
     {% else %}
       <div class="w-full h-full ml-thumb-placeholder flex items-center justify-center">
         {% if asset.file_type == 'video' %}
-          <svg class="w-8 h-8" style="color: var(--text-ghost, #A8A29E);" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+          <video src="{{ asset.file.url }}" muted playsinline preload="metadata"
+                 onloadedmetadata="this.currentTime=0.5;this.pause()"
+                 class="w-full h-full object-cover"></video>
         {% elif asset.file_type == 'document' %}
           <svg class="w-8 h-8" style="color: var(--text-ghost, #A8A29E);" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"/></svg>
         {% else %}
