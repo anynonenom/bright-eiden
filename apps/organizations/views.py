@@ -77,7 +77,7 @@ def settings_view(request):
 
 
 @login_required
-@require_org_role(OrgMembership.OrgRole.MEMBER)
+@require_org_role(OrgMembership.OrgRole.ADMIN)
 def workspaces_view(request):
     org = request.org
     workspaces = (
