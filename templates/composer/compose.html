@@ -1701,5 +1701,26 @@ document.getElementById('publish-action-btn')?.addEventListener('click', functio
     }
     if (errEl) errEl.classList.add('hidden');
 });
+
+// Global preview video lightbox — lives outside the HTMX-swapped preview panel
+window.openPreviewVideoLightbox = function(src) {
+    var lb = document.getElementById('composer-preview-lightbox');
+    if (!lb) return;
+    var vid = lb.querySelector('video');
+    vid.src = src;
+    lb.classList.remove('hidden');
+    vid.play();
+};
 </script>
+
+<!-- Preview video lightbox (global, not inside the swapped panel) -->
+<div id="composer-preview-lightbox"
+     class="hidden fixed inset-0 z-[9999] bg-black/85 flex items-center justify-center"
+     onclick="this.classList.add('hidden'); this.querySelector('video').pause(); this.querySelector('video').src='';">
+    <video controls class="max-w-[90vw] max-h-[85vh] rounded-xl shadow-2xl" onclick="event.stopPropagation()"></video>
+    <button class="absolute top-4 right-4 text-white/70 hover:text-white transition-colors"
+            onclick="document.getElementById('composer-preview-lightbox').classList.add('hidden'); document.getElementById('composer-preview-lightbox').querySelector('video').pause(); document.getElementById('composer-preview-lightbox').querySelector('video').src='';">
+        <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+    </button>
+</div>
 {% endblock %}
