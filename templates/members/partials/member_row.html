@@ -113,6 +113,43 @@
                 </a>
                 {% endif %}
 
+                <!-- Reset Password -->
+                <div class="px-3 py-2" style="border-top: 1px solid var(--border);"
+                     x-data="{ showPwForm: false, pwSaved: false }">
+                    <button type="button" @click="showPwForm = !showPwForm"
+                            class="text-sm w-full text-left flex items-center gap-2 cursor-pointer"
+                            style="color: var(--text-primary);">
+                        <svg class="w-4 h-4 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
+                        Reset Password
+                    </button>
+                    <div x-show="showPwForm" x-cloak class="mt-2">
+                        <form x-init="$nextTick(() => htmx.process($el))"
+                              hx-post="{% url 'members:reset_password' membership_id=member.membership.id %}"
+                              hx-on:htmx:after-request="if(event.detail.successful){ pwSaved = true; showPwForm = false; setTimeout(() => pwSaved = false, 3000); }"
+                              hx-on:htmx:response-error="document.getElementById('pw-error-{{ member.membership.id }}').textContent = event.detail.xhr.responseText"
+                              class="space-y-2">
+                            {% csrf_token %}
+                            <input type="password" name="new_password" required placeholder="New password (min 6 chars)"
+                                   class="input-focus w-full px-3 py-1.5 text-xs rounded-lg outline-none"
+                                   style="border: 1px solid var(--border); background: var(--surface-1); color: var(--text-primary);">
+                            <span id="pw-error-{{ member.membership.id }}" class="text-xs text-red-600"></span>
+                            <div class="flex gap-2">
+                                <button type="submit"
+                                        class="text-xs px-3 py-1.5 rounded-lg font-medium cursor-pointer text-white"
+                                        style="background: var(--primary);">
+                                    Save
+                                </button>
+                                <button type="button" @click="showPwForm = false"
+                                        class="text-xs px-3 py-1.5 rounded-lg font-medium cursor-pointer"
+                                        style="background: var(--neutral-100); color: var(--text-primary);">
+                                    Cancel
+                                </button>
+                            </div>
+                        </form>
+                        <p x-show="pwSaved" class="text-xs text-green-600 mt-1">Password updated.</p>
+                    </div>
+                </div>
+
             </div>
         </div>
         {% endif %}

@@ -502,6 +502,27 @@ def manage_workspaces(request, membership_id):
 
 
 # ---------------------------------------------------------------------------
+# Reset Member Password (admin)
+# ---------------------------------------------------------------------------
+
+
+@login_required
+@require_org_role("admin")
+@require_POST
+def reset_member_password(request, membership_id):
+    """Allow an admin to set a new password for a member."""
+    membership = get_object_or_404(OrgMembership, id=membership_id, organization=request.org)
+    new_password = request.POST.get("new_password", "").strip()
+
+    if not new_password or len(new_password) < 6:
+        return HttpResponse("Password must be at least 6 characters.", status=422)
+
+    membership.user.set_password(new_password)
+    membership.user.save(update_fields=["password"])
+    return HttpResponse(status=200)
+
+
+# ---------------------------------------------------------------------------
 # Team Activity Overview (admin)
 # ---------------------------------------------------------------------------
 
