@@ -73,7 +73,11 @@ def member_list(request):
         (OrgMembership.OrgRole.ADMIN, "Admin"),
         (OrgMembership.OrgRole.MEMBER, "Member"),
     ]
-    workspace_role_choices = WorkspaceMembership.WorkspaceRole.choices
+    workspace_role_choices = [
+        (WorkspaceMembership.WorkspaceRole.MANAGER, "Manager"),
+        (WorkspaceMembership.WorkspaceRole.EDITOR, "Editor"),
+        (WorkspaceMembership.WorkspaceRole.VIEWER, "Viewer"),
+    ]
 
     admin_members = [m for m in members_data if m["membership"].org_role in ("owner", "admin")]
     regular_members = [m for m in members_data if m["membership"].org_role == "member"]
@@ -296,7 +300,11 @@ def update_member_role(request, membership_id):
                 },
                 "is_admin": True,
                 "current_user": request.user,
-                "workspace_role_choices": WorkspaceMembership.WorkspaceRole.choices,
+                "workspace_role_choices": [
+                    (WorkspaceMembership.WorkspaceRole.MANAGER, "Manager"),
+                    (WorkspaceMembership.WorkspaceRole.EDITOR, "Editor"),
+                    (WorkspaceMembership.WorkspaceRole.VIEWER, "Viewer"),
+                ],
             },
         )
     return redirect("members:list")
@@ -378,7 +386,11 @@ def manage_workspaces(request, membership_id):
                     },
                     "is_admin": True,
                     "current_user": request.user,
-                    "workspace_role_choices": WorkspaceMembership.WorkspaceRole.choices,
+                    "workspace_role_choices": [
+                    (WorkspaceMembership.WorkspaceRole.MANAGER, "Manager"),
+                    (WorkspaceMembership.WorkspaceRole.EDITOR, "Editor"),
+                    (WorkspaceMembership.WorkspaceRole.VIEWER, "Viewer"),
+                ],
                 },
             )
         return redirect("members:list")
