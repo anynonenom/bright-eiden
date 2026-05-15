@@ -114,10 +114,10 @@ class Idea(models.Model):
     """A content idea on the Kanban board, scoped to a workspace."""
 
     class Status(models.TextChoices):
-        UNASSIGNED = "unassigned", "Unassigned"
-        TODO = "todo", "To Do"
-        IN_PROGRESS = "in_progress", "In Progress"
-        DONE = "done", "Done"
+        UNASSIGNED = "unassigned", "Ideas"
+        TODO = "todo", "Review"
+        IN_PROGRESS = "in_progress", "Approved"
+        DONE = "done", "Rejected"
 
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     workspace = models.ForeignKey(
