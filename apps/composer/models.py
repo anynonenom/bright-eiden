@@ -371,7 +371,7 @@ class PlatformPost(models.Model):
         "approved": "teal",
         "changes_requested": "orange",
         "rejected": "red",
-        "scheduled": "blue",
+        "scheduled": "green",
         "publishing": "indigo",
         "published": "green",
         "ready_to_post": "purple",
