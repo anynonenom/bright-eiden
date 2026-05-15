@@ -634,7 +634,7 @@
                         <template x-for="(media, index) in createMediaAssets" :key="media.asset_id + '-' + index">
                             <div class="idea-media-existing-card">
                                 <template x-if="media.media_type === 'video'">
-                                    <video :src="media.url" muted playsinline preload="metadata"></video>
+                                    <video :src="media.url" muted playsinline preload="metadata" onloadedmetadata="this.currentTime=0.5;this.pause()"></video>
                                 </template>
                                 <template x-if="media.media_type !== 'video'">
                                     <img :src="media.url" alt="Preview">
@@ -834,7 +834,7 @@
                         <template x-for="(media, index) in editMediaAssets" :key="media.asset_id + '-' + index">
                             <div class="idea-media-existing-card">
                                 <template x-if="media.media_type === 'video'">
-                                    <video :src="media.url" muted playsinline preload="metadata"></video>
+                                    <video :src="media.url" muted playsinline preload="metadata" onloadedmetadata="this.currentTime=0.5;this.pause()"></video>
                                 </template>
                                 <template x-if="media.media_type !== 'video'">
                                     <img :src="media.url" alt="Preview">

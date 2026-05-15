@@ -185,7 +185,13 @@ def remove_member(org, membership, removed_by):
         workspace_id__in=org_workspace_ids,
     ).delete()
 
+    user = membership.user
     membership.delete()
+
+    # Deactivate the user so they can no longer log in.
+    # Admin-created members are org-scoped; removing them revokes access entirely.
+    user.is_active = False
+    user.save(update_fields=["is_active"])
 
 
 def update_member_org_role(org, membership, new_role):
