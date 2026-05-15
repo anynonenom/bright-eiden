@@ -866,13 +866,22 @@
                             style="color: var(--danger, #ef4444); margin-right: auto; background: transparent;">
                         Delete
                     </button>
-                    <button type="button" @click="createPostFromIdea($event, 'edit')"
-                            :disabled="editMediaUploadCount > 0 || isEditSaving"
-                            :class="(editMediaUploadCount > 0 || isEditSaving) && 'opacity-50 cursor-not-allowed'"
-                            class="btn-neutral px-5 py-2 text-sm font-medium rounded-full cursor-pointer"
-                            style="background: var(--neutral-100); color: var(--text-primary);">
-                        Create Post
-                    </button>
+                    <template x-if="editingIdea && editingIdea.postId">
+                        <a :href="`/workspace/{{ workspace.id }}/compose/${editingIdea.postId}/`"
+                           class="btn-neutral px-5 py-2 text-sm font-medium rounded-full cursor-pointer inline-flex items-center gap-1.5"
+                           style="background: var(--neutral-100); color: var(--text-primary);">
+                            Open Post
+                        </a>
+                    </template>
+                    <template x-if="!editingIdea || !editingIdea.postId">
+                        <button type="button" @click="createPostFromIdea($event, 'edit')"
+                                :disabled="editMediaUploadCount > 0 || isEditSaving"
+                                :class="(editMediaUploadCount > 0 || isEditSaving) && 'opacity-50 cursor-not-allowed'"
+                                class="btn-neutral px-5 py-2 text-sm font-medium rounded-full cursor-pointer"
+                                style="background: var(--neutral-100); color: var(--text-primary);">
+                            Create Post
+                        </button>
+                    </template>
                     <button type="submit"
                             :disabled="editMediaUploadCount > 0 || isEditSaving"
                             :class="(editMediaUploadCount > 0 || isEditSaving) && 'opacity-50 cursor-not-allowed'"
@@ -1903,7 +1912,7 @@ function kanbanBoard() {
             });
         },
 
-        openEdit(ideaId, title, description, tagsJson, groupId, mediaJson) {
+        openEdit(ideaId, title, description, tagsJson, groupId, mediaJson, postId) {
             var parsedMedia = [];
             if (mediaJson) {
                 try {
@@ -1923,7 +1932,7 @@ function kanbanBoard() {
             }
             if (!Array.isArray(parsedTags)) parsedTags = [];
 
-            this.editingIdea = { id: ideaId, title: title, description: description, tags: parsedTags };
+            this.editingIdea = { id: ideaId, title: title, description: description, tags: parsedTags, postId: postId || '' };
             this.editSelectedGroup = groupId || this._defaultGroupId;
             this.editSelectedTags = parsedTags.slice();
             this.editGroupDropdownOpen = false;

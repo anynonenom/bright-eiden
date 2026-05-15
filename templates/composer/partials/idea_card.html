@@ -2,10 +2,11 @@
      data-idea-id="{{ idea.id }}"
      data-tags="{{ idea.tags_payload_json|escape }}"
      data-media="{{ idea.media_payload_json|escape }}"
+     data-post-id="{{ idea.post_id|default:'' }}"
      draggable="true"
      @dragstart="startDrag($event, '{{ idea.id }}')"
      @dragend="endDrag($event)"
-     @click="openEdit('{{ idea.id }}', '{{ idea.title|escapejs }}', '{{ idea.description|escapejs }}', $el.dataset.tags, '{{ group_id }}', $el.dataset.media)">
+     @click="openEdit('{{ idea.id }}', '{{ idea.title|escapejs }}', '{{ idea.description|escapejs }}', $el.dataset.tags, '{{ group_id }}', $el.dataset.media, $el.dataset.postId)">
     {% if idea.cover_media and idea.cover_media.file %}
     <div class="-mx-3 -mt-3 mb-2 rounded-t-lg overflow-hidden flex items-center justify-center h-[120px]">
         {% if idea.cover_media.media_type == 'video' %}
