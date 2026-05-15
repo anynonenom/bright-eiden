@@ -136,9 +136,13 @@ def create_member(request):
             role = request.POST.get(f"ws_role_{ws.id}", WorkspaceMembership.WorkspaceRole.VIEWER)
             workspace_assignments.append({"workspace_id": str(ws.id), "role": role})
 
+    from apps.organizations.models import Organization as _Org
     from django.db import transaction as _tx
     with _tx.atomic():
         user = User.objects.create_user(email=email, password=password, name=name, tos_accepted_at=timezone.now())
+        # The post_save signal auto-creates a personal org for every new user.
+        # Delete it so the member belongs only to the admin's org.
+        _Org.objects.filter(memberships__user=user).exclude(id=org.id).delete()
         membership = OrgMembership.objects.create(
             organization=org,
             user=user,
