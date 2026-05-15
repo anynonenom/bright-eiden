@@ -1463,7 +1463,7 @@ def _idea_columns(workspace, tag=None):
 
     ideas_qs = (
         Idea.objects.for_workspace(workspace.id)
-        .select_related("author", "media_asset")
+        .select_related("author", "media_asset", "post")
         .prefetch_related("media_attachments__media_asset")
         .order_by("position", "-created_at")
     )

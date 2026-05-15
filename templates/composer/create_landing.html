@@ -280,10 +280,10 @@
     }
     .idea-media-zone.idea-media-zone-tile {
         margin-top: 0;
-        width: 130px;
-        max-width: 130px;
-        min-height: 130px;
-        height: 130px;
+        width: 100px;
+        max-width: 100px;
+        min-height: 200px;
+        height: 200px;
         padding: 14px 10px;
     }
     .idea-media-existing-card {
@@ -291,16 +291,17 @@
         border-radius: 12px;
         overflow: hidden;
         border: 1px solid var(--border);
-        width: 130px;
-        height: 130px;
+        width: 200px;
+        height: 200px;
         background: var(--neutral-100);
     }
     .idea-media-existing-card img,
     .idea-media-existing-card video {
         width: 100%;
         height: 100%;
-        object-fit: cover;
+        object-fit: contain;
         display: block;
+        background: #000;
     }
     .idea-media-existing-card .remove-btn {
         position: absolute;
