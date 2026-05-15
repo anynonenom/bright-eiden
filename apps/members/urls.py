@@ -6,6 +6,7 @@ app_name = "members"
 
 urlpatterns = [
     path("", views.member_list, name="list"),
+    path("create/", views.create_member, name="create"),
     path("invite/", views.invite_member, name="invite"),
     path("invite/<uuid:invitation_id>/resend/", views.resend_invite, name="resend_invite"),
     path("invite/<uuid:invitation_id>/revoke/", views.revoke_invite, name="revoke_invite"),

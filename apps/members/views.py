@@ -108,6 +108,83 @@ def member_list(request):
 @login_required
 @require_org_role("admin")
 @require_POST
+def create_member(request):
+    """Directly create a user account and add them to the org."""
+    from django.contrib.auth import get_user_model
+
+    User = get_user_model()
+    org = request.org
+    name = request.POST.get("name", "").strip()
+    email = request.POST.get("email", "").strip().lower()
+    password = request.POST.get("password", "").strip()
+    org_role = request.POST.get("org_role", OrgMembership.OrgRole.MEMBER)
+
+    if not email:
+        return HttpResponse('<div class="text-red-600 text-sm p-3">Email is required.</div>', status=422)
+    if not password or len(password) < 6:
+        return HttpResponse('<div class="text-red-600 text-sm p-3">Password must be at least 6 characters.</div>', status=422)
+    if User.objects.filter(email=email).exists():
+        return HttpResponse('<div class="text-red-600 text-sm p-3">A user with this email already exists.</div>', status=422)
+    if OrgMembership.objects.filter(organization=org, user__email=email).exists():
+        return HttpResponse('<div class="text-red-600 text-sm p-3">This user is already a member of the organization.</div>', status=422)
+
+    # Parse workspace assignments
+    org_workspaces = Workspace.objects.filter(organization=org, is_archived=False)
+    workspace_assignments = []
+    for ws in org_workspaces:
+        if request.POST.get(f"ws_{ws.id}"):
+            role = request.POST.get(f"ws_role_{ws.id}", WorkspaceMembership.WorkspaceRole.VIEWER)
+            workspace_assignments.append({"workspace_id": str(ws.id), "role": role})
+
+    from django.db import transaction as _tx
+    with _tx.atomic():
+        user = User.objects.create_user(email=email, password=password, name=name)
+        membership = OrgMembership.objects.create(
+            organization=org,
+            user=user,
+            org_role=org_role,
+        )
+        for assignment in workspace_assignments:
+            try:
+                ws = Workspace.objects.get(id=assignment["workspace_id"], organization=org)
+                WorkspaceMembership.objects.create(
+                    workspace=ws,
+                    user=user,
+                    workspace_role=assignment["role"],
+                )
+            except Workspace.DoesNotExist:
+                pass
+
+    if request.headers.get("HX-Request"):
+        org_workspace_ids = [ws.id for ws in org_workspaces]
+        ws_memberships = WorkspaceMembership.objects.filter(
+            user=user,
+            workspace_id__in=org_workspace_ids,
+        ).select_related("workspace")
+        return render(
+            request,
+            "members/partials/member_row.html",
+            {
+                "member": {
+                    "membership": membership,
+                    "user": user,
+                    "workspace_memberships": list(ws_memberships),
+                },
+                "is_admin": True,
+                "current_user": request.user,
+                "workspace_role_choices": [
+                    (WorkspaceMembership.WorkspaceRole.MANAGER, "Manager"),
+                    (WorkspaceMembership.WorkspaceRole.EDITOR, "Editor"),
+                    (WorkspaceMembership.WorkspaceRole.VIEWER, "Viewer"),
+                ],
+            },
+        )
+    return redirect("members:list")
+
+
+@login_required
+@require_org_role("admin")
+@require_POST
 def invite_member(request):
     """Create and send a team member invitation."""
     org = request.org

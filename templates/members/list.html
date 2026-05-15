@@ -13,7 +13,7 @@
         <button @click="showInviteModal = true"
                 class="px-5 py-2 text-sm font-medium rounded-full cursor-pointer transition-colors"
                 style="background: var(--primary); color: white;">
-            Invite Member
+            Add Member
         </button>
         {% endif %}
     </div>
@@ -43,30 +43,13 @@
             {% for member in regular_members %}
             {% include "members/partials/member_row.html" %}
             {% empty %}
-            <div class="px-6 py-6 text-center">
-                <p class="text-sm" style="color: var(--text-tertiary);">No members yet. Invite someone to get started.</p>
+            <div class="px-6 py-6 text-center" id="no-members-placeholder">
+                <p class="text-sm" style="color: var(--text-tertiary);">No members yet. Add someone to get started.</p>
             </div>
             {% endfor %}
         </div>
     </div>
 
-    <!-- Pending Invitations -->
-    {% if is_admin %}
-    <div style="background: var(--surface-0); border: 1px solid var(--border); border-radius: var(--radius-xl); overflow: hidden;">
-        <div class="px-6 py-3" style="border-bottom: 1px solid var(--border);">
-            <h3 class="text-xs font-semibold uppercase tracking-wider" style="color: var(--text-tertiary);">Pending Invitations</h3>
-        </div>
-        <div id="invitations-list">
-            {% for invite in pending_invites %}
-                {% include "members/partials/invitation_row.html" %}
-            {% empty %}
-            <div class="px-6 py-8 text-center" id="no-invites-placeholder">
-                <p class="text-sm" style="color: var(--text-tertiary);">No pending invitations.</p>
-            </div>
-            {% endfor %}
-        </div>
-    </div>
-    {% endif %}
 
     <!-- Invite Modal -->
     {% if is_admin %}
