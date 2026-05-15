@@ -1322,9 +1322,10 @@ function composerApp() {
                 this.thumbnailPickerAccId = null;
             });
 
-            // Trigger preview on page load for existing posts
+            // Trigger preview on page load whenever accounts are selected
             if (this.selectedAccounts.length > 0) {
-                this.$nextTick(() => this.triggerPreviewUpdate());
+                // Double-nextTick ensures Alpine has flushed :value bindings before HTMX reads the hidden input
+                this.$nextTick(() => this.$nextTick(() => this.triggerPreviewUpdate()));
             }
 
             // Listen for autosaved events to capture the post ID on first save
