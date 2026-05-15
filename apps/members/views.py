@@ -138,7 +138,7 @@ def create_member(request):
 
     from django.db import transaction as _tx
     with _tx.atomic():
-        user = User.objects.create_user(email=email, password=password, name=name)
+        user = User.objects.create_user(email=email, password=password, name=name, tos_accepted_at=timezone.now())
         membership = OrgMembership.objects.create(
             organization=org,
             user=user,
