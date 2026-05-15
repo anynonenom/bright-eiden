@@ -502,6 +502,76 @@ def manage_workspaces(request, membership_id):
 
 
 # ---------------------------------------------------------------------------
+# Team Activity Overview (admin)
+# ---------------------------------------------------------------------------
+
+
+@login_required
+@require_org_role("admin")
+@require_GET
+def team_activity(request):
+    """Show a bird's-eye view of all team member activity for the admin."""
+    from apps.approvals.models import ApprovalAction
+    from apps.composer.models import Idea, Post
+
+    org = request.org
+    org_workspace_ids = list(
+        Workspace.objects.filter(organization=org, is_archived=False).values_list("id", flat=True)
+    )
+    memberships = OrgMembership.objects.filter(organization=org).select_related("user").order_by("invited_at")
+
+    member_stats = []
+    for m in memberships:
+        user = m.user
+        posts_total = Post.objects.filter(author=user, workspace_id__in=org_workspace_ids).count()
+        posts_pending = Post.objects.filter(
+            author=user,
+            workspace_id__in=org_workspace_ids,
+            platform_posts__status__in=["pending_review", "pending_client"],
+        ).distinct().count()
+        posts_scheduled = Post.objects.filter(
+            author=user,
+            workspace_id__in=org_workspace_ids,
+            platform_posts__status="scheduled",
+        ).distinct().count()
+        ideas_total = Idea.objects.filter(author=user, workspace_id__in=org_workspace_ids).count()
+        member_stats.append({
+            "membership": m,
+            "user": user,
+            "posts_total": posts_total,
+            "posts_pending": posts_pending,
+            "posts_scheduled": posts_scheduled,
+            "ideas_total": ideas_total,
+        })
+
+    # Recent posts across entire org (last 30)
+    recent_posts = (
+        Post.objects.filter(workspace_id__in=org_workspace_ids)
+        .select_related("author", "workspace")
+        .prefetch_related("platform_posts__social_account")
+        .order_by("-created_at")[:30]
+    )
+
+    # Recent approval actions across entire org (last 30)
+    recent_actions = (
+        ApprovalAction.objects.filter(post__workspace_id__in=org_workspace_ids)
+        .select_related("user", "post", "post__workspace")
+        .order_by("-created_at")[:30]
+    )
+
+    return render(
+        request,
+        "members/team_activity.html",
+        {
+            "settings_active": "team_activity",
+            "member_stats": member_stats,
+            "recent_posts": recent_posts,
+            "recent_actions": recent_actions,
+        },
+    )
+
+
+# ---------------------------------------------------------------------------
 # Member Activity Monitor
 # ---------------------------------------------------------------------------
 

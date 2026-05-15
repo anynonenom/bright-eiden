@@ -1,0 +1,153 @@
+{% extends "layouts/settings.html" %}
+{% block title %}Team Activity — Settings{% endblock %}
+{% block content %}
+<div>
+    <!-- Header -->
+    <div class="mb-6">
+        <h2 class="text-xl font-semibold" style="color: var(--text-primary);">Team Activity</h2>
+        <p class="text-sm mt-0.5" style="color: var(--text-tertiary);">See what every team member has been working on.</p>
+    </div>
+
+    <!-- Member summary cards -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
+        {% for s in member_stats %}
+        <a href="{% url 'members:member_activity' s.membership.id %}"
+           class="block rounded-xl p-4 transition-shadow hover:shadow-md"
+           style="background: var(--surface-0); border: 1px solid var(--border);">
+            <div class="flex items-center gap-3 mb-3">
+                {% if s.user.avatar %}
+                <img src="{{ s.user.avatar.url }}" class="w-9 h-9 rounded-full object-cover flex-shrink-0">
+                {% else %}
+                <div class="w-9 h-9 rounded-full flex items-center justify-center text-sm font-bold text-white flex-shrink-0"
+                     style="background: var(--primary);">
+                    {{ s.user.display_name|make_list|first|upper }}
+                </div>
+                {% endif %}
+                <div class="min-w-0">
+                    <div class="text-sm font-semibold truncate" style="color: var(--text-primary);">{{ s.user.display_name }}</div>
+                    <div class="text-xs truncate" style="color: var(--text-tertiary);">{{ s.user.email }}</div>
+                </div>
+                <span class="ml-auto text-[10px] font-semibold px-2 py-0.5 rounded-full flex-shrink-0
+                    {% if s.membership.org_role == 'owner' %}bg-amber-100 text-amber-700
+                    {% elif s.membership.org_role == 'admin' %}bg-blue-50 text-blue-700
+                    {% else %}bg-stone-100 text-stone-500{% endif %}">
+                    {{ s.membership.get_org_role_display }}
+                </span>
+            </div>
+            <div class="grid grid-cols-3 gap-2 text-center">
+                <div class="rounded-lg py-2" style="background: var(--neutral-50);">
+                    <div class="text-lg font-bold" style="color: var(--text-primary);">{{ s.posts_total }}</div>
+                    <div class="text-[10px]" style="color: var(--text-tertiary);">Posts</div>
+                </div>
+                <div class="rounded-lg py-2" style="background: var(--neutral-50);">
+                    <div class="text-lg font-bold" style="color: var(--text-primary);">{{ s.posts_scheduled }}</div>
+                    <div class="text-[10px]" style="color: var(--text-tertiary);">Scheduled</div>
+                </div>
+                <div class="rounded-lg py-2" style="background: var(--neutral-50);">
+                    <div class="text-lg font-bold" style="color: var(--text-primary);">{{ s.ideas_total }}</div>
+                    <div class="text-[10px]" style="color: var(--text-tertiary);">Ideas</div>
+                </div>
+            </div>
+            {% if s.posts_pending %}
+            <div class="mt-2 text-xs font-medium px-2 py-1 rounded-lg text-center" style="background: #FEF3C7; color: #92400E;">
+                {{ s.posts_pending }} post{{ s.posts_pending|pluralize }} pending review
+            </div>
+            {% endif %}
+        </a>
+        {% empty %}
+        <div class="col-span-3 text-center py-10" style="color: var(--text-tertiary);">No team members yet.</div>
+        {% endfor %}
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+
+        <!-- Recent Posts -->
+        <div style="background: var(--surface-0); border: 1px solid var(--border); border-radius: var(--radius-xl); overflow: hidden;">
+            <div class="px-5 py-3" style="border-bottom: 1px solid var(--border);">
+                <h3 class="text-xs font-semibold uppercase tracking-wider" style="color: var(--text-tertiary);">Recent Posts</h3>
+            </div>
+            <div class="divide-y" style="--tw-divide-opacity:1; border-color: var(--border);">
+                {% for post in recent_posts %}
+                <a href="{% url 'composer:compose_edit' workspace_id=post.workspace_id post_id=post.id %}"
+                   class="flex items-start gap-3 px-5 py-3 hover:bg-stone-50 transition-colors">
+                    <div class="w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold text-white flex-shrink-0 mt-0.5"
+                         style="background: var(--primary);">
+                        {{ post.author.display_name|make_list|first|upper }}
+                    </div>
+                    <div class="min-w-0 flex-1">
+                        <div class="text-sm font-medium truncate" style="color: var(--text-primary);">
+                            {{ post.title|default:post.caption_snippet|truncatechars:50|default:"Untitled post" }}
+                        </div>
+                        <div class="text-xs mt-0.5" style="color: var(--text-tertiary);">
+                            <span class="font-medium" style="color: var(--text-secondary);">{{ post.author.display_name }}</span>
+                            · {{ post.workspace.name }}
+                            · {{ post.created_at|timesince }} ago
+                        </div>
+                    </div>
+                    <span class="text-[10px] font-semibold px-2 py-0.5 rounded-full flex-shrink-0 mt-1
+                        {% with s=post.status %}
+                        {% if s == 'draft' %}bg-stone-100 text-stone-500
+                        {% elif s == 'pending_review' %}bg-amber-100 text-amber-700
+                        {% elif s == 'approved' %}bg-teal-50 text-teal-700
+                        {% elif s == 'scheduled' %}bg-green-50 text-green-700
+                        {% elif s == 'published' %}bg-emerald-50 text-emerald-700
+                        {% elif s == 'rejected' %}bg-red-50 text-red-600
+                        {% else %}bg-stone-100 text-stone-500{% endif %}
+                        {% endwith %}">
+                        {{ post.get_status_display }}
+                    </span>
+                </a>
+                {% empty %}
+                <div class="px-5 py-8 text-center text-sm" style="color: var(--text-tertiary);">No posts yet.</div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- Recent Approval Actions -->
+        <div style="background: var(--surface-0); border: 1px solid var(--border); border-radius: var(--radius-xl); overflow: hidden;">
+            <div class="px-5 py-3" style="border-bottom: 1px solid var(--border);">
+                <h3 class="text-xs font-semibold uppercase tracking-wider" style="color: var(--text-tertiary);">Recent Approvals</h3>
+            </div>
+            <div class="divide-y" style="border-color: var(--border);">
+                {% for action in recent_actions %}
+                <a href="{% url 'composer:compose_edit' workspace_id=action.post.workspace_id post_id=action.post_id %}"
+                   class="flex items-start gap-3 px-5 py-3 hover:bg-stone-50 transition-colors">
+                    <div class="w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold text-white flex-shrink-0 mt-0.5"
+                         style="background: var(--primary);">
+                        {{ action.user.display_name|make_list|first|upper }}
+                    </div>
+                    <div class="min-w-0 flex-1">
+                        <div class="text-sm font-medium" style="color: var(--text-primary);">
+                            <span style="color: var(--text-secondary);">{{ action.user.display_name }}</span>
+                            <span class="font-normal" style="color: var(--text-tertiary);">
+                                {% if action.action == 'approve' %}approved
+                                {% elif action.action == 'reject' %}rejected
+                                {% elif action.action == 'request_changes' %}requested changes on
+                                {% else %}acted on{% endif %}
+                            </span>
+                        </div>
+                        <div class="text-xs truncate mt-0.5" style="color: var(--text-tertiary);">
+                            "{{ action.post.caption_snippet|truncatechars:45|default:"Untitled" }}"
+                            · {{ action.created_at|timesince }} ago
+                        </div>
+                        {% if action.comment %}
+                        <div class="text-xs mt-1 italic truncate" style="color: var(--text-tertiary);">"{{ action.comment|truncatechars:60 }}"</div>
+                        {% endif %}
+                    </div>
+                    <span class="text-[10px] font-semibold px-2 py-0.5 rounded-full flex-shrink-0 mt-1
+                        {% if action.action == 'approve' %}bg-teal-50 text-teal-700
+                        {% elif action.action == 'reject' %}bg-red-50 text-red-600
+                        {% elif action.action == 'request_changes' %}bg-amber-100 text-amber-700
+                        {% else %}bg-stone-100 text-stone-500{% endif %}">
+                        {{ action.action|title }}
+                    </span>
+                </a>
+                {% empty %}
+                <div class="px-5 py-8 text-center text-sm" style="color: var(--text-tertiary);">No approval actions yet.</div>
+                {% endfor %}
+            </div>
+        </div>
+
+    </div>
+</div>
+{% endblock %}
