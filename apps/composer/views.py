@@ -1711,6 +1711,9 @@ def create_landing(request, workspace_id):
 
     feeds = Feed.objects.for_workspace(workspace.id)
 
+    membership = getattr(request, "workspace_membership", None)
+    can_drag = bool(membership and membership.effective_permissions.get("approve_posts"))
+
     context = {
         "workspace": workspace,
         "tab": tab,
@@ -1721,6 +1724,7 @@ def create_landing(request, workspace_id):
         "builtin_templates": get_all_templates(),
         "template_categories": CATEGORIES,
         "feeds": feeds,
+        "can_drag": can_drag,
     }
     return render(request, "composer/create_landing.html", context)
 
@@ -2254,6 +2258,9 @@ def idea_board(request, workspace_id):
     tag = request.GET.get("tag")
     columns, all_tags = _idea_columns(workspace, tag)
 
+    membership = getattr(request, "workspace_membership", None)
+    can_drag = bool(membership and membership.effective_permissions.get("approve_posts"))
+
     return render(
         request,
         "composer/partials/kanban_board.html",
@@ -2262,6 +2269,7 @@ def idea_board(request, workspace_id):
             "columns": columns,
             "all_tags": all_tags,
             "active_tag": tag,
+            "can_drag": can_drag,
         },
     )
 

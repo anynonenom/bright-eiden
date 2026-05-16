@@ -1,12 +1,12 @@
 <div class="kanban-column" data-group-id="{{ col.id }}"
-     draggable="true"
+     {% if can_drag %}draggable="true"
      @dragstart="startColumnDrag($event, '{{ col.id }}')"
      @dragend="endColumnDrag($event)"
      @dragover.prevent="columnDragOver($event)"
      @dragleave="columnDragLeave($event)"
-     @drop="dropColumn($event, '{{ col.id }}')">
-    <div class="flex items-center justify-between px-3 py-2.5 column-header" style="cursor: grab;"
-         @mousedown="columnHeaderMouseDown()">
+     @drop="dropColumn($event, '{{ col.id }}')"{% else %}draggable="false"{% endif %}>
+    <div class="flex items-center justify-between px-3 py-2.5 column-header" style="cursor: {% if can_drag %}grab{% else %}default{% endif %};"
+         {% if can_drag %}@mousedown="columnHeaderMouseDown()"{% endif %}>
         <div class="flex items-center gap-2">
             <span class="group-label text-[13px] font-bold text-stone-800">{{ col.label }}</span>
             <span class="column-count inline-flex items-center justify-center min-w-[20px] h-5 px-1.5 rounded-full text-[11px] font-semibold bg-stone-200/70 text-stone-500">{{ col.ideas|length }}</span>
@@ -43,11 +43,11 @@
     </div>
 
     <div class="kanban-cards"
-         @dragover.prevent="dragOver($event)"
+         {% if can_drag %}@dragover.prevent="dragOver($event)"
          @dragleave="dragLeave($event)"
-         @drop="dropOnColumn($event, '{{ col.id }}')">
+         @drop="dropOnColumn($event, '{{ col.id }}')"{% endif %}>
         {% for idea in col.ideas %}
-            {% include "composer/partials/idea_card.html" with idea=idea group_id=col.id %}
+            {% include "composer/partials/idea_card.html" with idea=idea group_id=col.id can_drag=can_drag %}
         {% endfor %}
     </div>
 
