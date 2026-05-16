@@ -1373,36 +1373,97 @@ def remove_pending_media(request, workspace_id, asset_id):
 @login_required
 @require_GET
 def drafts_list(request, workspace_id):
-    """List all drafts for this workspace."""
+    """My Posts — all posts authored by the current user, grouped by status."""
     workspace = _get_workspace(request, workspace_id)
-    # A post is a "draft" when at least one of its PlatformPost children is in
-    # the draft state and none have moved into a more advanced workflow stage.
-    # Easiest correct query: any post whose only child statuses are "draft".
-    drafts = (
+    membership = getattr(request, "workspace_membership", None)
+    perms = membership.effective_permissions if membership else {}
+    can_approve = perms.get("approve_posts", False)
+
+    tab = request.GET.get("tab", "all")
+
+    base_qs = (
         Post.objects.for_workspace(workspace.id)
-        .filter(platform_posts__status="draft")
-        .exclude(
-            platform_posts__status__in=[
-                "pending_review",
-                "pending_client",
-                "approved",
-                "scheduled",
-                "publishing",
-                "published",
-            ]
-        )
-        .distinct()
         .select_related("author")
         .prefetch_related("platform_posts__social_account")
         .order_by("-updated_at")
     )
+
+    # Managers see all posts; members see only their own
+    if not can_approve:
+        base_qs = base_qs.filter(author=request.user)
+
+    # Tab filtering
+    STATUS_TABS = {
+        "draft": ["draft"],
+        "pending": ["pending_review", "pending_client"],
+        "changes": ["changes_requested"],
+        "rejected": ["rejected"],
+        "approved": ["approved", "scheduled", "published", "publishing"],
+    }
+    if tab in STATUS_TABS:
+        base_qs = base_qs.filter(
+            platform_posts__status__in=STATUS_TABS[tab]
+        ).distinct()
+
+    # Counts for tab badges (scoped to same author filter)
+    count_qs = Post.objects.for_workspace(workspace.id)
+    if not can_approve:
+        count_qs = count_qs.filter(author=request.user)
+
+    counts = {
+        "all": count_qs.distinct().count(),
+        "draft": count_qs.filter(platform_posts__status="draft").exclude(
+            platform_posts__status__in=["pending_review", "pending_client", "approved", "scheduled", "publishing", "published"]
+        ).distinct().count(),
+        "pending": count_qs.filter(platform_posts__status__in=["pending_review", "pending_client"]).distinct().count(),
+        "changes": count_qs.filter(platform_posts__status="changes_requested").distinct().count(),
+        "rejected": count_qs.filter(platform_posts__status="rejected").distinct().count(),
+        "approved": count_qs.filter(platform_posts__status__in=["approved", "scheduled", "published", "publishing"]).distinct().count(),
+    }
+
+    # Fetch latest manager comment for each post (changes_requested / rejected)
+    from apps.approvals.models import ApprovalAction
+    post_ids = [p.id for p in base_qs]
+    latest_comments = {}
+    if post_ids:
+        actions = (
+            ApprovalAction.objects
+            .filter(
+                post_id__in=post_ids,
+                action__in=[ApprovalAction.ActionType.CHANGES_REQUESTED, ApprovalAction.ActionType.REJECTED],
+            )
+            .select_related("user")
+            .order_by("post_id", "-created_at")
+        )
+        seen = set()
+        for action in actions:
+            if action.post_id not in seen:
+                latest_comments[action.post_id] = action
+                seen.add(action.post_id)
+
+    posts = list(base_qs)
+    for post in posts:
+        post.latest_review_action = latest_comments.get(post.id)
+
+    tab_defs = [
+        ("all", "All"),
+        ("draft", "Drafts"),
+        ("pending", "Pending Review"),
+        ("changes", "Changes Requested"),
+        ("rejected", "Rejected"),
+        ("approved", "Approved"),
+    ]
 
     return render(
         request,
         "composer/drafts_list.html",
         {
             "workspace": workspace,
-            "drafts": drafts,
+            "posts": posts,
+            "tab": tab,
+            "counts": counts,
+            "can_approve": can_approve,
+            "tab_defs": tab_defs,
         },
     )
 

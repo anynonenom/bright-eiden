@@ -83,8 +83,10 @@ def sidebar_context(request):
             InboxMessage.objects.for_workspace(workspace.id).filter(status=InboxMessage.Status.UNREAD).count()
         )
 
-    # Pending approval count for badge
+    # Pending approval count for badge (managers)
     sidebar_pending_approvals = 0
+    # Action-needed count for member "My Posts" badge (changes requested or rejected)
+    sidebar_my_pending_count = 0
     if workspace:
         from apps.composer.models import PlatformPost
 
@@ -97,6 +99,18 @@ def sidebar_context(request):
             .distinct()
             .count()
         )
+
+        if request.user.is_authenticated:
+            sidebar_my_pending_count = (
+                PlatformPost.objects.filter(
+                    post__workspace_id=workspace.id,
+                    post__author=request.user,
+                    status__in=["changes_requested", "rejected"],
+                )
+                .values("post_id")
+                .distinct()
+                .count()
+            )
 
     # Idea columns and tags for the quick-create modal in the sidebar
     sidebar_idea_columns = []
@@ -129,6 +143,7 @@ def sidebar_context(request):
         "sidebar_connectable_platforms": sidebar_connectable_platforms,
         "sidebar_unread_inbox_count": sidebar_unread_inbox_count,
         "sidebar_pending_approvals": sidebar_pending_approvals,
+        "sidebar_my_pending_count": sidebar_my_pending_count,
         "sidebar_idea_columns": sidebar_idea_columns,
         "sidebar_idea_tags": sidebar_idea_tags,
     }
