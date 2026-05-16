@@ -979,9 +979,8 @@
                     Save
                 </button>
 
-                {% if show_submit_button %}<input type="hidden" name="stages_json" value="[]">{% endif %}
-
-                <!-- Schedule to Calendar -->
+                {% if can_publish %}
+                <!-- Schedule to Calendar (managers/owners only) -->
                 <div class="relative inline-flex flex-shrink-0" x-data="{ showSchedulePicker: false }">
                     <button type="button"
                             :disabled="selectedAccounts.length === 0"
@@ -1015,6 +1014,29 @@
                         </div>
                     </div>
                 </div>
+                {% elif show_submit_button %}
+                <!-- Submit for Review (editors/contributors — no direct publish) -->
+                <input type="hidden" name="stages_json" value="[]">
+                {% if show_resubmit_button %}
+                <button type="submit" name="action" value="resubmit_for_approval"
+                        :disabled="selectedAccounts.length === 0"
+                        :class="selectedAccounts.length === 0 && 'opacity-50 cursor-not-allowed'"
+                        class="inline-flex items-center gap-1.5 px-5 py-2 text-sm font-semibold text-white rounded-lg shadow-sm transition-all duration-150 cursor-pointer flex-shrink-0"
+                        style="background: var(--primary); border: 1px solid var(--primary);">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+                    Resubmit for Review
+                </button>
+                {% else %}
+                <button type="submit" name="action" value="submit_for_approval"
+                        :disabled="selectedAccounts.length === 0"
+                        :class="selectedAccounts.length === 0 && 'opacity-50 cursor-not-allowed'"
+                        class="inline-flex items-center gap-1.5 px-5 py-2 text-sm font-semibold text-white rounded-lg shadow-sm transition-all duration-150 cursor-pointer flex-shrink-0"
+                        style="background: var(--primary); border: 1px solid var(--primary);">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                    Submit for Review
+                </button>
+                {% endif %}
+                {% endif %}
 
             </div>
         </form>
