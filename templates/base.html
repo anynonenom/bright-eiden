@@ -624,7 +624,7 @@
                 </a>
                 {% endif %}
                 {% if workspace_permissions.approve_posts or can_create_workspace %}
-                <a href="{% url 'calendar:calendar' workspace_id=request.workspace.id %}?view=list&status=pending_review" class="mb-1 sidebar-nav-item">
+                <a href="{% url 'approvals:queue' workspace_id=request.workspace.id %}" class="mb-1 sidebar-nav-item {% if request.resolver_match.app_name == 'approvals' %}active{% endif %}">
                     <svg class="flex-shrink-0" width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
                     <span class="sidebar-nav-label">Approvals</span>
                     {% if sidebar_pending_approvals > 0 %}
