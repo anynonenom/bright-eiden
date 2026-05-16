@@ -14,8 +14,8 @@
     {% else %}
       <div class="w-full h-full flex items-center justify-center" style="background: linear-gradient(135deg, var(--surface-2, #F5F5F4) 0%, var(--surface-1, #FAFAF9) 100%);">
         {% if asset.media_type == 'video' %}
-          <video src="{{ asset.file.url }}" muted playsinline preload="metadata"
-                 onloadedmetadata="this.currentTime=0.5;this.pause()"
+          <video src="{{ asset.file.url }}" muted playsinline preload="auto"
+                 onloadeddata="this.currentTime=0.5" onseeked="this.pause()" onplay="this.pause()"
                  class="w-full h-full object-cover"></video>
         {% elif asset.media_type == 'document' %}
           <svg class="w-8 h-8" style="color: var(--text-ghost, #A8A29E);" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"/></svg>

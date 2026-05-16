@@ -24,7 +24,7 @@ Context: previews (list of dicts with account, title, caption, first_comment, ch
             {% with m=media_items.0 %}
             <div class="relative bg-black" style="aspect-ratio: 16/9;">
                 {% if m.is_video %}
-                <video src="{{ m.url }}#t=0.5" class="w-full h-full object-contain" muted preload="metadata" onloadedmetadata="this.currentTime=0.5;this.pause()" onclick="event.stopPropagation();openPreviewVideoLightbox(this.src)" style="cursor:pointer"></video>
+                <video src="{{ m.url }}#t=0.5" class="w-full h-full object-contain" muted playsinline preload="auto" onloadeddata="this.currentTime=0.5" onseeked="this.pause()" onplay="this.pause()" onclick="event.stopPropagation();openPreviewVideoLightbox(this.src)" style="cursor:pointer"></video>
                 <div class="absolute inset-0 flex items-center justify-center">
                     <div class="w-12 h-12 rounded-full bg-red-600/90 flex items-center justify-center shadow-lg">
                         <svg class="w-5 h-5 text-white ml-0.5" fill="currentColor" viewBox="0 0 20 20"><path d="M6.3 2.841A1.5 1.5 0 004 4.11V15.89a1.5 1.5 0 002.3 1.269l9.344-5.89a1.5 1.5 0 000-2.538L6.3 2.84z"/></svg>
@@ -79,7 +79,7 @@ Context: previews (list of dicts with account, title, caption, first_comment, ch
                 {% for m in media_items %}
                 <div x-show="slide === {{ forloop.counter0 }}" class="absolute inset-0">
                     {% if m.is_video %}
-                    <video src="{{ m.url }}#t=0.5" class="w-full h-full object-cover" muted preload="metadata" onloadedmetadata="this.currentTime=0.5;this.pause()" onclick="event.stopPropagation();openPreviewVideoLightbox(this.src)" style="cursor:pointer"></video>
+                    <video src="{{ m.url }}#t=0.5" class="w-full h-full object-cover" muted playsinline preload="auto" onloadeddata="this.currentTime=0.5" onseeked="this.pause()" onplay="this.pause()" onclick="event.stopPropagation();openPreviewVideoLightbox(this.src)" style="cursor:pointer"></video>
                     {% else %}
                     <img src="{{ m.url }}" class="w-full h-full object-cover" alt="">
                     {% endif %}
@@ -107,7 +107,7 @@ Context: previews (list of dicts with account, title, caption, first_comment, ch
             {% with m=media_items.0 %}
             <div class="relative bg-stone-100" style="aspect-ratio: 1/1;">
                 {% if m.is_video %}
-                <video src="{{ m.url }}#t=0.5" class="w-full h-full object-cover" muted preload="metadata" onloadedmetadata="this.currentTime=0.5;this.pause()" onclick="event.stopPropagation();openPreviewVideoLightbox(this.src)" style="cursor:pointer"></video>
+                <video src="{{ m.url }}#t=0.5" class="w-full h-full object-cover" muted playsinline preload="auto" onloadeddata="this.currentTime=0.5" onseeked="this.pause()" onplay="this.pause()" onclick="event.stopPropagation();openPreviewVideoLightbox(this.src)" style="cursor:pointer"></video>
                 {% else %}
                 <img src="{{ m.url }}" class="w-full h-full object-cover" alt="">
                 {% endif %}
@@ -164,7 +164,7 @@ Context: previews (list of dicts with account, title, caption, first_comment, ch
                 {% for m in media_items %}
                 <div x-show="slide === {{ forloop.counter0 }}" class="absolute inset-0">
                     {% if m.is_video %}
-                    <video src="{{ m.url }}#t=0.5" class="w-full h-full object-cover" muted preload="metadata" onloadedmetadata="this.currentTime=0.5;this.pause()" onclick="event.stopPropagation();openPreviewVideoLightbox(this.src)" style="cursor:pointer"></video>
+                    <video src="{{ m.url }}#t=0.5" class="w-full h-full object-cover" muted playsinline preload="auto" onloadeddata="this.currentTime=0.5" onseeked="this.pause()" onplay="this.pause()" onclick="event.stopPropagation();openPreviewVideoLightbox(this.src)" style="cursor:pointer"></video>
                     <div class="absolute inset-0 flex items-center justify-center"><div class="w-14 h-14 rounded-full bg-black/40 flex items-center justify-center"><svg class="w-6 h-6 text-white ml-0.5" fill="currentColor" viewBox="0 0 20 20"><path d="M6.3 2.841A1.5 1.5 0 004 4.11V15.89a1.5 1.5 0 002.3 1.269l9.344-5.89a1.5 1.5 0 000-2.538L6.3 2.84z"/></svg></div></div>
                     {% else %}
                     <img src="{{ m.url }}" class="w-full h-full object-cover" alt="">
@@ -193,7 +193,7 @@ Context: previews (list of dicts with account, title, caption, first_comment, ch
             {% with m=media_items.0 %}
             <div class="relative bg-stone-100">
                 {% if m.is_video %}
-                <div style="aspect-ratio: 16/9;"><video src="{{ m.url }}#t=0.5" class="w-full h-full object-cover" muted preload="metadata" onloadedmetadata="this.currentTime=0.5;this.pause()" onclick="event.stopPropagation();openPreviewVideoLightbox(this.src)" style="cursor:pointer"></video>
+                <div style="aspect-ratio: 16/9;"><video src="{{ m.url }}#t=0.5" class="w-full h-full object-cover" muted playsinline preload="auto" onloadeddata="this.currentTime=0.5" onseeked="this.pause()" onplay="this.pause()" onclick="event.stopPropagation();openPreviewVideoLightbox(this.src)" style="cursor:pointer"></video>
                 <div class="absolute inset-0 flex items-center justify-center"><div class="w-14 h-14 rounded-full bg-black/40 flex items-center justify-center"><svg class="w-6 h-6 text-white ml-0.5" fill="currentColor" viewBox="0 0 20 20"><path d="M6.3 2.841A1.5 1.5 0 004 4.11V15.89a1.5 1.5 0 002.3 1.269l9.344-5.89a1.5 1.5 0 000-2.538L6.3 2.84z"/></svg></div></div></div>
                 {% else %}
                 <img src="{{ m.url }}" class="w-full object-cover" alt="" style="max-height: 220px;">
@@ -244,7 +244,7 @@ Context: previews (list of dicts with account, title, caption, first_comment, ch
                 {% for m in media_items %}
                 <div x-show="slide === {{ forloop.counter0 }}" class="absolute inset-0">
                     {% if m.is_video %}
-                    <video src="{{ m.url }}#t=0.5" class="w-full h-full object-cover" muted preload="metadata" onloadedmetadata="this.currentTime=0.5;this.pause()" onclick="event.stopPropagation();openPreviewVideoLightbox(this.src)" style="cursor:pointer"></video>
+                    <video src="{{ m.url }}#t=0.5" class="w-full h-full object-cover" muted playsinline preload="auto" onloadeddata="this.currentTime=0.5" onseeked="this.pause()" onplay="this.pause()" onclick="event.stopPropagation();openPreviewVideoLightbox(this.src)" style="cursor:pointer"></video>
                     <div class="absolute inset-0 flex items-center justify-center"><div class="w-14 h-14 rounded-full bg-[#0A66C2]/80 flex items-center justify-center"><svg class="w-6 h-6 text-white ml-0.5" fill="currentColor" viewBox="0 0 20 20"><path d="M6.3 2.841A1.5 1.5 0 004 4.11V15.89a1.5 1.5 0 002.3 1.269l9.344-5.89a1.5 1.5 0 000-2.538L6.3 2.84z"/></svg></div></div>
                     {% else %}
                     <img src="{{ m.url }}" class="w-full h-full object-cover" alt="">
@@ -273,7 +273,7 @@ Context: previews (list of dicts with account, title, caption, first_comment, ch
             {% with m=media_items.0 %}
             <div class="relative bg-stone-100">
                 {% if m.is_video %}
-                <div style="aspect-ratio: 16/9;"><video src="{{ m.url }}#t=0.5" class="w-full h-full object-cover" muted preload="metadata" onloadedmetadata="this.currentTime=0.5;this.pause()" onclick="event.stopPropagation();openPreviewVideoLightbox(this.src)" style="cursor:pointer"></video>
+                <div style="aspect-ratio: 16/9;"><video src="{{ m.url }}#t=0.5" class="w-full h-full object-cover" muted playsinline preload="auto" onloadeddata="this.currentTime=0.5" onseeked="this.pause()" onplay="this.pause()" onclick="event.stopPropagation();openPreviewVideoLightbox(this.src)" style="cursor:pointer"></video>
                 <div class="absolute inset-0 flex items-center justify-center"><div class="w-14 h-14 rounded-full bg-[#0A66C2]/80 flex items-center justify-center"><svg class="w-6 h-6 text-white ml-0.5" fill="currentColor" viewBox="0 0 20 20"><path d="M6.3 2.841A1.5 1.5 0 004 4.11V15.89a1.5 1.5 0 002.3 1.269l9.344-5.89a1.5 1.5 0 000-2.538L6.3 2.84z"/></svg></div></div></div>
                 {% else %}
                 <img src="{{ m.url }}" class="w-full object-cover" alt="" style="max-height: 220px;">
@@ -297,7 +297,7 @@ Context: previews (list of dicts with account, title, caption, first_comment, ch
             {% if media_items %}
             {% with m=media_items.0 %}
             {% if m.is_video %}
-            <video src="{{ m.url }}#t=0.5" class="absolute inset-0 w-full h-full object-cover" muted preload="metadata" onloadedmetadata="this.currentTime=0.5;this.pause()" onclick="event.stopPropagation();openPreviewVideoLightbox(this.src)" style="cursor:pointer"></video>
+            <video src="{{ m.url }}#t=0.5" class="absolute inset-0 w-full h-full object-cover" muted playsinline preload="auto" onloadeddata="this.currentTime=0.5" onseeked="this.pause()" onplay="this.pause()" onclick="event.stopPropagation();openPreviewVideoLightbox(this.src)" style="cursor:pointer"></video>
             {% else %}
             <img src="{{ m.url }}" class="absolute inset-0 w-full h-full object-cover" alt="">
             {% endif %}
@@ -387,7 +387,7 @@ Context: previews (list of dicts with account, title, caption, first_comment, ch
                         {% for m in media_items %}
                         <div x-show="slide === {{ forloop.counter0 }}" class="absolute inset-0">
                             {% if m.is_video %}
-                            <div class="relative bg-stone-900 w-full h-full"><video src="{{ m.url }}#t=0.5" class="w-full h-full object-cover" muted preload="metadata" onloadedmetadata="this.currentTime=0.5;this.pause()" onclick="event.stopPropagation();openPreviewVideoLightbox(this.src)" style="cursor:pointer"></video></div>
+                            <div class="relative bg-stone-900 w-full h-full"><video src="{{ m.url }}#t=0.5" class="w-full h-full object-cover" muted playsinline preload="auto" onloadeddata="this.currentTime=0.5" onseeked="this.pause()" onplay="this.pause()" onclick="event.stopPropagation();openPreviewVideoLightbox(this.src)" style="cursor:pointer"></video></div>
                             {% else %}
                             <img src="{{ m.url }}" class="w-full h-full object-cover" alt="">
                             {% endif %}
@@ -413,7 +413,7 @@ Context: previews (list of dicts with account, title, caption, first_comment, ch
                     {% with m=media_items.0 %}
                     <div class="rounded-lg overflow-hidden mb-2">
                         {% if m.is_video %}
-                        <div class="relative bg-stone-900" style="aspect-ratio: 16/9;"><video src="{{ m.url }}#t=0.5" class="w-full h-full object-cover" muted preload="metadata" onloadedmetadata="this.currentTime=0.5;this.pause()" onclick="event.stopPropagation();openPreviewVideoLightbox(this.src)" style="cursor:pointer"></video></div>
+                        <div class="relative bg-stone-900" style="aspect-ratio: 16/9;"><video src="{{ m.url }}#t=0.5" class="w-full h-full object-cover" muted playsinline preload="auto" onloadeddata="this.currentTime=0.5" onseeked="this.pause()" onplay="this.pause()" onclick="event.stopPropagation();openPreviewVideoLightbox(this.src)" style="cursor:pointer"></video></div>
                         {% else %}
                         <img src="{{ m.url }}" class="w-full rounded-lg object-cover" alt="" style="max-height: 180px;">
                         {% endif %}
@@ -455,7 +455,7 @@ Context: previews (list of dicts with account, title, caption, first_comment, ch
                     {% with m=media_items.0 %}
                     <div class="rounded-xl overflow-hidden border border-stone-200 mb-2">
                         {% if m.is_video %}
-                        <div class="relative bg-stone-900" style="aspect-ratio: 16/9;"><video src="{{ m.url }}#t=0.5" class="w-full h-full object-cover" muted preload="metadata" onloadedmetadata="this.currentTime=0.5;this.pause()" onclick="event.stopPropagation();openPreviewVideoLightbox(this.src)" style="cursor:pointer"></video></div>
+                        <div class="relative bg-stone-900" style="aspect-ratio: 16/9;"><video src="{{ m.url }}#t=0.5" class="w-full h-full object-cover" muted playsinline preload="auto" onloadeddata="this.currentTime=0.5" onseeked="this.pause()" onplay="this.pause()" onclick="event.stopPropagation();openPreviewVideoLightbox(this.src)" style="cursor:pointer"></video></div>
                         {% else %}
                         <img src="{{ m.url }}" class="w-full object-cover" alt="" style="max-height: 180px;">
                         {% endif %}
@@ -479,7 +479,7 @@ Context: previews (list of dicts with account, title, caption, first_comment, ch
             {% with m=media_items.0 %}
             <div class="rounded-t-xl overflow-hidden bg-stone-100">
                 {% if m.is_video %}
-                <div class="relative" style="aspect-ratio: 2/3; max-height: 260px;"><video src="{{ m.url }}#t=0.5" class="w-full h-full object-cover" muted preload="metadata" onloadedmetadata="this.currentTime=0.5;this.pause()" onclick="event.stopPropagation();openPreviewVideoLightbox(this.src)" style="cursor:pointer"></video></div>
+                <div class="relative" style="aspect-ratio: 2/3; max-height: 260px;"><video src="{{ m.url }}#t=0.5" class="w-full h-full object-cover" muted playsinline preload="auto" onloadeddata="this.currentTime=0.5" onseeked="this.pause()" onplay="this.pause()" onclick="event.stopPropagation();openPreviewVideoLightbox(this.src)" style="cursor:pointer"></video></div>
                 {% else %}
                 <img src="{{ m.url }}" class="w-full object-cover" alt="" style="aspect-ratio: 2/3; max-height: 260px;">
                 {% endif %}
@@ -532,7 +532,7 @@ Context: previews (list of dicts with account, title, caption, first_comment, ch
             {% with m=media_items.0 %}
             <div class="rounded-lg overflow-hidden mb-3">
                 {% if m.is_video %}
-                <div class="relative bg-stone-900" style="aspect-ratio: 16/9;"><video src="{{ m.url }}#t=0.5" class="w-full h-full object-cover" muted preload="metadata" onloadedmetadata="this.currentTime=0.5;this.pause()" onclick="event.stopPropagation();openPreviewVideoLightbox(this.src)" style="cursor:pointer"></video>
+                <div class="relative bg-stone-900" style="aspect-ratio: 16/9;"><video src="{{ m.url }}#t=0.5" class="w-full h-full object-cover" muted playsinline preload="auto" onloadeddata="this.currentTime=0.5" onseeked="this.pause()" onplay="this.pause()" onclick="event.stopPropagation();openPreviewVideoLightbox(this.src)" style="cursor:pointer"></video>
                 <div class="absolute inset-0 flex items-center justify-center"><div class="w-12 h-12 rounded-full bg-black/40 flex items-center justify-center"><svg class="w-5 h-5 text-white ml-0.5" fill="currentColor" viewBox="0 0 20 20"><path d="M6.3 2.841A1.5 1.5 0 004 4.11V15.89a1.5 1.5 0 002.3 1.269l9.344-5.89a1.5 1.5 0 000-2.538L6.3 2.84z"/></svg></div></div></div>
                 {% else %}
                 <img src="{{ m.url }}" class="w-full object-cover" alt="" style="max-height: 200px;">

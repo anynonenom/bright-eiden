@@ -29,7 +29,7 @@ Shows all published/partially_published platform posts. Loaded via HTMX into #ta
                         {% elif first_att.media_asset.media_type == 'image' or first_att.media_asset.media_type == 'gif' %}
                             <img src="{{ first_att.media_asset.file.url }}" alt="" class="w-full h-full object-cover">
                         {% else %}
-                            <video src="{{ first_att.media_asset.file.url }}" class="w-full h-full object-cover" muted preload="metadata" onloadedmetadata="this.currentTime=0.5;this.pause()"></video>
+                            <video src="{{ first_att.media_asset.file.url }}" class="w-full h-full object-cover" muted playsinline preload="auto" onloadeddata="this.currentTime=0.5" onseeked="this.pause()" onplay="this.pause()"></video>
                         {% endif %}
                         {% if first_att.media_asset.media_type == 'video' %}
                         <div class="absolute inset-0 flex items-center justify-center">
