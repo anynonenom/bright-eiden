@@ -500,12 +500,15 @@
                                         <template x-for="(media, index) in createMediaAssets" :key="media.asset_id + '-' + index">
                                             <div class="idea-media-existing-card">
                                                 <template x-if="media.media_type === 'video'">
-                                                    <video :src="media.url" muted playsinline preload="metadata" onloadedmetadata="this.currentTime=0.5;this.pause()"></video>
+                                                    <video :src="media.url" muted playsinline preload="metadata"
+                                                           onloadedmetadata="this.currentTime=0.5;this.pause()"
+                                                           oncanplay="this.pause()"
+                                                           onplay="this.pause()"></video>
                                                 </template>
                                                 <template x-if="media.media_type !== 'video'">
-                                                    <img :src="media.url" alt="Preview">
+                                                    <img :src="media.url" alt="Preview" style="width:100%;height:100%;object-fit:contain;display:block;">
                                                 </template>
-                                                <button type="button" class="remove-btn" @click="_removeCreateMedia(index)" title="Remove">
+                                                <button type="button" class="remove-btn" @click.stop="_removeCreateMedia(index)" title="Remove">
                                                     <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.7" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
                                                 </button>
                                             </div>
