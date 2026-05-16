@@ -3,10 +3,13 @@
      data-tags="{{ idea.tags_payload_json|escape }}"
      data-media="{{ idea.media_payload_json|escape }}"
      data-post-id="{{ idea.post_id|default:'' }}"
+     data-approval-status="{{ idea.approval_status }}"
+     data-review-note="{{ idea.review_note|escapejs }}"
      draggable="true"
      @dragstart="startDrag($event, '{{ idea.id }}')"
      @dragend="endDrag($event)"
      @click="openEdit('{{ idea.id }}', '{{ idea.title|escapejs }}', '{{ idea.description|escapejs }}', $el.dataset.tags, '{{ group_id }}', $el.dataset.media, $el.dataset.postId)">
+
     {% if idea.cover_media and idea.cover_media.file %}
     <div class="-mx-3 -mt-3 mb-2 rounded-t-lg overflow-hidden flex items-center justify-center h-[120px]">
         {% if idea.cover_media.media_type == 'video' %}
@@ -16,15 +19,19 @@
         {% endif %}
     </div>
     {% endif %}
+
     {% if idea.media_count > 1 %}
     <div class="absolute right-2 top-2 inline-flex items-center justify-center min-w-[24px] h-6 px-1.5 rounded-full text-[10px] font-semibold bg-black/65 text-white">
         +{{ idea.media_count|add:"-1" }}
     </div>
     {% endif %}
-    <h4 class="text-sm font-semibold text-stone-800 mb-1">{{ idea.title }}</h4>
+
+    <h4 class="text-sm font-semibold text-stone-800 mb-1 pr-2">{{ idea.title }}</h4>
+
     {% if idea.description %}
     <p class="text-xs text-stone-500 line-clamp-2">{{ idea.description|truncatechars:120 }}</p>
     {% endif %}
+
     {% if idea.tags %}
     <div class="flex flex-wrap gap-1 mt-2">
         {% for tag in idea.tags %}
@@ -32,4 +39,106 @@
         {% endfor %}
     </div>
     {% endif %}
+
+    {# Approval status badge #}
+    <div class="mt-2 flex items-center justify-between gap-2" @click.stop>
+        {% if idea.approval_status == 'draft' %}
+        <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-stone-100 text-stone-500">
+            Draft
+        </span>
+        {% elif idea.approval_status == 'pending_review' %}
+        <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-amber-100 text-amber-700">
+            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+            Pending Review
+        </span>
+        {% elif idea.approval_status == 'changes_requested' %}
+        <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-orange-100 text-orange-700">
+            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+            Changes Requested
+        </span>
+        {% elif idea.approval_status == 'approved' %}
+        <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-green-100 text-green-700">
+            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+            Approved
+        </span>
+        {% elif idea.approval_status == 'rejected' %}
+        <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-red-100 text-red-600">
+            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+            Rejected
+        </span>
+        {% endif %}
+
+        {# Action buttons — only shown to the right role #}
+        <div class="flex items-center gap-1 ml-auto">
+
+            {# Creator: Submit for Review #}
+            {% if idea.can_be_submitted %}
+            <button
+                hx-post="{% url 'composer:idea_submit_for_review' workspace_id=workspace.id idea_id=idea.id %}"
+                hx-headers='{"X-CSRFToken": "{{ csrf_token }}", "Accept": "application/json"}'
+                hx-swap="none"
+                @htmx:after-request="if(event.detail.successful){ $dispatch('idea-card-updated', { ideaId: '{{ idea.id }}', cardHtml: JSON.parse(event.detail.xhr.responseText).card_html }) }"
+                class="px-2 py-0.5 text-[10px] font-semibold text-white bg-orange-500 hover:bg-orange-600 rounded-full transition-colors"
+                title="Submit for review">
+                Submit
+            </button>
+            {% endif %}
+
+            {# Manager: Approve / Reject / Request Changes (only when pending) #}
+            {% if idea.approval_status == 'pending_review' %}
+            <div x-data="{ open: false }" class="relative">
+                <button @click.stop="open = !open"
+                        class="px-2 py-0.5 text-[10px] font-semibold text-stone-600 bg-stone-100 hover:bg-stone-200 rounded-full transition-colors">
+                    Review ▾
+                </button>
+                <div x-show="open" @click.away="open = false" x-cloak
+                     x-transition:enter="transition ease-out duration-100"
+                     x-transition:enter-start="opacity-0 scale-95"
+                     x-transition:enter-end="opacity-100 scale-100"
+                     class="absolute right-0 bottom-full mb-1 bg-white rounded-xl shadow-lg ring-1 ring-stone-200 py-1 z-50 min-w-[160px]">
+
+                    {# Approve #}
+                    <button
+                        hx-post="{% url 'composer:idea_approve' workspace_id=workspace.id idea_id=idea.id %}"
+                        hx-headers='{"X-CSRFToken": "{{ csrf_token }}", "Accept": "application/json"}'
+                        hx-swap="none"
+                        @htmx:after-request="open = false; if(event.detail.successful){ const d = JSON.parse(event.detail.xhr.responseText); $dispatch('idea-card-updated', { ideaId: '{{ idea.id }}', cardHtml: d.card_html }); if(d.compose_url) window.location.href = d.compose_url; }"
+                        class="w-full text-left flex items-center gap-2 px-3 py-1.5 text-xs font-medium text-green-700 hover:bg-green-50 transition-colors">
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+                        Approve & Create Post
+                    </button>
+
+                    {# Request changes — opens note input #}
+                    <button @click.stop="open = false; $dispatch('open-request-changes', { ideaId: '{{ idea.id }}' })"
+                            class="w-full text-left flex items-center gap-2 px-3 py-1.5 text-xs font-medium text-orange-700 hover:bg-orange-50 transition-colors">
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/></svg>
+                        Request Changes
+                    </button>
+
+                    {# Reject — opens note input #}
+                    <button @click.stop="open = false; $dispatch('open-reject', { ideaId: '{{ idea.id }}' })"
+                            class="w-full text-left flex items-center gap-2 px-3 py-1.5 text-xs font-medium text-red-600 hover:bg-red-50 transition-colors">
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                        Reject
+                    </button>
+                </div>
+            </div>
+            {% endif %}
+
+            {# Approved: link to Post in composer #}
+            {% if idea.approval_status == 'approved' and idea.post_id %}
+            <a href="{% url 'composer:compose_edit' workspace_id=workspace.id post_id=idea.post_id %}"
+               class="px-2 py-0.5 text-[10px] font-semibold text-green-700 bg-green-100 hover:bg-green-200 rounded-full transition-colors">
+                Open Post →
+            </a>
+            {% endif %}
+        </div>
+    </div>
+
+    {# Review note (shown when changes requested or rejected) #}
+    {% if idea.review_note %}{% if idea.approval_status == 'changes_requested' or idea.approval_status == 'rejected' %}
+    <div class="mt-2 px-2 py-1.5 bg-stone-50 border border-stone-200 rounded-lg text-[11px] text-stone-600 italic" @click.stop>
+        "{{ idea.review_note|truncatechars:120 }}"
+    </div>
+    {% endif %}{% endif %}
 </div>

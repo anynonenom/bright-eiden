@@ -119,6 +119,13 @@ class Idea(models.Model):
         IN_PROGRESS = "in_progress", "Approved"
         DONE = "done", "Rejected"
 
+    class ApprovalStatus(models.TextChoices):
+        DRAFT = "draft", "Draft"
+        PENDING_REVIEW = "pending_review", "Pending Review"
+        CHANGES_REQUESTED = "changes_requested", "Changes Requested"
+        APPROVED = "approved", "Approved"
+        REJECTED = "rejected", "Rejected"
+
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     workspace = models.ForeignKey(
         "workspaces.Workspace",
@@ -161,7 +168,24 @@ class Idea(models.Model):
     )
     position = models.PositiveIntegerField(default=0)
 
-    # Optional link to a Post (when idea is converted)
+    # Approval workflow
+    approval_status = models.CharField(
+        max_length=20,
+        choices=ApprovalStatus.choices,
+        default=ApprovalStatus.DRAFT,
+        db_index=True,
+    )
+    reviewer = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="reviewed_ideas",
+    )
+    reviewed_at = models.DateTimeField(null=True, blank=True)
+    review_note = models.TextField(blank=True, default="")
+
+    # Optional link to a Post (when idea is approved and converted)
     post = models.OneToOneField(
         "Post",
         on_delete=models.SET_NULL,
@@ -182,6 +206,30 @@ class Idea(models.Model):
 
     def __str__(self):
         return f"Idea({self.group or self.status}): {self.title[:50]}"
+
+    @property
+    def is_editable(self):
+        return self.approval_status in (
+            self.ApprovalStatus.DRAFT,
+            self.ApprovalStatus.CHANGES_REQUESTED,
+        )
+
+    @property
+    def can_be_submitted(self):
+        return self.approval_status in (
+            self.ApprovalStatus.DRAFT,
+            self.ApprovalStatus.CHANGES_REQUESTED,
+        )
+
+    @property
+    def approval_status_color(self):
+        return {
+            "draft": "stone",
+            "pending_review": "amber",
+            "changes_requested": "orange",
+            "approved": "green",
+            "rejected": "red",
+        }.get(self.approval_status, "stone")
 
 
 class IdeaMedia(models.Model):

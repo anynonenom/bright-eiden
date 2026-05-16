@@ -14,6 +14,11 @@ urlpatterns = [
     path("ideas/<uuid:idea_id>/edit/", views.idea_edit, name="idea_edit"),
     path("ideas/<uuid:idea_id>/delete/", views.idea_delete, name="idea_delete"),
     path("ideas/<uuid:idea_id>/move/", views.idea_move, name="idea_move"),
+    # Idea approval workflow
+    path("ideas/<uuid:idea_id>/submit/", views.idea_submit_for_review, name="idea_submit_for_review"),
+    path("ideas/<uuid:idea_id>/approve/", views.idea_approve, name="idea_approve"),
+    path("ideas/<uuid:idea_id>/reject/", views.idea_reject, name="idea_reject"),
+    path("ideas/<uuid:idea_id>/request-changes/", views.idea_request_changes, name="idea_request_changes"),
     path("ideas/board/", views.idea_board, name="idea_board"),
     # Idea groups (Kanban columns)
     path("ideas/groups/create/", views.idea_group_create, name="idea_group_create"),

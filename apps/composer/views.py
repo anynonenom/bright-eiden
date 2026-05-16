@@ -1562,6 +1562,7 @@ def _render_idea_card_fragment(request, idea):
         {
             "idea": idea,
             "group_id": str(idea.group_id) if idea.group_id else "",
+            "workspace": idea.workspace,
         },
         request=request,
     )
@@ -1824,6 +1825,10 @@ def idea_edit(request, workspace_id, idea_id):
     """Edit an existing idea via HTMX."""
     workspace = _get_workspace(request, workspace_id)
     idea = get_object_or_404(Idea, id=idea_id, workspace=workspace)
+
+    if not idea.is_editable:
+        return JsonResponse({"error": "This idea cannot be edited in its current approval state."}, status=400)
+
     previous_group_id = str(idea.group_id) if idea.group_id else ""
 
     idea.title = request.POST.get("title", idea.title).strip()
@@ -1979,6 +1984,194 @@ def idea_create_post(request, workspace_id, idea_id):
             "compose_url": compose_url,
         }
     )
+
+
+@login_required
+@require_permission("create_posts")
+@require_POST
+def idea_submit_for_review(request, workspace_id, idea_id):
+    """Creator submits an idea for manager review."""
+    workspace = _get_workspace(request, workspace_id)
+    idea = get_object_or_404(Idea, id=idea_id, workspace=workspace)
+
+    if not idea.can_be_submitted:
+        return JsonResponse({"error": "This idea cannot be submitted for review."}, status=400)
+
+    idea.approval_status = Idea.ApprovalStatus.PENDING_REVIEW
+    idea.review_note = ""
+    idea.save(update_fields=["approval_status", "review_note", "updated_at"])
+
+    if _wants_json_response(request):
+        idea = (
+            Idea.objects.for_workspace(workspace.id)
+            .select_related("media_asset")
+            .prefetch_related("media_attachments__media_asset")
+            .get(id=idea.id)
+        )
+        return JsonResponse(
+            {
+                "ok": True,
+                "approval_status": idea.approval_status,
+                "card_html": _render_idea_card_fragment(request, idea),
+            }
+        )
+    return HttpResponse(status=204, headers={"HX-Trigger": "ideaChanged"})
+
+
+@login_required
+@require_permission("approve_posts")
+@require_POST
+def idea_approve(request, workspace_id, idea_id):
+    """Manager approves an idea — auto-creates a Draft Post from it."""
+    workspace = _get_workspace(request, workspace_id)
+    idea = get_object_or_404(Idea, id=idea_id, workspace=workspace)
+
+    if idea.approval_status != Idea.ApprovalStatus.PENDING_REVIEW:
+        return JsonResponse({"error": "Only ideas pending review can be approved."}, status=400)
+
+    now = timezone.now()
+
+    # Build post from idea (same logic as idea_create_post)
+    tags = [t.strip() for t in (idea.tags or []) if isinstance(t, str) and t.strip()]
+
+    ordered_media_asset_ids = []
+    seen_ids: set = set()
+    for att in idea.media_attachments.all():
+        if not att.media_asset_id:
+            continue
+        mid = str(att.media_asset_id)
+        if mid in seen_ids:
+            continue
+        seen_ids.add(mid)
+        ordered_media_asset_ids.append(mid)
+    if not ordered_media_asset_ids and idea.media_asset_id:
+        ordered_media_asset_ids.append(str(idea.media_asset_id))
+
+    connected_accounts = list(
+        SocialAccount.objects.for_workspace(workspace.id)
+        .filter(connection_status=SocialAccount.ConnectionStatus.CONNECTED)
+        .order_by("platform", "account_name", "id")
+    )
+
+    with transaction.atomic():
+        post = Post.objects.create(
+            workspace=workspace,
+            author=idea.author or request.user,
+            title=idea.title or "",
+            caption="",
+            tags=tags,
+        )
+        if ordered_media_asset_ids:
+            PostMedia.objects.bulk_create(
+                [
+                    PostMedia(post=post, media_asset_id=aid, position=i)
+                    for i, aid in enumerate(ordered_media_asset_ids)
+                ]
+            )
+        if connected_accounts:
+            PlatformPost.objects.bulk_create(
+                [PlatformPost(post=post, social_account=acc) for acc in connected_accounts]
+            )
+
+        idea.approval_status = Idea.ApprovalStatus.APPROVED
+        idea.reviewer = request.user
+        idea.reviewed_at = now
+        idea.review_note = request.POST.get("note", "").strip()
+        idea.post = post
+        idea.save(update_fields=["approval_status", "reviewer", "reviewed_at", "review_note", "post", "updated_at"])
+
+    from django.urls import reverse
+    compose_url = reverse("composer:compose_edit", kwargs={"workspace_id": workspace.id, "post_id": post.id})
+
+    if _wants_json_response(request):
+        idea = (
+            Idea.objects.for_workspace(workspace.id)
+            .select_related("media_asset", "reviewer")
+            .prefetch_related("media_attachments__media_asset")
+            .get(id=idea.id)
+        )
+        return JsonResponse(
+            {
+                "ok": True,
+                "approval_status": idea.approval_status,
+                "post_id": str(post.id),
+                "compose_url": compose_url,
+                "card_html": _render_idea_card_fragment(request, idea),
+            }
+        )
+    return HttpResponse(status=204, headers={"HX-Trigger": "ideaChanged"})
+
+
+@login_required
+@require_permission("approve_posts")
+@require_POST
+def idea_reject(request, workspace_id, idea_id):
+    """Manager rejects an idea with an optional note."""
+    workspace = _get_workspace(request, workspace_id)
+    idea = get_object_or_404(Idea, id=idea_id, workspace=workspace)
+
+    if idea.approval_status != Idea.ApprovalStatus.PENDING_REVIEW:
+        return JsonResponse({"error": "Only ideas pending review can be rejected."}, status=400)
+
+    idea.approval_status = Idea.ApprovalStatus.REJECTED
+    idea.reviewer = request.user
+    idea.reviewed_at = timezone.now()
+    idea.review_note = request.POST.get("note", "").strip()
+    idea.save(update_fields=["approval_status", "reviewer", "reviewed_at", "review_note", "updated_at"])
+
+    if _wants_json_response(request):
+        idea = (
+            Idea.objects.for_workspace(workspace.id)
+            .select_related("media_asset", "reviewer")
+            .prefetch_related("media_attachments__media_asset")
+            .get(id=idea.id)
+        )
+        return JsonResponse(
+            {
+                "ok": True,
+                "approval_status": idea.approval_status,
+                "card_html": _render_idea_card_fragment(request, idea),
+            }
+        )
+    return HttpResponse(status=204, headers={"HX-Trigger": "ideaChanged"})
+
+
+@login_required
+@require_permission("approve_posts")
+@require_POST
+def idea_request_changes(request, workspace_id, idea_id):
+    """Manager requests changes on an idea before it can be approved."""
+    workspace = _get_workspace(request, workspace_id)
+    idea = get_object_or_404(Idea, id=idea_id, workspace=workspace)
+
+    if idea.approval_status != Idea.ApprovalStatus.PENDING_REVIEW:
+        return JsonResponse({"error": "Only ideas pending review can have changes requested."}, status=400)
+
+    note = request.POST.get("note", "").strip()
+    if not note:
+        return JsonResponse({"error": "Please provide a note explaining what needs to change."}, status=400)
+
+    idea.approval_status = Idea.ApprovalStatus.CHANGES_REQUESTED
+    idea.reviewer = request.user
+    idea.reviewed_at = timezone.now()
+    idea.review_note = note
+    idea.save(update_fields=["approval_status", "reviewer", "reviewed_at", "review_note", "updated_at"])
+
+    if _wants_json_response(request):
+        idea = (
+            Idea.objects.for_workspace(workspace.id)
+            .select_related("media_asset", "reviewer")
+            .prefetch_related("media_attachments__media_asset")
+            .get(id=idea.id)
+        )
+        return JsonResponse(
+            {
+                "ok": True,
+                "approval_status": idea.approval_status,
+                "card_html": _render_idea_card_fragment(request, idea),
+            }
+        )
+    return HttpResponse(status=204, headers={"HX-Trigger": "ideaChanged"})
 
 
 @login_required
