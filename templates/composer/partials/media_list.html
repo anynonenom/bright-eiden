@@ -6,7 +6,7 @@ Context: media_attachments, post, workspace.
 {% for attachment in media_attachments %}
 <div class="media-thumb" draggable="true">
     {% if attachment.media_asset.is_video %}
-    <video src="{{ attachment.media_asset.file.url }}" class="w-full h-full object-cover" muted preload="metadata" onloadedmetadata="this.currentTime=0.5;this.pause()"></video>
+    <video src="{{ attachment.media_asset.file.url }}" class="w-full h-full object-cover" muted playsinline preload="metadata" onloadedmetadata="this.currentTime=0.5;this.pause()" oncanplay="this.pause()"></video>
     <!-- Play button — click opens lightbox -->
     <div class="absolute inset-0 flex items-center justify-center cursor-pointer"
          onclick="event.stopPropagation(); document.getElementById('vp-{{ attachment.id }}').classList.remove('hidden')">
@@ -37,6 +37,7 @@ Context: media_attachments, post, workspace.
     {% endif %}
     {% if post %}
     <button type="button" class="remove-btn"
+            onclick="event.preventDefault(); event.stopPropagation();"
             hx-post="{% url 'composer:remove_media' workspace_id=workspace.id post_id=post.id media_id=attachment.id %}"
             hx-target="#media-list"
             hx-swap="innerHTML">
