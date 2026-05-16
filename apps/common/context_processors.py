@@ -114,9 +114,16 @@ def sidebar_context(request):
     if org_membership and org_membership.org_role in ("owner", "admin"):
         can_create_workspace = True
 
+    # Effective workspace permissions for current membership
+    workspace_permissions = {}
+    ws_membership = getattr(request, "workspace_membership", None)
+    if ws_membership:
+        workspace_permissions = ws_membership.effective_permissions
+
     return {
         "sidebar_workspaces": sidebar_workspaces,
         "can_create_workspace": can_create_workspace,
+        "workspace_permissions": workspace_permissions,
         "sidebar_channels": sidebar_channels,
         "sidebar_unhealthy_channels": sidebar_unhealthy_channels,
         "sidebar_connectable_platforms": sidebar_connectable_platforms,
