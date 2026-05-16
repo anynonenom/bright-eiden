@@ -27,6 +27,10 @@ def check_social_account_health(account_id: str):
         logger.warning("Health check: account %s not found, skipping", account_id)
         return
 
+    if account.is_virtual:
+        logger.debug("Health check: skipping virtual account %s", account_id)
+        return
+
     # Load app credentials from the workspace's org or env fallback
     from django.conf import settings
 
@@ -131,7 +135,8 @@ def schedule_all_health_checks():
         connection_status__in=[
             SocialAccount.ConnectionStatus.CONNECTED,
             SocialAccount.ConnectionStatus.TOKEN_EXPIRING,
-        ]
+        ],
+        is_virtual=False,
     ).values_list("id", flat=True)
 
     count = 0
