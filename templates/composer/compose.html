@@ -1597,9 +1597,9 @@ function composerApp() {
                 video.className = 'w-full h-full object-cover';
                 video.muted = true;
                 video.playsInline = true;
-                video.preload = 'metadata';
-                video.onloadedmetadata = function() { this.currentTime = 0.5; this.pause(); };
-                video.oncanplay = function() { this.pause(); };
+                video.preload = 'auto';
+                video.onloadeddata = function() { this.currentTime = 0.5; };
+                video.onseeked = function() { this.pause(); };
                 video.onplay = function() { this.pause(); };
                 const placeholder = thumb.querySelector('.bg-stone-100');
                 if (placeholder) placeholder.replaceWith(video);

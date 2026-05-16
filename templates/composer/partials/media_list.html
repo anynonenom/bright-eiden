@@ -6,7 +6,7 @@ Context: media_attachments, post, workspace.
 {% for attachment in media_attachments %}
 <div class="media-thumb" draggable="true">
     {% if attachment.media_asset.is_video %}
-    <video src="{{ attachment.media_asset.file.url }}" class="w-full h-full object-cover" muted playsinline preload="metadata" onloadedmetadata="this.currentTime=0.5;this.pause()" oncanplay="this.pause()" onplay="this.pause()"></video>
+    <video src="{{ attachment.media_asset.file.url }}" class="w-full h-full object-cover" muted playsinline preload="auto" onloadeddata="this.currentTime=0.5" onseeked="this.pause()" onplay="this.pause()"></video>
     <!-- Play button — click opens lightbox -->
     <div class="absolute inset-0 flex items-center justify-center cursor-pointer"
          onclick="event.stopPropagation(); document.getElementById('vp-{{ attachment.id }}').classList.remove('hidden')">

@@ -6,7 +6,7 @@ Context: pending_assets, workspace.
 {% for asset in pending_assets %}
 <div class="media-thumb">
     {% if asset.is_video %}
-    <video src="{{ asset.file.url }}" class="w-full h-full object-cover" muted playsinline preload="metadata" onloadedmetadata="this.currentTime=0.5;this.pause()" oncanplay="this.pause()" onplay="this.pause()"></video>
+    <video src="{{ asset.file.url }}" class="w-full h-full object-cover" muted playsinline preload="auto" onloadeddata="this.currentTime=0.5" onseeked="this.pause()" onplay="this.pause()"></video>
     <div class="absolute inset-0 flex items-center justify-center cursor-pointer"
          onclick="event.stopPropagation(); document.getElementById('vp-pending-{{ asset.id }}').classList.remove('hidden')">
         <div class="w-7 h-7 rounded-full bg-black/60 flex items-center justify-center hover:bg-black/80 transition-colors">
