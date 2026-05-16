@@ -1554,6 +1554,16 @@ def _prepare_idea_for_kanban(idea):
     return idea
 
 
+def _move_idea_to_column(idea, workspace, column_name):
+    """Move idea to the Kanban column whose name matches column_name (case-insensitive)."""
+    group = IdeaGroup.objects.for_workspace(workspace.id).filter(
+        name__iexact=column_name
+    ).first()
+    if group and idea.group_id != group.id:
+        idea.group = group
+        idea.save(update_fields=["group", "updated_at"])
+
+
 def _render_idea_card_fragment(request, idea):
     """Render a single Kanban idea card fragment."""
     _prepare_idea_for_kanban(idea)
@@ -1751,12 +1761,15 @@ def idea_create(request, workspace_id):
     if not title:
         return HttpResponse("Title is required.", status=400)
 
-    # Assign to the specified group or default to the first group
+    # Assign to the specified group, or default to the "Ideas" column, then first group
     group_id = request.POST.get("group")
     if group_id:
         group = IdeaGroup.objects.filter(id=group_id, workspace=workspace).first()
     else:
-        group = IdeaGroup.objects.for_workspace(workspace.id).order_by("position").first()
+        group = (
+            IdeaGroup.objects.for_workspace(workspace.id).filter(name__iexact="ideas").first()
+            or IdeaGroup.objects.for_workspace(workspace.id).order_by("position").first()
+        )
 
     has_multi_media_payload = "media_asset_ids" in request.POST
     media_asset_ids = _normalize_media_asset_ids(request.POST.get("media_asset_ids", ""))
@@ -2000,6 +2013,7 @@ def idea_submit_for_review(request, workspace_id, idea_id):
     idea.approval_status = Idea.ApprovalStatus.PENDING_REVIEW
     idea.review_note = ""
     idea.save(update_fields=["approval_status", "review_note", "updated_at"])
+    _move_idea_to_column(idea, workspace, "review")
 
     if _wants_json_response(request):
         idea = (
@@ -2080,6 +2094,8 @@ def idea_approve(request, workspace_id, idea_id):
         idea.post = post
         idea.save(update_fields=["approval_status", "reviewer", "reviewed_at", "review_note", "post", "updated_at"])
 
+    _move_idea_to_column(idea, workspace, "Approved")
+
     from django.urls import reverse
     compose_url = reverse("composer:compose_edit", kwargs={"workspace_id": workspace.id, "post_id": post.id})
 
@@ -2118,6 +2134,7 @@ def idea_reject(request, workspace_id, idea_id):
     idea.reviewed_at = timezone.now()
     idea.review_note = request.POST.get("note", "").strip()
     idea.save(update_fields=["approval_status", "reviewer", "reviewed_at", "review_note", "updated_at"])
+    _move_idea_to_column(idea, workspace, "Rejected")
 
     if _wants_json_response(request):
         idea = (
@@ -2156,6 +2173,7 @@ def idea_request_changes(request, workspace_id, idea_id):
     idea.reviewed_at = timezone.now()
     idea.review_note = note
     idea.save(update_fields=["approval_status", "reviewer", "reviewed_at", "review_note", "updated_at"])
+    _move_idea_to_column(idea, workspace, "Ideas")
 
     if _wants_json_response(request):
         idea = (
