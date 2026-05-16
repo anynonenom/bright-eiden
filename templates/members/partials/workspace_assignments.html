@@ -18,7 +18,7 @@
                     class="text-xs px-2 py-1 rounded border outline-none"
                     style="border-color: var(--border); background: var(--surface-0); color: var(--text-primary);">
                 {% for value, label in workspace_role_choices %}
-                <option value="{{ value }}" {% if value == wd.current_role %}selected{% endif %}>{{ label }}</option>
+                <option value="{{ value }}" {% if value == wd.current_role %}selected{% elif not wd.assigned and value == "editor" %}selected{% endif %}>{{ label }}</option>
                 {% endfor %}
             </select>
         </div>
