@@ -1463,6 +1463,8 @@ function composerApp() {
         },
 
         onFormSaved(event) {
+            // Only handle HTMX events from the form itself, not from child elements (e.g. remove media button)
+            if (event.target !== document.getElementById('composer-form')) return;
             const xhr = event.detail.xhr;
             if (event.detail.successful) {
                 const action = document.getElementById('publish-action-btn')?.value;
