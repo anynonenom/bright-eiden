@@ -144,16 +144,34 @@ Calendar grid scrolls beneath.
         {% endif %}
     </div>
 
-    <!-- ── Floating legend bar ─────────────────────────────────────── -->
+    <!-- ── Floating legend bar (clickable status filters) ──────────── -->
     <div class="px-3 sm:px-4 lg:px-6 py-2 flex-shrink-0" style="border-top: 1px solid #EDE8DF; background: rgba(254,253,251,0.9);">
-        <div class="flex flex-wrap items-center justify-end gap-x-3 gap-y-1.5">
-            <span class="cal-legend-dot" style="--dot:#9BB5AE; --txt:#5C6B66;">Draft</span>
-            <span class="cal-legend-dot" style="--dot:#D97706; --txt:#92400E;">Pending</span>
-            <span class="cal-legend-dot" style="--dot:#0C5752; --txt:#0C5752;">Approved</span>
-            <span class="cal-legend-dot" style="--dot:#3B82F6; --txt:#1D4ED8;">Scheduled</span>
-            <span class="cal-legend-dot" style="--dot:#7C3AED; --txt:#4C1D95;">Publishing</span>
-            <span class="cal-legend-dot" style="--dot:#34D399; --txt:#065F46;">Published</span>
-            <span class="cal-legend-dot" style="--dot:#EF4444; --txt:#B91C1C;">Failed</span>
+        <div class="flex flex-wrap items-center justify-end gap-x-1 gap-y-1.5">
+            <button type="button" @click="calendarFilters.status = (calendarFilters.status === '' ? '' : ''); calendarFilters.status = ''; reloadCalendar()"
+                    :class="calendarFilters.status === '' ? 'ring-2 ring-stone-400 ring-offset-1' : ''"
+                    class="cal-legend-dot cursor-pointer hover:opacity-80 transition-opacity rounded-full px-1" style="--dot:#9BB5AE; --txt:#5C6B66;">All</button>
+            <button type="button" @click="calendarFilters.status = 'draft'; reloadCalendar()"
+                    :class="calendarFilters.status === 'draft' ? 'ring-2 ring-offset-1' : ''"
+                    :style="calendarFilters.status === 'draft' ? '--ring:#9BB5AE; ring-color:#9BB5AE;' : ''"
+                    class="cal-legend-dot cursor-pointer hover:opacity-80 transition-opacity rounded-full px-1" style="--dot:#9BB5AE; --txt:#5C6B66;">Draft</button>
+            <button type="button" @click="calendarFilters.status = 'pending_review'; reloadCalendar()"
+                    :class="calendarFilters.status === 'pending_review' ? 'ring-2 ring-offset-1' : ''"
+                    class="cal-legend-dot cursor-pointer hover:opacity-80 transition-opacity rounded-full px-1" style="--dot:#D97706; --txt:#92400E;">Pending</button>
+            <button type="button" @click="calendarFilters.status = 'approved'; reloadCalendar()"
+                    :class="calendarFilters.status === 'approved' ? 'ring-2 ring-offset-1' : ''"
+                    class="cal-legend-dot cursor-pointer hover:opacity-80 transition-opacity rounded-full px-1" style="--dot:#0C5752; --txt:#0C5752;">Approved</button>
+            <button type="button" @click="calendarFilters.status = 'scheduled'; reloadCalendar()"
+                    :class="calendarFilters.status === 'scheduled' ? 'ring-2 ring-offset-1' : ''"
+                    class="cal-legend-dot cursor-pointer hover:opacity-80 transition-opacity rounded-full px-1" style="--dot:#34D399; --txt:#065F46;">Scheduled</button>
+            <button type="button" @click="calendarFilters.status = 'publishing'; reloadCalendar()"
+                    :class="calendarFilters.status === 'publishing' ? 'ring-2 ring-offset-1' : ''"
+                    class="cal-legend-dot cursor-pointer hover:opacity-80 transition-opacity rounded-full px-1" style="--dot:#7C3AED; --txt:#4C1D95;">Publishing</button>
+            <button type="button" @click="calendarFilters.status = 'published'; reloadCalendar()"
+                    :class="calendarFilters.status === 'published' ? 'ring-2 ring-offset-1' : ''"
+                    class="cal-legend-dot cursor-pointer hover:opacity-80 transition-opacity rounded-full px-1" style="--dot:#34D399; --txt:#065F46;">Published</button>
+            <button type="button" @click="calendarFilters.status = 'failed'; reloadCalendar()"
+                    :class="calendarFilters.status === 'failed' ? 'ring-2 ring-offset-1' : ''"
+                    class="cal-legend-dot cursor-pointer hover:opacity-80 transition-opacity rounded-full px-1" style="--dot:#EF4444; --txt:#B91C1C;">Failed</button>
         </div>
     </div>
 </div>
