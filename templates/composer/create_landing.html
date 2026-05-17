@@ -112,7 +112,7 @@
     }
     .tag-chip button:hover { background: #FFEDD5; }
 
-    /* Modal overlay */
+    /* Create idea — centered modal (unchanged) */
     .idea-modal-overlay {
         position: fixed; inset: 0;
         background: rgba(0,0,0,0.3);
@@ -130,6 +130,32 @@
         max-height: calc(100vh - 80px);
         position: relative;
     }
+
+    /* Edit idea — right-side drawer panel */
+    .idea-panel-backdrop {
+        position: fixed; inset: 0;
+        background: rgba(0,0,0,0.18);
+        z-index: 100;
+        cursor: pointer;
+    }
+    .idea-panel {
+        position: fixed;
+        top: 0; right: 0; bottom: 0;
+        width: 100%;
+        max-width: 480px;
+        background: white;
+        box-shadow: -8px 0 40px rgba(0,0,0,0.12);
+        display: flex;
+        flex-direction: column;
+        z-index: 101;
+        transform: translateX(100%);
+        transition: transform 260ms cubic-bezier(0.16,1,0.3,1);
+    }
+    .idea-panel.is-open {
+        transform: translateX(0);
+    }
+
+    /* Shared close button */
     .idea-modal-close {
         position: absolute;
         top: 16px;
@@ -148,33 +174,36 @@
         z-index: 130;
         pointer-events: auto;
     }
-    .idea-modal-close svg {
-        pointer-events: none;
-    }
+    .idea-modal-close svg { pointer-events: none; }
     .idea-modal-close:hover {
         color: var(--text-primary);
         background: var(--neutral-100);
     }
-    .idea-modal-header {
+
+    /* Shared header / body / footer */
+    .idea-modal-header, .idea-panel-header {
         display: flex;
         align-items: center;
         justify-content: space-between;
         padding: 20px 50px 16px 24px;
+        flex-shrink: 0;
     }
-    .idea-modal-body {
+    .idea-modal-body, .idea-panel-body {
         flex: 1;
         overflow-y: auto;
         padding: 0 24px 16px;
     }
-    .idea-modal-footer {
+    .idea-modal-footer, .idea-panel-footer {
         padding: 16px 24px;
         border-top: 1px solid var(--border);
         display: flex;
         align-items: center;
         justify-content: flex-end;
         gap: 8px;
+        flex-shrink: 0;
     }
-    .idea-modal-body input.idea-title-input {
+    .idea-modal-body input.idea-title-input,
+    .idea-panel-body input.idea-title-input {
         width: 100%;
         font-size: 1.25rem;
         font-weight: 700;
@@ -185,10 +214,12 @@
         margin-bottom: 12px;
         background: transparent;
     }
-    .idea-modal-body input.idea-title-input::placeholder {
+    .idea-modal-body input.idea-title-input::placeholder,
+    .idea-panel-body input.idea-title-input::placeholder {
         color: var(--neutral-300);
     }
-    .idea-modal-body textarea.idea-desc-input {
+    .idea-modal-body textarea.idea-desc-input,
+    .idea-panel-body textarea.idea-desc-input {
         width: 100%;
         min-height: 160px;
         font-size: 0.875rem;
@@ -200,7 +231,8 @@
         background: transparent;
         line-height: 1.7;
     }
-    .idea-modal-body textarea.idea-desc-input::placeholder {
+    .idea-modal-body textarea.idea-desc-input::placeholder,
+    .idea-panel-body textarea.idea-desc-input::placeholder {
         color: var(--neutral-300);
     }
     .idea-pill-btn {
@@ -718,30 +750,41 @@
     </div>
 
     <!-- Edit Idea Modal -->
+    <!-- Edit idea — right-side panel backdrop -->
     <div x-show="editingIdea" x-cloak
-         class="idea-modal-overlay"
-         @click.self="editingIdea = null"
-         @keydown.escape.window="if (!editGroupDropdownOpen && !editTagDropdownOpen && !emojiPickerOpen) editingIdea = null">
-        <div class="idea-modal" @click.stop>
-            <!-- Close button -->
-            <button type="button" class="idea-modal-close" @click="editingIdea = null" title="Close">
-                <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-            </button>
-            <form :action="editingIdea ? `/workspace/{{ workspace.id }}/ideas/${editingIdea.id}/edit/` : ''"
-                  method="post"
-                  enctype="multipart/form-data"
-                  @submit.prevent="submitEditIdea($event)">
-                {% csrf_token %}
-                <!-- Hidden fields -->
-                <input type="hidden" name="group" :value="editSelectedGroup">
-                <input type="hidden" name="tags" :value="editSelectedTags.join(',')">
-                <input type="hidden" name="media_asset_ids" :value="editMediaAssetIdsCsv()">
-                <input type="hidden" name="media_asset_id" :value="editPrimaryMediaAssetId()">
-                <input type="hidden" name="remove_media" :value="editMediaAssets.length ? '' : 'true'">
+         class="idea-panel-backdrop"
+         @click="editingIdea = null"
+         @keydown.escape.window="if (!editGroupDropdownOpen && !editTagDropdownOpen && !emojiPickerOpen) editingIdea = null"
+         x-transition:enter="transition ease-out duration-200"
+         x-transition:enter-start="opacity-0"
+         x-transition:enter-end="opacity-100"
+         x-transition:leave="transition ease-in duration-150"
+         x-transition:leave-start="opacity-100"
+         x-transition:leave-end="opacity-0">
+    </div>
 
-                <!-- Header -->
-                <div class="idea-modal-header">
-                    <h2 class="text-lg font-semibold" style="color: var(--text-primary);">Edit Idea</h2>
+    <!-- Edit idea — right-side panel -->
+    <div :class="editingIdea ? 'idea-panel is-open' : 'idea-panel'" @click.stop>
+        <!-- Close button -->
+        <button type="button" class="idea-modal-close" @click="editingIdea = null" title="Close">
+            <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+        <form :action="editingIdea ? `/workspace/{{ workspace.id }}/ideas/${editingIdea.id}/edit/` : ''"
+              method="post"
+              enctype="multipart/form-data"
+              @submit.prevent="submitEditIdea($event)"
+              class="flex flex-col h-full">
+            {% csrf_token %}
+            <!-- Hidden fields -->
+            <input type="hidden" name="group" :value="editSelectedGroup">
+            <input type="hidden" name="tags" :value="editSelectedTags.join(',')">
+            <input type="hidden" name="media_asset_ids" :value="editMediaAssetIdsCsv()">
+            <input type="hidden" name="media_asset_id" :value="editPrimaryMediaAssetId()">
+            <input type="hidden" name="remove_media" :value="editMediaAssets.length ? '' : 'true'">
+
+            <!-- Header -->
+            <div class="idea-panel-header">
+                <h2 class="text-lg font-semibold" style="color: var(--text-primary);">Edit Idea</h2>
                     <div class="flex items-center gap-2">
                         <!-- Column selector dropdown -->
                         <div class="relative" @click.away="editGroupDropdownOpen = false">
@@ -828,7 +871,7 @@
                 </template>
 
                 <!-- Body -->
-                <div class="idea-modal-body" @click="editGroupDropdownOpen = false; editTagDropdownOpen = false">
+                <div class="idea-panel-body" @click="editGroupDropdownOpen = false; editTagDropdownOpen = false">
                     <input type="text" name="title" required
                            :value="editingIdea?.title || ''"
                            class="idea-title-input" placeholder="Give your idea a title">
@@ -869,7 +912,7 @@
                 </div>
 
                 <!-- Footer -->
-                <div class="idea-modal-footer" @click="editGroupDropdownOpen = false; editTagDropdownOpen = false">
+                <div class="idea-panel-footer" @click="editGroupDropdownOpen = false; editTagDropdownOpen = false">
                     <button type="button"
                             @click="showDeleteIdeaConfirm = true"
                             class="btn-danger-tint px-4 py-2 text-sm font-medium rounded-full cursor-pointer"
@@ -901,7 +944,6 @@
                     </button>
                 </div>
             </form>
-        </div>
     </div>
 
     <!-- Delete Idea Confirmation Modal -->

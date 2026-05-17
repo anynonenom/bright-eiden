@@ -264,9 +264,10 @@ def compose(request, workspace_id, post_id=None):
         post = get_object_or_404(Post, id=post_id, workspace=workspace)
         # Enforce edit permissions: authors can edit their own posts,
         # but editing another user's post requires edit_others_posts.
-        membership = request.workspace_membership
+        membership = getattr(request, "workspace_membership", None)
         perms = membership.effective_permissions if membership else {}
-        if post.author != request.user and not perms.get("edit_others_posts", False):
+        is_superuser = getattr(request.user, "is_superuser", False)
+        if post.author != request.user and not perms.get("edit_others_posts", False) and not is_superuser:
             raise PermissionDenied("You do not have permission to edit this post.")
         form = PostForm(instance=post)
         if post.scheduled_at:
@@ -372,12 +373,13 @@ def compose(request, workspace_id, post_id=None):
     )
 
     # Permissions for action buttons
-    membership = request.workspace_membership
+    membership = getattr(request, "workspace_membership", None)
     perms = membership.effective_permissions if membership else {}
-    can_publish = perms.get("publish_directly", False)
-    can_approve = perms.get("approve_posts", False)
+    is_superuser = getattr(request.user, "is_superuser", False)
+    can_publish = perms.get("publish_directly", False) or is_superuser
+    can_approve = perms.get("approve_posts", False) or is_superuser
     ws_role = membership.workspace_role if membership else None
-    can_view_internal_notes = ws_role not in ("client", "viewer") if ws_role else True
+    can_view_internal_notes = ws_role not in ("viewer",) if ws_role else True
 
     # Approval workflow context
     workflow_mode = workspace.approval_workflow_mode
@@ -1632,12 +1634,18 @@ def _move_idea_to_column(idea, workspace, column_name):
 def _render_idea_card_fragment(request, idea):
     """Render a single Kanban idea card fragment."""
     _prepare_idea_for_kanban(idea)
+    membership = getattr(request, "workspace_membership", None)
+    perms = membership.effective_permissions if membership else {}
+    can_drag = bool(perms.get("approve_posts"))
+    can_submit_drag = bool(perms.get("create_posts") and not can_drag)
     return render_to_string(
         "composer/partials/idea_card.html",
         {
             "idea": idea,
             "group_id": str(idea.group_id) if idea.group_id else "",
             "workspace": idea.workspace,
+            "can_drag": can_drag,
+            "can_submit_drag": can_submit_drag,
         },
         request=request,
     )
