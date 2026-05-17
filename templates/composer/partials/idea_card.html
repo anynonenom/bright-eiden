@@ -8,7 +8,7 @@
      {% if can_drag or can_submit_drag and idea.can_be_submitted %}draggable="true"
      @dragstart="startDrag($event, '{{ idea.id }}')"
      @dragend="endDrag($event)"{% else %}draggable="false"{% endif %}
-     @click="openEdit('{{ idea.id }}', '{{ idea.title|escapejs }}', '{{ idea.description|escapejs }}', $el.dataset.tags, '{{ group_id }}', $el.dataset.media, $el.dataset.postId)">
+     @click="openEdit('{{ idea.id }}', '{{ idea.title|escapejs }}', '{{ idea.description|escapejs }}', $el.dataset.tags, '{{ group_id }}', $el.dataset.media, $el.dataset.postId, $el.dataset.approvalStatus, $el.dataset.reviewNote)">
 
     {% if idea.cover_media and idea.cover_media.file %}
     <div class="-mx-3 -mt-3 mb-2 rounded-t-lg overflow-hidden flex items-center justify-center h-[120px]">
@@ -84,45 +84,11 @@
             </button>
             {% endif %}
 
-            {# Manager: Approve / Reject / Request Changes (only when pending) #}
+            {# Manager: clicking the card opens the panel for review — show a subtle indicator #}
             {% if idea.approval_status == 'pending_review' %}
-            <div x-data="{ open: false }" class="relative">
-                <button @click.stop="open = !open"
-                        class="px-2 py-0.5 text-[10px] font-semibold text-stone-600 bg-stone-100 hover:bg-stone-200 rounded-full transition-colors">
-                    Review ▾
-                </button>
-                <div x-show="open" @click.away="open = false" x-cloak
-                     x-transition:enter="transition ease-out duration-100"
-                     x-transition:enter-start="opacity-0 scale-95"
-                     x-transition:enter-end="opacity-100 scale-100"
-                     class="absolute right-0 bottom-full mb-1 bg-white rounded-xl shadow-lg ring-1 ring-stone-200 py-1 z-50 min-w-[160px]">
-
-                    {# Approve #}
-                    <button
-                        hx-post="{% url 'composer:idea_approve' workspace_id=workspace.id idea_id=idea.id %}"
-                        hx-headers='{"X-CSRFToken": "{{ csrf_token }}", "Accept": "application/json"}'
-                        hx-swap="none"
-                        @htmx:after-request="open = false; if(event.detail.successful){ const d = JSON.parse(event.detail.xhr.responseText); $dispatch('idea-card-updated', { ideaId: '{{ idea.id }}', cardHtml: d.card_html }); if(d.compose_url) window.location.href = d.compose_url; }"
-                        class="w-full text-left flex items-center gap-2 px-3 py-1.5 text-xs font-medium text-green-700 hover:bg-green-50 transition-colors">
-                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
-                        Approve & Create Post
-                    </button>
-
-                    {# Request changes — opens note input #}
-                    <button @click.stop="open = false; $dispatch('open-request-changes', { ideaId: '{{ idea.id }}' })"
-                            class="w-full text-left flex items-center gap-2 px-3 py-1.5 text-xs font-medium text-orange-700 hover:bg-orange-50 transition-colors">
-                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/></svg>
-                        Request Changes
-                    </button>
-
-                    {# Reject — opens note input #}
-                    <button @click.stop="open = false; $dispatch('open-reject', { ideaId: '{{ idea.id }}' })"
-                            class="w-full text-left flex items-center gap-2 px-3 py-1.5 text-xs font-medium text-red-600 hover:bg-red-50 transition-colors">
-                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-                        Reject
-                    </button>
-                </div>
-            </div>
+            <span class="px-2 py-0.5 text-[10px] font-semibold text-stone-400 bg-stone-100 rounded-full pointer-events-none">
+                Review →
+            </span>
             {% endif %}
 
             {# Approved: link to Post in composer #}
