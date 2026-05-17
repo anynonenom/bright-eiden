@@ -1210,6 +1210,9 @@ function kanbanBoard() {
         draggedIdeaId: null,
         draggedColumnId: null,
         _columnDragAllowed: false,
+        canDragAll: {{ can_drag|yesno:"true,false" }},
+        canSubmitDrag: {{ can_submit_drag|yesno:"true,false" }},
+        reviewGroupId: '{{ review_group_id }}',
 
         // Column ID-to-label map for the dropdown
         _columnMap: { {% for col in columns %}'{{ col.id }}': '{{ col.label }}'{% if not forloop.last %}, {% endif %}{% endfor %} },
@@ -1945,6 +1948,11 @@ function kanbanBoard() {
         dragOver(event) {
             if (this.draggedColumnId) return; // Ignore during column drag
             event.preventDefault();
+            var groupId = event.currentTarget.dataset.groupId;
+            if (!this.canDragAll && this.canSubmitDrag && groupId !== this.reviewGroupId) {
+                event.dataTransfer.dropEffect = 'none';
+                return;
+            }
             event.dataTransfer.dropEffect = 'move';
             event.currentTarget.classList.add('drag-over');
         },
@@ -1961,6 +1969,11 @@ function kanbanBoard() {
             var ideaId = event.dataTransfer.getData('text/plain');
             if (!ideaId) return;
 
+            // Members can only drop onto the Review column
+            if (!this.canDragAll && this.canSubmitDrag) {
+                if (groupId !== this.reviewGroupId) return;
+            }
+
             // Optimistic UI: move the card in the DOM immediately
             var card = this._findCardById(ideaId);
             if (card) {
@@ -1969,9 +1982,32 @@ function kanbanBoard() {
                 this._updateColumnCounts();
             }
 
-            // Fire server request in background (no full-board reload)
             var csrfToken = document.querySelector('[name=csrfmiddlewaretoken]')?.value
                 || document.cookie.match(/csrftoken=([^;]+)/)?.[1] || '';
+
+            // Members dragging to Review = submit for review
+            if (!this.canDragAll && this.canSubmitDrag) {
+                fetch('/workspace/{{ workspace.id }}/ideas/' + ideaId + '/submit/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                        'X-CSRFToken': csrfToken,
+                        'Accept': 'application/json',
+                    },
+                }).then(r => r.json()).then(data => {
+                    if (data.card_html) {
+                        var c = this._findCardById(ideaId);
+                        if (c) {
+                            var tmp = document.createElement('div');
+                            tmp.innerHTML = data.card_html;
+                            c.replaceWith(tmp.firstElementChild);
+                        }
+                    }
+                });
+                return;
+            }
+
+            // Managers: standard move
             fetch('/workspace/{{ workspace.id }}/ideas/' + ideaId + '/move/', {
                 method: 'POST',
                 headers: {

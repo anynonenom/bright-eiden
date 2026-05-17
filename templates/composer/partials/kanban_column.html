@@ -42,12 +42,12 @@
         </div>
     </div>
 
-    <div class="kanban-cards"
-         {% if can_drag %}@dragover.prevent="dragOver($event)"
+    <div class="kanban-cards" data-group-id="{{ col.id }}"
+         {% if can_drag or can_submit_drag %}@dragover.prevent="dragOver($event)"
          @dragleave="dragLeave($event)"
          @drop="dropOnColumn($event, '{{ col.id }}')"{% endif %}>
         {% for idea in col.ideas %}
-            {% include "composer/partials/idea_card.html" with idea=idea group_id=col.id can_drag=can_drag %}
+            {% include "composer/partials/idea_card.html" with idea=idea group_id=col.id can_drag=can_drag can_submit_drag=can_submit_drag %}
         {% endfor %}
     </div>
 

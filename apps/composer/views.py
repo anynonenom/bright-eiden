@@ -1777,7 +1777,11 @@ def create_landing(request, workspace_id):
     feeds = Feed.objects.for_workspace(workspace.id)
 
     membership = getattr(request, "workspace_membership", None)
-    can_drag = bool(membership and membership.effective_permissions.get("approve_posts"))
+    perms = membership.effective_permissions if membership else {}
+    can_drag = bool(perms.get("approve_posts"))
+    can_submit_drag = bool(perms.get("create_posts") and not can_drag)
+    review_group = IdeaGroup.objects.for_workspace(workspace.id).filter(name__iexact="review").first()
+    review_group_id = str(review_group.id) if review_group else ""
 
     context = {
         "workspace": workspace,
@@ -1790,6 +1794,8 @@ def create_landing(request, workspace_id):
         "template_categories": CATEGORIES,
         "feeds": feeds,
         "can_drag": can_drag,
+        "can_submit_drag": can_submit_drag,
+        "review_group_id": review_group_id,
     }
     return render(request, "composer/create_landing.html", context)
 
@@ -2293,8 +2299,21 @@ def idea_move(request, workspace_id, idea_id):
     """Move an idea to a new column/position via HTMX (drag-and-drop)."""
     workspace = _get_workspace(request, workspace_id)
     idea = get_object_or_404(Idea, id=idea_id, workspace=workspace)
+
+    membership = getattr(request, "workspace_membership", None)
+    perms = membership.effective_permissions if membership else {}
+    can_drag_all = perms.get("approve_posts", False)
+
     new_group_id = request.POST.get("group")
     new_position = request.POST.get("position")
+
+    # Members without approve_posts can only drag to the Review column and only their own ideas
+    if not can_drag_all:
+        if idea.author != request.user:
+            raise PermissionDenied
+        review_group = IdeaGroup.objects.for_workspace(workspace.id).filter(name__iexact="review").first()
+        if not review_group or str(new_group_id) != str(review_group.id):
+            raise PermissionDenied
 
     # Support both group-based and legacy status-based moves
     if new_group_id:
@@ -2324,7 +2343,11 @@ def idea_board(request, workspace_id):
     columns, all_tags = _idea_columns(workspace, tag)
 
     membership = getattr(request, "workspace_membership", None)
-    can_drag = bool(membership and membership.effective_permissions.get("approve_posts"))
+    perms = membership.effective_permissions if membership else {}
+    can_drag = bool(perms.get("approve_posts"))
+    can_submit_drag = bool(perms.get("create_posts") and not can_drag)
+    review_group = IdeaGroup.objects.for_workspace(workspace.id).filter(name__iexact="review").first()
+    review_group_id = str(review_group.id) if review_group else ""
 
     return render(
         request,
@@ -2335,6 +2358,8 @@ def idea_board(request, workspace_id):
             "all_tags": all_tags,
             "active_tag": tag,
             "can_drag": can_drag,
+            "can_submit_drag": can_submit_drag,
+            "review_group_id": review_group_id,
         },
     )
 

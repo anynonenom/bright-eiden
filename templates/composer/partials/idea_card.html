@@ -5,7 +5,7 @@
      data-post-id="{{ idea.post_id|default:'' }}"
      data-approval-status="{{ idea.approval_status }}"
      data-review-note="{{ idea.review_note|escapejs }}"
-     {% if can_drag %}draggable="true"
+     {% if can_drag or can_submit_drag and idea.can_be_submitted %}draggable="true"
      @dragstart="startDrag($event, '{{ idea.id }}')"
      @dragend="endDrag($event)"{% else %}draggable="false"{% endif %}
      @click="openEdit('{{ idea.id }}', '{{ idea.title|escapejs }}', '{{ idea.description|escapejs }}', $el.dataset.tags, '{{ group_id }}', $el.dataset.media, $el.dataset.postId)">
