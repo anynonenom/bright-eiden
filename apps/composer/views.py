@@ -539,9 +539,10 @@ def save_post(request, workspace_id, post_id=None):
     if post_id:
         post = get_object_or_404(Post, id=post_id, workspace=workspace)
         # Enforce edit permissions: authors can edit their own, others need edit_others_posts
-        membership = request.workspace_membership
+        membership = getattr(request, "workspace_membership", None)
         perms = membership.effective_permissions if membership else {}
-        if post.author != request.user and not perms.get("edit_others_posts", False):
+        is_superuser = getattr(request.user, "is_superuser", False)
+        if post.author != request.user and not perms.get("edit_others_posts", False) and not is_superuser:
             raise PermissionDenied("You do not have permission to edit this post.")
         form = PostForm(request.POST, instance=post)
     else:
@@ -562,9 +563,10 @@ def save_post(request, workspace_id, post_id=None):
     initial_status = "draft"  # default status for newly created PlatformPosts
 
     if action == "schedule":
-        membership = request.workspace_membership
+        membership = getattr(request, "workspace_membership", None)
         perms = membership.effective_permissions if membership else {}
-        if not perms.get("publish_directly", False):
+        is_superuser = getattr(request.user, "is_superuser", False)
+        if not perms.get("publish_directly", False) and not is_superuser:
             raise PermissionDenied("You do not have permission to schedule posts directly.")
         sched_date = form.cleaned_data.get("scheduled_date")
         sched_time = form.cleaned_data.get("scheduled_time")
@@ -590,9 +592,10 @@ def save_post(request, workspace_id, post_id=None):
             return JsonResponse({"errors": {"schedule": "Date and time required."}}, status=400)
     elif action == "publish_now":
         # Server-side permission check - only roles with publish_directly can bypass approval
-        membership = request.workspace_membership
+        membership = getattr(request, "workspace_membership", None)
         perms = membership.effective_permissions if membership else {}
-        if not perms.get("publish_directly", False):
+        is_superuser = getattr(request.user, "is_superuser", False)
+        if not perms.get("publish_directly", False) and not is_superuser:
             raise PermissionDenied("You do not have permission to publish directly.")
         now_dt = timezone.now()
         post.scheduled_at = now_dt
@@ -810,12 +813,13 @@ def transition_platform_post(request, workspace_id, post_id, platform_post_id):
     if not target:
         return JsonResponse({"error": "target_status required"}, status=400)
 
-    membership = request.workspace_membership
+    membership = getattr(request, "workspace_membership", None)
     perms = membership.effective_permissions if membership else {}
+    is_superuser = getattr(request.user, "is_superuser", False)
     approval_states = {"approved", "pending_review", "changes_requested", "rejected"}
-    if target in ("scheduled", "publishing") and not perms.get("publish_directly", False):
+    if target in ("scheduled", "publishing") and not perms.get("publish_directly", False) and not is_superuser:
         raise PermissionDenied("You do not have permission to schedule this post.")
-    if target in approval_states and not perms.get("approve_posts", False) and target != "pending_review":
+    if target in approval_states and not perms.get("approve_posts", False) and target != "pending_review" and not is_superuser:
         raise PermissionDenied("You do not have permission to make approval decisions.")
 
     if pp.status == target:
@@ -845,9 +849,10 @@ def autosave(request, workspace_id, post_id=None):
     if post_id:
         post = get_object_or_404(Post, id=post_id, workspace=workspace)
         # Enforce edit permissions on existing posts
-        membership = request.workspace_membership
+        membership = getattr(request, "workspace_membership", None)
         perms = membership.effective_permissions if membership else {}
-        if post.author != request.user and not perms.get("edit_others_posts", False):
+        is_superuser = getattr(request.user, "is_superuser", False)
+        if post.author != request.user and not perms.get("edit_others_posts", False) and not is_superuser:
             raise PermissionDenied("You do not have permission to edit this post.")
     else:
         # Check if a previous autosave already created a draft for this session
@@ -1400,7 +1405,6 @@ def drafts_list(request, workspace_id):
 
     # Tab filtering
     STATUS_TABS = {
-        "draft": ["draft"],
         "pending": ["pending_review"],
         "changes": ["changes_requested"],
         "rejected": ["rejected"],
@@ -1418,9 +1422,6 @@ def drafts_list(request, workspace_id):
 
     counts = {
         "all": count_qs.distinct().count(),
-        "draft": count_qs.filter(platform_posts__status="draft").exclude(
-            platform_posts__status__in=["pending_review", "approved", "scheduled", "publishing", "published"]
-        ).distinct().count(),
         "pending": count_qs.filter(platform_posts__status="pending_review").distinct().count(),
         "changes": count_qs.filter(platform_posts__status="changes_requested").distinct().count(),
         "rejected": count_qs.filter(platform_posts__status="rejected").distinct().count(),
@@ -1453,7 +1454,6 @@ def drafts_list(request, workspace_id):
 
     tab_defs = [
         ("all", "All"),
-        ("draft", "Drafts"),
         ("pending", "Pending Review"),
         ("changes", "Changes Requested"),
         ("rejected", "Rejected"),
