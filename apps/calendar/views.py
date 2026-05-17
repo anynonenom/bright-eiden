@@ -395,6 +395,10 @@ def calendar_view(request, workspace_id):
     # Publish page context (channels, tags, timezone dropdowns)
     publish_ctx = _get_publish_context(workspace, request)
 
+    cal_membership = getattr(request, "workspace_membership", None)
+    cal_perms = cal_membership.effective_permissions if cal_membership else {}
+    can_schedule = cal_perms.get("publish_directly", False)
+
     context = {
         "workspace": workspace,
         "mode": mode,
@@ -407,6 +411,7 @@ def calendar_view(request, workspace_id):
         "active_filters": active_filters,
         "status_choices": Post.Status.choices,
         "show_holidays": show_holidays,
+        "can_schedule": can_schedule,
         **publish_ctx,
     }
 
@@ -769,6 +774,8 @@ def reschedule_post(request, workspace_id):
     can_edit = (is_own_post and perms.get("edit_own_posts")) or perms.get("edit_others_posts")
     if not can_edit:
         return JsonResponse({"error": "Permission denied."}, status=403)
+    if not perms.get("publish_directly", False):
+        return JsonResponse({"error": "You do not have permission to schedule posts directly."}, status=403)
 
     try:
         import zoneinfo

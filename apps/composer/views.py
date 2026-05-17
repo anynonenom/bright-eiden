@@ -560,6 +560,10 @@ def save_post(request, workspace_id, post_id=None):
     initial_status = "draft"  # default status for newly created PlatformPosts
 
     if action == "schedule":
+        membership = request.workspace_membership
+        perms = membership.effective_permissions if membership else {}
+        if not perms.get("publish_directly", False):
+            raise PermissionDenied("You do not have permission to schedule posts directly.")
         sched_date = form.cleaned_data.get("scheduled_date")
         sched_time = form.cleaned_data.get("scheduled_time")
         if sched_date and sched_time:
