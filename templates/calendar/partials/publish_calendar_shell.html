@@ -150,11 +150,7 @@ Calendar grid scrolls beneath.
             <button type="button" @click="calendarFilters.status = (calendarFilters.status === '' ? '' : ''); calendarFilters.status = ''; reloadCalendar()"
                     :class="calendarFilters.status === '' ? 'ring-2 ring-stone-400 ring-offset-1' : ''"
                     class="cal-legend-dot cursor-pointer hover:opacity-80 transition-opacity rounded-full px-1" style="--dot:#9BB5AE; --txt:#5C6B66;">All</button>
-            <button type="button" @click="calendarFilters.status = 'draft'; reloadCalendar()"
-                    :class="calendarFilters.status === 'draft' ? 'ring-2 ring-offset-1' : ''"
-                    :style="calendarFilters.status === 'draft' ? '--ring:#9BB5AE; ring-color:#9BB5AE;' : ''"
-                    class="cal-legend-dot cursor-pointer hover:opacity-80 transition-opacity rounded-full px-1" style="--dot:#9BB5AE; --txt:#5C6B66;">Draft</button>
-            <button type="button" @click="calendarFilters.status = 'pending_review'; reloadCalendar()"
+<button type="button" @click="calendarFilters.status = 'pending_review'; reloadCalendar()"
                     :class="calendarFilters.status === 'pending_review' ? 'ring-2 ring-offset-1' : ''"
                     class="cal-legend-dot cursor-pointer hover:opacity-80 transition-opacity rounded-full px-1" style="--dot:#D97706; --txt:#92400E;">Pending</button>
             <button type="button" @click="calendarFilters.status = 'approved'; reloadCalendar()"
