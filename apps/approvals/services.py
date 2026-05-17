@@ -374,11 +374,8 @@ def bulk_reject(post_ids, user, workspace, comment):
 
 
 def _notify_clients(post, workspace):
-    """Send CLIENT_APPROVAL_REQUESTED notification to all client members."""
-    client_memberships = WorkspaceMembership.objects.filter(
-        workspace=workspace,
-        workspace_role=WorkspaceMembership.WorkspaceRole.CLIENT,
-    ).select_related("user")
+    """No-op: client role removed."""
+    client_memberships = WorkspaceMembership.objects.none()
 
     for membership in client_memberships:
         notify(

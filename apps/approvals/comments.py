@@ -138,8 +138,8 @@ def get_comments_for_post(post, user):
         .order_by("created_at")
     )
 
-    # Clients only see external comments
-    if membership and membership.workspace_role == WorkspaceMembership.WorkspaceRole.CLIENT:
+    # Viewers only see external comments
+    if membership and membership.workspace_role == WorkspaceMembership.WorkspaceRole.VIEWER:
         qs = qs.filter(visibility=PostComment.Visibility.EXTERNAL)
 
     return qs
