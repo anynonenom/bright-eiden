@@ -47,7 +47,7 @@
 
                 {# Status indicator stripe #}
                 <div class="flex-shrink-0 w-1 self-stretch rounded-full mt-0.5
-                    {% if post.status == 'pending_review' or post.status == 'pending_client' %}bg-amber-400
+                    {% if post.status == 'pending_review' %}bg-amber-400
                     {% elif post.status == 'changes_requested' %}bg-orange-400
                     {% elif post.status == 'rejected' %}bg-red-400
                     {% elif post.status == 'approved' %}bg-green-400
@@ -70,7 +70,7 @@
                         <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-semibold bg-stone-100 text-stone-500">
                             Draft
                         </span>
-                        {% elif post.status == 'pending_review' or post.status == 'pending_client' %}
+                        {% elif post.status == 'pending_review' %}
                         <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-semibold bg-amber-100 text-amber-700">
                             <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
                             Pending Review

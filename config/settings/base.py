@@ -73,7 +73,6 @@ LOCAL_APPS = [
     "apps.notifications",
     "apps.inbox",
     "apps.approvals",
-    "apps.client_portal",
     "apps.onboarding",
     "theme",
 ]

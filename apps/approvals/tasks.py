@@ -16,7 +16,6 @@ logger = logging.getLogger(__name__)
 
 # Default reminder thresholds (overridable via settings_manager)
 PENDING_REVIEW_HOURS = 24
-PENDING_CLIENT_HOURS = 48
 MAX_REMINDERS = 2
 
 
@@ -35,13 +34,6 @@ def check_approval_reminders():
         now=now,
     )
 
-    # 2. Posts stuck in pending_client
-    _process_stage(
-        stage="pending_client",
-        status="pending_client",
-        threshold_hours=PENDING_CLIENT_HOURS,
-        now=now,
-    )
 
 
 def _process_stage(stage, status, threshold_hours, now):
@@ -82,8 +74,6 @@ def _process_stage(stage, status, threshold_hours, now):
         # Send reminder
         if stage == "pending_review":
             _remind_reviewers(post)
-        elif stage == "pending_client":
-            _remind_clients(post)
 
         reminder.reminder_count += 1
         reminder.last_reminder_at = now
@@ -119,27 +109,6 @@ def _remind_reviewers(post):
             )
 
 
-def _remind_clients(post):
-    """Send reminder to client members."""
-    workspace = post.workspace
-    client_memberships = WorkspaceMembership.objects.filter(
-        workspace=workspace,
-        workspace_role=WorkspaceMembership.WorkspaceRole.CLIENT,
-    ).select_related("user")
-
-    for membership in client_memberships:
-        notify(
-            user=membership.user,
-            event_type=EventType.APPROVAL_REMINDER,
-            title="Posts waiting for your approval",
-            body=f"Content in {workspace.name} is waiting for your review.",
-            data={
-                "post_id": str(post.id),
-                "workspace_id": str(workspace.id),
-            },
-        )
-
-
 def _escalate(post, stage):
     """Notify workspace managers that a post is stalled."""
     workspace = post.workspace
@@ -151,7 +120,7 @@ def _escalate(post, stage):
         ],
     ).select_related("user")
 
-    stage_label = "internal review" if stage == "pending_review" else "client approval"
+    stage_label = "internal review"
 
     for membership in manager_memberships:
         notify(

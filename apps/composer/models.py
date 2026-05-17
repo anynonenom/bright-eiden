@@ -384,7 +384,6 @@ class PlatformPost(models.Model):
     class Status(models.TextChoices):
         DRAFT = "draft", "Draft"
         PENDING_REVIEW = "pending_review", "Pending Review"
-        PENDING_CLIENT = "pending_client", "Pending Client"
         APPROVED = "approved", "Approved"
         CHANGES_REQUESTED = "changes_requested", "Changes Requested"
         REJECTED = "rejected", "Rejected"
@@ -401,8 +400,7 @@ class PlatformPost(models.Model):
     VALID_TRANSITIONS = {
         "draft": {"pending_review", "scheduled", "publishing"},
         "pending_review": {"approved", "changes_requested", "rejected"},
-        "approved": {"pending_client", "scheduled", "publishing", "draft"},
-        "pending_client": {"approved", "changes_requested", "rejected"},
+        "approved": {"scheduled", "publishing", "draft"},
         "changes_requested": {"pending_review", "draft"},
         "rejected": {"draft", "pending_review"},
         "scheduled": {"publishing", "draft"},
@@ -415,7 +413,6 @@ class PlatformPost(models.Model):
     STATUS_COLORS = {
         "draft": "gray",
         "pending_review": "orange",
-        "pending_client": "amber",
         "approved": "teal",
         "changes_requested": "orange",
         "rejected": "red",

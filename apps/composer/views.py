@@ -810,7 +810,7 @@ def transition_platform_post(request, workspace_id, post_id, platform_post_id):
 
     membership = request.workspace_membership
     perms = membership.effective_permissions if membership else {}
-    approval_states = {"approved", "pending_review", "pending_client", "changes_requested", "rejected"}
+    approval_states = {"approved", "pending_review", "changes_requested", "rejected"}
     if target in ("scheduled", "publishing") and not perms.get("publish_directly", False):
         raise PermissionDenied("You do not have permission to schedule this post.")
     if target in approval_states and not perms.get("approve_posts", False) and target != "pending_review":
@@ -1399,7 +1399,7 @@ def drafts_list(request, workspace_id):
     # Tab filtering
     STATUS_TABS = {
         "draft": ["draft"],
-        "pending": ["pending_review", "pending_client"],
+        "pending": ["pending_review"],
         "changes": ["changes_requested"],
         "rejected": ["rejected"],
         "approved": ["approved", "scheduled", "published", "publishing"],
@@ -1417,9 +1417,9 @@ def drafts_list(request, workspace_id):
     counts = {
         "all": count_qs.distinct().count(),
         "draft": count_qs.filter(platform_posts__status="draft").exclude(
-            platform_posts__status__in=["pending_review", "pending_client", "approved", "scheduled", "publishing", "published"]
+            platform_posts__status__in=["pending_review", "approved", "scheduled", "publishing", "published"]
         ).distinct().count(),
-        "pending": count_qs.filter(platform_posts__status__in=["pending_review", "pending_client"]).distinct().count(),
+        "pending": count_qs.filter(platform_posts__status="pending_review").distinct().count(),
         "changes": count_qs.filter(platform_posts__status="changes_requested").distinct().count(),
         "rejected": count_qs.filter(platform_posts__status="rejected").distinct().count(),
         "approved": count_qs.filter(platform_posts__status__in=["approved", "scheduled", "published", "publishing"]).distinct().count(),

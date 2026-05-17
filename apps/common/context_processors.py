@@ -93,7 +93,7 @@ def sidebar_context(request):
         sidebar_pending_approvals = (
             PlatformPost.objects.filter(
                 post__workspace_id=workspace.id,
-                status__in=["pending_review", "pending_client"],
+                status__in=["pending_review"],
             )
             .values("post_id")
             .distinct()

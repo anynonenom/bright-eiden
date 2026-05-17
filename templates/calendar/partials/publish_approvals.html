@@ -12,7 +12,7 @@ All members can view; action buttons shown conditionally based on can_approve pe
                 hx-target="#tab-content" hx-swap="innerHTML"
                 class="px-3.5 py-1.5 text-[0.8125rem] font-medium rounded-full transition-colors {% if status_filter == 'all' %}text-white{% else %}text-stone-600 hover:bg-stone-100{% endif %}"
                 {% if status_filter == 'all' %}style="background: var(--primary);"{% endif %}>
-            All <span class="ml-1 opacity-75">{{ pending_review_count|add:pending_client_count|add:approved_count|add:rejected_count|add:changes_requested_count }}</span>
+            All <span class="ml-1 opacity-75">{{ pending_review_count|add:approved_count|add:rejected_count|add:changes_requested_count }}</span>
         </button>
         <button hx-get="{% url 'calendar:publish_tab_approvals' workspace_id=workspace.id %}?approval_status=pending_review"
                 hx-target="#tab-content" hx-swap="innerHTML"

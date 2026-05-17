@@ -212,7 +212,7 @@ def _get_publish_context(workspace, request):
         "drafts_count": PlatformPost.objects.filter(post__workspace_id=workspace.id, status="draft").count(),
         "approvals_count": PlatformPost.objects.filter(
             post__workspace_id=workspace.id,
-            status__in=["pending_review", "pending_client", "approved", "rejected", "changes_requested"],
+            status__in=["pending_review", "approved", "rejected", "changes_requested"],
         ).count(),
         "sent_count": PlatformPost.objects.filter(
             post__workspace_id=workspace.id,
@@ -313,7 +313,7 @@ def _get_tab_context(request, workspace, tab: str) -> dict:
         return {**base_ctx, "platform_posts": platform_posts[:200]}
 
     # approvals
-    approval_statuses = ["pending_review", "pending_client", "approved", "changes_requested", "rejected"]
+    approval_statuses = ["pending_review", "approved", "changes_requested", "rejected"]
     status_filter = request.GET.get("approval_status", "all")
     platform_posts = (
         PlatformPost.objects.filter(
@@ -341,7 +341,6 @@ def _get_tab_context(request, workspace, tab: str) -> dict:
         "status_filter": status_filter,
         "can_approve": can_approve,
         "pending_review_count": _count("pending_review"),
-        "pending_client_count": _count("pending_client"),
         "approved_count": _count("approved"),
         "rejected_count": _count("rejected"),
         "changes_requested_count": _count("changes_requested"),

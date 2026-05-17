@@ -14,7 +14,6 @@ _WORKFLOW_ORDER = [
     "changes_requested",
     "rejected",
     "pending_review",
-    "pending_client",
     "approved",
     "scheduled",
     "publishing",

@@ -8,8 +8,6 @@
                 <!-- Status badge -->
                 {% if post.status == 'pending_review' %}
                 <span class="inline-flex items-center px-2 py-0.5 text-[0.6875rem] font-semibold rounded-full bg-orange-50 text-orange-700">Pending Review</span>
-                {% elif post.status == 'pending_client' %}
-                <span class="inline-flex items-center px-2 py-0.5 text-[0.6875rem] font-semibold rounded-full bg-amber-50 text-amber-700">Pending Client</span>
                 {% elif post.status == 'approved' %}
                 <span class="inline-flex items-center px-2 py-0.5 text-[0.6875rem] font-semibold rounded-full bg-emerald-50 text-emerald-700">Approved</span>
                 {% elif post.status == 'changes_requested' %}
@@ -78,7 +76,7 @@
                title="Edit post">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931z"/></svg>
             </a>
-            {% if post.status == 'pending_review' or post.status == 'pending_client' %}
+            {% if post.status == 'pending_review' %}
             <!-- Approve -->
             <button hx-post="{% url 'approvals:approve' workspace_id=workspace.id post_id=post.id %}"
                     hx-target="#post-row-{{ post.id }}"

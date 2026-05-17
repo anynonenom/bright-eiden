@@ -45,7 +45,6 @@ class WorkspaceMembership(models.Model):
         MANAGER = "manager", "Manager"
         EDITOR = "editor", "Editor"
         CONTRIBUTOR = "contributor", "Contributor"
-        CLIENT = "client", "Client"
         VIEWER = "viewer", "Viewer"
 
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)

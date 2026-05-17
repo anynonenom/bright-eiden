@@ -55,17 +55,17 @@ def approval_queue(request, workspace_id):
     )
 
     status_map = {
-        "pending_review": {"platform_posts__status__in": ["pending_review", "pending_client"]},
+        "pending_review": {"platform_posts__status": "pending_review"},
         "approved": {"platform_posts__status": "approved"},
         "changes_requested": {"platform_posts__status": "changes_requested"},
         "rejected": {"platform_posts__status": "rejected"},
     }
-    filter_kwargs = status_map.get(status_filter, {"platform_posts__status__in": ["pending_review", "pending_client"]})
+    filter_kwargs = status_map.get(status_filter, {"platform_posts__status": "pending_review"})
     order = "scheduled_at" if status_filter in ("pending_review", "approved") else "-created_at"
     posts = base_qs.filter(**filter_kwargs).distinct().order_by(order)
 
     pp_qs = PlatformPost.objects.filter(post__workspace=workspace)
-    pending_review_count = pp_qs.filter(status__in=["pending_review", "pending_client"]).values("post_id").distinct().count()
+    pending_review_count = pp_qs.filter(status="pending_review").values("post_id").distinct().count()
     approved_count = pp_qs.filter(status="approved").values("post_id").distinct().count()
     changes_requested_count = pp_qs.filter(status="changes_requested").values("post_id").distinct().count()
     rejected_count = pp_qs.filter(status="rejected").values("post_id").distinct().count()

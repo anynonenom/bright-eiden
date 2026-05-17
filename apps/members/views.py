@@ -552,7 +552,7 @@ def team_activity(request):
         posts_pending = Post.objects.filter(
             author=user,
             workspace_id__in=org_workspace_ids,
-            platform_posts__status__in=["pending_review", "pending_client"],
+            platform_posts__status="pending_review",
         ).distinct().count()
         posts_scheduled = Post.objects.filter(
             author=user,
@@ -623,7 +623,7 @@ def member_activity(request, membership_id):
     pending_posts = Post.objects.filter(
         author=member,
         workspace_id__in=org_workspace_ids,
-        platform_posts__status__in=["pending_review", "pending_client"],
+        platform_posts__status="pending_review",
     ).distinct().count()
     approved_posts = Post.objects.filter(
         author=member,

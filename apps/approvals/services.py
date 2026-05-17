@@ -159,7 +159,7 @@ def approve_post(target, user, workspace, comment=""):
     from django.utils import timezone
 
     post, targets, is_bundled = _resolve_targets(
-        target, eligible_from_states={"pending_review", "pending_client", "draft", "rejected", "changes_requested"}
+        target, eligible_from_states={"pending_review", "draft", "rejected", "changes_requested"}
     )
 
     # --- Custom stage pipeline ---
@@ -223,7 +223,7 @@ def request_changes(target, user, workspace, comment):
     if not comment.strip():
         raise ValueError("A comment is required when requesting changes.")
 
-    post, targets, is_bundled = _resolve_targets(target, eligible_from_states={"pending_review", "pending_client"})
+    post, targets, is_bundled = _resolve_targets(target, eligible_from_states={"pending_review"})
 
     moved = []
     with transaction.atomic():
@@ -259,7 +259,7 @@ def reject_post(target, user, workspace, comment):
     if not comment.strip():
         raise ValueError("A comment is required when rejecting a post.")
 
-    post, targets, is_bundled = _resolve_targets(target, eligible_from_states={"pending_review", "pending_client"})
+    post, targets, is_bundled = _resolve_targets(target, eligible_from_states={"pending_review"})
 
     moved = []
     with transaction.atomic():
@@ -338,7 +338,7 @@ def bulk_approve(post_ids, user, workspace):
     posts = Post.objects.filter(
         id__in=post_ids,
         workspace=workspace,
-        platform_posts__status__in=["pending_review", "pending_client"],
+        platform_posts__status__in=["pending_review"],
     ).distinct()
 
     for post in posts:
@@ -360,7 +360,7 @@ def bulk_reject(post_ids, user, workspace, comment):
     posts = Post.objects.filter(
         id__in=post_ids,
         workspace=workspace,
-        platform_posts__status__in=["pending_review", "pending_client"],
+        platform_posts__status__in=["pending_review"],
     ).distinct()
 
     for post in posts:

@@ -26,8 +26,6 @@
                 <div class="flex items-center gap-2 mb-1">
                     {% if post.status == 'pending_review' %}
                     <span class="inline-flex items-center px-2 py-0.5 text-[0.6875rem] font-semibold rounded-full bg-orange-50 text-orange-700">Pending Review</span>
-                    {% elif post.status == 'pending_client' %}
-                    <span class="inline-flex items-center px-2 py-0.5 text-[0.6875rem] font-semibold rounded-full bg-amber-50 text-amber-700">Pending Client</span>
                     {% endif %}
 
                     {% for pp in post.platform_posts.all %}
