@@ -80,12 +80,13 @@
 
 <script>
 function loadApprovalPanel(url) {
-    fetch(url, {headers: {'X-Requested-With': 'XMLHttpRequest'}})
+    fetch(url, {credentials: 'same-origin'})
         .then(function(r) { return r.text(); })
         .then(function(html) {
             document.getElementById('approval-panel').innerHTML = html;
             openApprovalPanel();
-        });
+        })
+        .catch(function(e) { alert('Error: ' + e); });
 }
 function openApprovalPanel() {
     document.getElementById('approval-backdrop').style.display = 'block';
