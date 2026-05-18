@@ -77,7 +77,8 @@
 
 <!-- ── Post preview dialog (native <dialog> — hidden by default, no flash) ── -->
 <dialog id="approval-dialog"
-        style="padding:0; border:none; border-radius:0; max-width:480px; width:100%; height:100vh; max-height:100vh; margin:0 0 0 auto; box-shadow:-8px 0 40px rgba(0,0,0,0.12); display:flex; flex-direction:column; overflow:hidden;">
+        style="padding:0; border:none; border-radius:0; max-width:480px; width:100%; height:100vh; max-height:100vh; margin:0 0 0 auto; box-shadow:-8px 0 40px rgba(0,0,0,0.12); flex-direction:column; overflow:hidden;">
+    <style>#approval-dialog[open]{display:flex;}</style>
     <!-- Header -->
     <div style="display:flex; align-items:center; justify-content:space-between; padding:16px 20px; border-bottom:1px solid #e7e5e4; flex-shrink:0;">
         <div style="display:flex; align-items:center; gap:10px;">
