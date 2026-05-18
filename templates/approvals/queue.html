@@ -302,10 +302,11 @@ function approvalQueue() {
                 return;
             }
             this.panelSaving = true;
+            const base = `/workspace/{{ workspace.id }}/approvals/`;
             const urlMap = {
-                approve: `{% url 'approvals:approve' workspace_id=workspace.id post_id='POST_ID' %}`.replace('POST_ID', this.panelPostId),
-                request_changes: `{% url 'approvals:request_changes' workspace_id=workspace.id post_id='POST_ID' %}`.replace('POST_ID', this.panelPostId),
-                reject: `{% url 'approvals:reject' workspace_id=workspace.id post_id='POST_ID' %}`.replace('POST_ID', this.panelPostId),
+                approve: `${base}${this.panelPostId}/approve/`,
+                request_changes: `${base}${this.panelPostId}/request-changes/`,
+                reject: `${base}${this.panelPostId}/reject/`,
             };
             const body = new FormData();
             body.append('csrfmiddlewaretoken', '{{ csrf_token }}');
@@ -326,7 +327,7 @@ function approvalQueue() {
                 return;
             }
             this.panelSaving = true;
-            const url = `{% url 'approvals:schedule_post' workspace_id=workspace.id post_id='POST_ID' %}`.replace('POST_ID', this.panelPostId);
+            const url = `/workspace/{{ workspace.id }}/approvals/${this.panelPostId}/schedule/`;
             const body = new FormData();
             body.append('csrfmiddlewaretoken', '{{ csrf_token }}');
             body.append('scheduled_date', this.panelSchedDate);
