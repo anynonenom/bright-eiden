@@ -2,9 +2,7 @@
 {% block title %}Approval Queue - {{ workspace.name }}{% endblock %}
 
 {% block content %}
-<div x-data="approvalQueue()"
-     @keydown.escape.window="closePanel()"
-     hx-trigger="approvalAction from:body"
+<div hx-trigger="approvalAction from:body"
      hx-get="{% url 'approvals:queue' workspace_id=workspace.id %}?status={{ status_filter }}"
      hx-target="#approval-list"
      hx-select="#approval-list"
@@ -294,10 +292,6 @@ async function _panelSchedule(postId, csrf) {
     }
 }
 
-function approvalQueue() {
-    return {
-        closePanel() { approvalPanelClose(); },
-    };
-}
+document.addEventListener('keydown', e => { if (e.key === 'Escape') approvalPanelClose(); });
 </script>
 {% endblock %}
