@@ -7,7 +7,6 @@ Run: python manage.py cleanup_orphaned_orgs
 from django.core.management.base import BaseCommand
 
 from apps.members.models import OrgMembership
-from apps.organizations.models import Organization
 
 
 class Command(BaseCommand):

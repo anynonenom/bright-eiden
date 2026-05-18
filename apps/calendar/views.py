@@ -408,7 +408,7 @@ def calendar_view(request, workspace_id):
         "authors": authors,
         "categories": categories,
         "active_filters": active_filters,
-        "status_choices": [(v, l) for v, l in PlatformPost.Status.choices if v != "draft"],
+        "status_choices": [(v, label) for v, label in PlatformPost.Status.choices if v != "draft"],
         "show_holidays": show_holidays,
         "can_schedule": can_schedule,
         **publish_ctx,

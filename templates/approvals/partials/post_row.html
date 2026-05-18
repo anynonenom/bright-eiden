@@ -1,21 +1,21 @@
 {% load humanize %}
+{{ post.caption|json_script:post.id|default:'' }}
+
 <div id="post-row-{{ post.id }}"
      class="bg-white border border-stone-200 rounded-xl p-4 hover:shadow-md hover:border-stone-300 transition-all cursor-pointer select-none"
      data-post-id="{{ post.id }}"
-     data-caption="{{ post.caption|default:''|escapejs }}"
      data-status="{{ post.status }}"
      data-author="{{ post.author.display_name|default:'Unknown'|escapejs }}"
      data-author-initial="{{ post.author.display_name|default:'?'|make_list|first|upper }}"
      data-platforms="{% for pp in post.platform_posts.all %}{{ pp.social_account.platform }}{% if not forloop.last %},{% endif %}{% endfor %}"
      data-media="{% for pm in post.media_attachments.all %}{% if pm.media_asset.file %}{{ pm.media_asset.file.url }}|{{ pm.media_asset.media_type|default:'image' }}{% if not forloop.last %},{% endif %}{% endif %}{% endfor %}"
      data-scheduled-at="{% if post.scheduled_at %}{{ post.scheduled_at|date:'M j, Y g:i A' }}{% endif %}"
-     data-review-comment="{{ post.latest_review_comment|escapejs }}"
+     data-review-comment="{{ post.latest_review_comment|default:''|escapejs }}"
      data-edit-url="{% url 'composer:compose_edit' workspace_id=workspace.id post_id=post.id %}"
-     @click="openPanel($el.dataset)">
+     @click="openPanelFromRow('{{ post.id }}', $el.dataset)">
 
     <div class="flex items-start gap-3">
         <div class="flex-1 min-w-0">
-            <!-- Status + platforms + scheduled -->
             <div class="flex items-center gap-2 mb-1.5 flex-wrap">
                 {% if post.status == 'pending_review' %}
                 <span class="inline-flex items-center px-2 py-0.5 text-[0.6875rem] font-semibold rounded-full bg-orange-50 text-orange-700">Pending Review</span>
@@ -41,10 +41,8 @@
                 {% endif %}
             </div>
 
-            <!-- Caption snippet -->
             <p class="text-sm text-stone-700 leading-relaxed line-clamp-2">{{ post.caption_snippet }}</p>
 
-            <!-- Author -->
             <div class="flex items-center gap-1.5 mt-2">
                 <div class="w-5 h-5 rounded-full bg-stone-200 flex items-center justify-center text-[9px] font-bold text-stone-500">
                     {{ post.author.display_name|default:"?"|make_list|first|upper }}
@@ -53,7 +51,6 @@
             </div>
         </div>
 
-        <!-- Chevron -->
         <div class="flex-shrink-0 mt-1 text-stone-300">
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
         </div>

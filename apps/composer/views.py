@@ -9,6 +9,7 @@ from datetime import UTC, datetime
 
 import httpx
 from dateutil import parser as date_parser
+from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.core.cache import cache
 from django.core.exceptions import PermissionDenied, ValidationError
@@ -1404,15 +1405,15 @@ def drafts_list(request, workspace_id):
         base_qs = base_qs.filter(author=request.user)
 
     # Tab filtering
-    STATUS_TABS = {
+    status_tabs = {
         "pending": ["pending_review"],
         "changes": ["changes_requested"],
         "rejected": ["rejected"],
         "approved": ["approved", "scheduled", "published", "publishing"],
     }
-    if tab in STATUS_TABS:
+    if tab in status_tabs:
         base_qs = base_qs.filter(
-            platform_posts__status__in=STATUS_TABS[tab]
+            platform_posts__status__in=status_tabs[tab]
         ).distinct()
 
     # Counts for tab badges (scoped to same author filter)
@@ -2040,7 +2041,7 @@ def idea_create_post(request, workspace_id, idea_id):
             workspace=workspace,
             author=request.user,
             title=idea.title or "",
-            caption="",
+            caption=idea.description or "",
             tags=tags,
         )
 
@@ -2155,7 +2156,7 @@ def idea_approve(request, workspace_id, idea_id):
             workspace=workspace,
             author=idea.author or request.user,
             title=idea.title or "",
-            caption="",
+            caption=idea.description or "",
             tags=tags,
         )
         if ordered_media_asset_ids:

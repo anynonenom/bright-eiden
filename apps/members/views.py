@@ -1,7 +1,6 @@
 """Views for team member management."""
 
 from django.contrib.auth.decorators import login_required
-from django.db.models import Count, Q
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
@@ -112,7 +111,7 @@ def create_member(request):
     """Directly create a user account and add them to the org."""
     from django.contrib.auth import get_user_model
 
-    User = get_user_model()
+    user_model = get_user_model()
     org = request.org
     name = request.POST.get("name", "").strip()
     email = request.POST.get("email", "").strip().lower()
@@ -123,7 +122,7 @@ def create_member(request):
         return HttpResponse('<div class="text-red-600 text-sm p-3">Email is required.</div>', status=422)
     if not password or len(password) < 6:
         return HttpResponse('<div class="text-red-600 text-sm p-3">Password must be at least 6 characters.</div>', status=422)
-    if User.objects.filter(email=email).exists():
+    if user_model.objects.filter(email=email).exists():
         return HttpResponse('<div class="text-red-600 text-sm p-3">A user with this email already exists.</div>', status=422)
     if OrgMembership.objects.filter(organization=org, user__email=email).exists():
         return HttpResponse('<div class="text-red-600 text-sm p-3">This user is already a member of the organization.</div>', status=422)
@@ -136,10 +135,11 @@ def create_member(request):
             role = request.POST.get(f"ws_role_{ws.id}", WorkspaceMembership.WorkspaceRole.VIEWER)
             workspace_assignments.append({"workspace_id": str(ws.id), "role": role})
 
-    from apps.organizations.models import Organization as _Org
     from django.db import transaction as _tx
+
+    from apps.organizations.models import Organization as _Org
     with _tx.atomic():
-        user = User.objects.create_user(email=email, password=password, name=name, tos_accepted_at=timezone.now())
+        user = user_model.objects.create_user(email=email, password=password, name=name, tos_accepted_at=timezone.now())
         # The post_save signal auto-creates a personal org for every new user.
         # Delete it so the member belongs only to the admin's org.
         _Org.objects.filter(memberships__user=user).exclude(id=org.id).delete()
