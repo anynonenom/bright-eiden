@@ -133,8 +133,8 @@ def post_detail_panel(request, workspace_id, post_id):
         .first()
     )
     post.latest_review_comment = last_action.comment if last_action else ""
-    can_approve = getattr(request, "workspace_membership", None) and \
-        request.workspace_membership.role in ("owner", "manager")
+    membership = getattr(request, "workspace_membership", None)
+    can_approve = membership and membership.workspace_role in ("owner", "manager") or request.user.is_superuser
     return render(request, "approvals/partials/post_panel.html", {
         "workspace": workspace,
         "post": post,
