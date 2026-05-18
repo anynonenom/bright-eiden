@@ -108,6 +108,41 @@ def approval_queue(request, workspace_id):
 
 
 # ---------------------------------------------------------------------------
+# Post Detail Panel (HTMX)
+# ---------------------------------------------------------------------------
+
+
+@login_required
+@require_GET
+def post_detail_panel(request, workspace_id, post_id):
+    workspace = _get_workspace(request, workspace_id)
+    post = get_object_or_404(
+        Post.objects.select_related("author")
+        .prefetch_related("platform_posts__social_account", "media_attachments__media_asset"),
+        id=post_id,
+        workspace=workspace,
+    )
+    from apps.approvals.models import ApprovalAction
+    last_action = (
+        ApprovalAction.objects
+        .filter(post=post, action__in=[
+            ApprovalAction.ActionType.CHANGES_REQUESTED,
+            ApprovalAction.ActionType.REJECTED,
+        ])
+        .order_by("-created_at")
+        .first()
+    )
+    post.latest_review_comment = last_action.comment if last_action else ""
+    can_approve = getattr(request, "workspace_membership", None) and \
+        request.workspace_membership.role in ("owner", "manager")
+    return render(request, "approvals/partials/post_panel.html", {
+        "workspace": workspace,
+        "post": post,
+        "can_approve": can_approve,
+    })
+
+
+# ---------------------------------------------------------------------------
 # Approval Actions
 # ---------------------------------------------------------------------------
 

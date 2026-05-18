@@ -1,18 +1,10 @@
 {% load humanize %}
-{{ post.caption|json_script:post.id|default:'' }}
-
 <div id="post-row-{{ post.id }}"
      class="bg-white border border-stone-200 rounded-xl p-4 hover:shadow-md hover:border-stone-300 transition-all cursor-pointer select-none"
-     data-post-id="{{ post.id }}"
-     data-status="{{ post.status }}"
-     data-author="{{ post.author.display_name|default:'Unknown'|escapejs }}"
-     data-author-initial="{{ post.author.display_name|default:'?'|make_list|first|upper }}"
-     data-platforms="{% for pp in post.platform_posts.all %}{{ pp.social_account.platform }}{% if not forloop.last %},{% endif %}{% endfor %}"
-     data-media="{% for pm in post.media_attachments.all %}{% if pm.media_asset.file %}{{ pm.media_asset.file.url }}|{{ pm.media_asset.media_type|default:'image' }}{% if not forloop.last %},{% endif %}{% endif %}{% endfor %}"
-     data-scheduled-at="{% if post.scheduled_at %}{{ post.scheduled_at|date:'M j, Y g:i A' }}{% endif %}"
-     data-review-comment="{{ post.latest_review_comment|default:''|escapejs }}"
-     data-edit-url="{% url 'composer:compose_edit' workspace_id=workspace.id post_id=post.id %}"
-     onclick="approvalPanelOpen('{{ post.id }}', this.dataset)">
+     hx-get="{% url 'approvals:post_detail_panel' workspace_id=workspace.id post_id=post.id %}"
+     hx-target="#approval-panel"
+     hx-swap="innerHTML"
+     hx-on::after-request="openApprovalPanel()">
 
     <div class="flex items-start gap-3">
         <div class="flex-1 min-w-0">
