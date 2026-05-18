@@ -4,7 +4,7 @@
 <!-- Header -->
 <div style="display:flex;align-items:center;justify-content:space-between;padding:16px 20px;border-bottom:1px solid #e7e5e4;flex-shrink:0;">
     <div style="display:flex;align-items:center;gap:10px;">
-        <button onclick="closeApprovalPanel()" style="width:28px;height:28px;border-radius:50%;border:none;background:none;cursor:pointer;color:#a8a29e;display:flex;align-items:center;justify-content:center;" onmouseover="this.style.background='#f5f5f4'" onmouseout="this.style.background='none'">
+        <button class="panel-close-btn" style="width:28px;height:28px;border-radius:50%;border:none;background:none;cursor:pointer;color:#a8a29e;display:flex;align-items:center;justify-content:center;">
             <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
         </button>
         <span style="font-size:0.8125rem;font-weight:600;color:#44403c;">{% if status == 'pending_review' %}Review Post{% else %}Post Preview{% endif %}</span>
@@ -48,15 +48,13 @@
     <div>
         <p style="font-size:0.6875rem;font-weight:600;color:#a8a29e;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:6px;">Media</p>
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
-            {% for pm in post.media_attachments.all %}
-            {% if pm.media_asset.file %}
+            {% for pm in post.media_attachments.all %}{% if pm.media_asset.file %}
             {% if pm.media_asset.media_type == 'video' %}
             <video src="{{ pm.media_asset.file.url }}" style="width:100%;aspect-ratio:1;object-fit:cover;border-radius:8px;background:#000;" controls preload="auto"></video>
             {% else %}
             <img src="{{ pm.media_asset.file.url }}" style="width:100%;aspect-ratio:1;object-fit:cover;border-radius:8px;" loading="lazy">
             {% endif %}
-            {% endif %}
-            {% endfor %}
+            {% endif %}{% endfor %}
         </div>
     </div>
     {% endif %}
@@ -88,9 +86,9 @@
             style="width:100%;padding:8px 10px;border:1px solid #e7e5e4;border-radius:8px;font-size:0.8125rem;resize:none;color:#44403c;box-sizing:border-box;"></textarea>
     </div>
     <div id="panel-btn-row" style="display:flex;gap:8px;">
-        <button onclick="panelAction('{{ post.id }}','approve','{{ csrf_token }}')" style="flex:1;padding:9px 16px;border-radius:10px;border:none;cursor:pointer;font-size:0.8125rem;font-weight:600;color:#fff;background:var(--primary);">Approve</button>
-        <button onclick="panelShowComment('{{ post.id }}','request_changes','{{ csrf_token }}')" style="flex:1;padding:9px 16px;border-radius:10px;border:1px solid #e7e5e4;cursor:pointer;font-size:0.8125rem;font-weight:600;color:#57534e;background:#fff;">Request Changes</button>
-        <button onclick="panelShowComment('{{ post.id }}','reject','{{ csrf_token }}')" style="flex:1;padding:9px 16px;border-radius:10px;border:none;cursor:pointer;font-size:0.8125rem;font-weight:600;color:#b91c1c;background:#fef2f2;">Reject</button>
+        <button class="panel-action-btn" data-action="approve" data-post-id="{{ post.id }}" data-csrf="{{ csrf_token }}" style="flex:1;padding:9px 16px;border-radius:10px;border:none;cursor:pointer;font-size:0.8125rem;font-weight:600;color:#fff;background:var(--primary);">Approve</button>
+        <button class="panel-action-btn" data-action="request_changes" data-post-id="{{ post.id }}" data-csrf="{{ csrf_token }}" style="flex:1;padding:9px 16px;border-radius:10px;border:1px solid #e7e5e4;cursor:pointer;font-size:0.8125rem;font-weight:600;color:#57534e;background:#fff;">Request Changes</button>
+        <button class="panel-action-btn" data-action="reject" data-post-id="{{ post.id }}" data-csrf="{{ csrf_token }}" style="flex:1;padding:9px 16px;border-radius:10px;border:none;cursor:pointer;font-size:0.8125rem;font-weight:600;color:#b91c1c;background:#fef2f2;">Reject</button>
     </div>
     {% elif status == 'approved' %}
     <div id="panel-sched-form" style="display:none;flex-direction:column;gap:8px;">
@@ -98,10 +96,10 @@
             <input type="date" id="panel-sched-date" style="flex:1;padding:7px 10px;border:1px solid #e7e5e4;border-radius:8px;font-size:0.8125rem;">
             <input type="time" id="panel-sched-time" style="flex:1;padding:7px 10px;border:1px solid #e7e5e4;border-radius:8px;font-size:0.8125rem;">
         </div>
-        <button onclick="panelSchedule('{{ post.id }}','{{ csrf_token }}')" style="padding:9px 16px;border-radius:10px;border:none;cursor:pointer;font-size:0.8125rem;font-weight:600;color:#fff;background:var(--primary);">Confirm Schedule</button>
+        <button class="panel-sched-confirm-btn" data-post-id="{{ post.id }}" data-csrf="{{ csrf_token }}" style="padding:9px 16px;border-radius:10px;border:none;cursor:pointer;font-size:0.8125rem;font-weight:600;color:#fff;background:var(--primary);">Confirm Schedule</button>
     </div>
     <div style="display:flex;gap:8px;">
-        <button onclick="document.getElementById('panel-sched-form').style.display='flex';document.getElementById('panel-sched-form').style.flexDirection='column';" style="flex:1;padding:9px 16px;border-radius:10px;border:none;cursor:pointer;font-size:0.8125rem;font-weight:600;color:#fff;background:var(--primary);">Schedule</button>
+        <button class="panel-sched-toggle-btn" style="flex:1;padding:9px 16px;border-radius:10px;border:none;cursor:pointer;font-size:0.8125rem;font-weight:600;color:#fff;background:var(--primary);">Schedule</button>
     </div>
     {% endif %}
 </div>

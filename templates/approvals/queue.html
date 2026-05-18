@@ -71,14 +71,34 @@
 <!-- Backdrop — hidden by default -->
 <div id="approval-backdrop"
      style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.18);z-index:40;"
-     onclick="closeApprovalPanel()"></div>
+     ></div>
 
 <!-- Side panel — hidden by default, content loaded by HTMX -->
 <div id="approval-panel"
      style="display:none;position:fixed;top:0;right:0;bottom:0;width:100%;max-width:480px;background:#fff;box-shadow:-8px 0 40px rgba(0,0,0,0.12);z-index:41;flex-direction:column;overflow:hidden;">
 </div>
 
-<script>
+<script nonce="{{ request.csp_nonce }}">
+document.addEventListener('click', function(e) {
+    // Open panel
+    var viewBtn = e.target.closest('.approval-view-btn');
+    if (viewBtn) { loadApprovalPanel(viewBtn.dataset.panelUrl); return; }
+    // Close panel
+    if (e.target.closest('.panel-close-btn') || e.target.id === 'approval-backdrop') { closeApprovalPanel(); return; }
+    // Approve / request changes / reject
+    var actionBtn = e.target.closest('.panel-action-btn');
+    if (actionBtn) { panelAction(actionBtn.dataset.postId, actionBtn.dataset.action, actionBtn.dataset.csrf); return; }
+    // Schedule toggle
+    if (e.target.closest('.panel-sched-toggle-btn')) {
+        var form = document.getElementById('panel-sched-form');
+        if (form) { form.style.display = 'flex'; form.style.flexDirection = 'column'; }
+        return;
+    }
+    // Schedule confirm
+    var schedBtn = e.target.closest('.panel-sched-confirm-btn');
+    if (schedBtn) { panelSchedule(schedBtn.dataset.postId, schedBtn.dataset.csrf); return; }
+});
+
 function loadApprovalPanel(url) {
     fetch(url, {credentials: 'same-origin'})
         .then(function(r) { return r.text(); })

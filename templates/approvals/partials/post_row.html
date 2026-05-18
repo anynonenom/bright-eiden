@@ -40,7 +40,8 @@
         </div>
 
         <button
-            onclick="alert('clicked'); loadApprovalPanel('{% url 'approvals:post_detail_panel' workspace_id=workspace.id post_id=post.id %}')"
+            data-panel-url="{% url 'approvals:post_detail_panel' workspace_id=workspace.id post_id=post.id %}"
+            class="approval-view-btn"
             style="flex-shrink:0;padding:6px 14px;border-radius:8px;border:1px solid #e7e5e4;background:#fff;cursor:pointer;font-size:0.75rem;font-weight:600;color:#57534e;">
             View
         </button>
