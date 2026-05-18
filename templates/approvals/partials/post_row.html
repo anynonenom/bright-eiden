@@ -1,10 +1,6 @@
 {% load humanize %}
 <div id="post-row-{{ post.id }}"
-     class="bg-white border border-stone-200 rounded-xl p-4 hover:shadow-md hover:border-stone-300 transition-all cursor-pointer select-none"
-     hx-get="{% url 'approvals:post_detail_panel' workspace_id=workspace.id post_id=post.id %}"
-     hx-target="#approval-panel"
-     hx-swap="innerHTML"
-     hx-on::after-request="openApprovalPanel()">
+     class="bg-white border border-stone-200 rounded-xl p-4 hover:shadow-md hover:border-stone-300 transition-all">
 
     <div class="flex items-start gap-3">
         <div class="flex-1 min-w-0">
@@ -43,8 +39,13 @@
             </div>
         </div>
 
-        <div class="flex-shrink-0 mt-1 text-stone-300">
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
-        </div>
+        <button
+            hx-get="{% url 'approvals:post_detail_panel' workspace_id=workspace.id post_id=post.id %}"
+            hx-target="#approval-panel"
+            hx-swap="innerHTML"
+            hx-on::after-request="openApprovalPanel()"
+            style="flex-shrink:0;padding:6px 14px;border-radius:8px;border:1px solid #e7e5e4;background:#fff;cursor:pointer;font-size:0.75rem;font-weight:600;color:#57534e;">
+            View
+        </button>
     </div>
 </div>
