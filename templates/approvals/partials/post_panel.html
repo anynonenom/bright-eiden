@@ -37,27 +37,123 @@
         </span>
     </div>
 
-    <!-- Caption -->
-    <div>
-        <p style="font-size:0.6875rem;font-weight:600;color:#a8a29e;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:6px;">Caption</p>
-        <p style="font-size:0.875rem;color:#44403c;line-height:1.6;white-space:pre-wrap;">{{ post.caption }}</p>
-    </div>
+    <!-- Platform previews -->
+    {% for pp in post.platform_posts.all %}
+    {% with platform=pp.social_account.platform|lower %}
+    <div style="border:1px solid #e7e5e4;border-radius:12px;overflow:hidden;background:#fff;">
 
-    <!-- Media -->
-    {% if post.media_attachments.all %}
-    <div>
-        <p style="font-size:0.6875rem;font-weight:600;color:#a8a29e;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:6px;">Media</p>
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+        {% if platform == 'facebook' %}
+        <!-- Facebook preview -->
+        <div style="padding:10px 12px;display:flex;align-items:center;gap:8px;border-bottom:1px solid #f0f0f0;">
+            <div style="width:36px;height:36px;border-radius:50%;background:#1877f2;display:flex;align-items:center;justify-content:center;">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="#fff"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/></svg>
+            </div>
+            <div>
+                <p style="font-size:0.8125rem;font-weight:600;color:#050505;margin:0;">{{ workspace.name }}</p>
+                <p style="font-size:0.6875rem;color:#65676b;margin:0;">Just now · 🌐</p>
+            </div>
+        </div>
+        <div style="padding:10px 12px;">
+            <p style="font-size:0.875rem;color:#050505;line-height:1.5;white-space:pre-wrap;margin:0;">{{ post.caption|truncatechars:180 }}</p>
+        </div>
+        {% if post.media_attachments.all %}
+        <div style="{% if post.media_attachments.all|length == 1 %}display:block{% else %}display:grid;grid-template-columns:1fr 1fr;gap:2px{% endif %};">
             {% for pm in post.media_attachments.all %}{% if pm.media_asset.file %}
             {% if pm.media_asset.media_type == 'video' %}
-            <video src="{{ pm.media_asset.file.url }}" style="width:100%;aspect-ratio:1;object-fit:cover;border-radius:8px;background:#000;" controls preload="auto"></video>
+            <video src="{{ pm.media_asset.file.url }}" style="width:100%;{% if post.media_attachments.all|length == 1 %}max-height:300px{% else %}height:140px{% endif %};object-fit:cover;" controls preload="auto"></video>
             {% else %}
-            <img src="{{ pm.media_asset.file.url }}" style="width:100%;aspect-ratio:1;object-fit:cover;border-radius:8px;" loading="lazy">
+            <img src="{{ pm.media_asset.file.url }}" style="width:100%;{% if post.media_attachments.all|length == 1 %}max-height:300px{% else %}height:140px{% endif %};object-fit:cover;" loading="lazy">
             {% endif %}
             {% endif %}{% endfor %}
         </div>
+        {% endif %}
+        <div style="padding:6px 12px;display:flex;gap:16px;border-top:1px solid #f0f0f0;">
+            <span style="font-size:0.75rem;color:#65676b;display:flex;align-items:center;gap:4px;">👍 Like</span>
+            <span style="font-size:0.75rem;color:#65676b;display:flex;align-items:center;gap:4px;">💬 Comment</span>
+            <span style="font-size:0.75rem;color:#65676b;display:flex;align-items:center;gap:4px;">↗ Share</span>
+        </div>
+
+        {% elif platform == 'instagram' %}
+        <!-- Instagram preview -->
+        <div style="padding:10px 12px;display:flex;align-items:center;gap:8px;">
+            <div style="width:32px;height:32px;border-radius:50%;background:linear-gradient(45deg,#f09433,#e6683c,#dc2743,#cc2366,#bc1888);display:flex;align-items:center;justify-content:center;">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="0.5" fill="#fff"/></svg>
+            </div>
+            <p style="font-size:0.8125rem;font-weight:600;color:#262626;margin:0;flex:1;">{{ workspace.name|lower|cut:" " }}</p>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#262626" stroke-width="2"><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/><circle cx="5" cy="12" r="1"/></svg>
+        </div>
+        {% if post.media_attachments.all %}
+        {% with pm=post.media_attachments.all.0 %}{% if pm.media_asset.file %}
+        {% if pm.media_asset.media_type == 'video' %}
+        <video src="{{ pm.media_asset.file.url }}" style="width:100%;aspect-ratio:1;object-fit:cover;" controls preload="auto"></video>
+        {% else %}
+        <img src="{{ pm.media_asset.file.url }}" style="width:100%;aspect-ratio:1;object-fit:cover;" loading="lazy">
+        {% endif %}
+        {% endif %}{% endwith %}
+        {% endif %}
+        <div style="padding:8px 12px;">
+            <div style="display:flex;gap:12px;margin-bottom:6px;">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#262626" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#262626" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#262626" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+            </div>
+            <p style="font-size:0.8125rem;color:#262626;line-height:1.5;margin:0;white-space:pre-wrap;"><strong>{{ workspace.name|lower|cut:" " }}</strong> {{ post.caption|truncatechars:120 }}</p>
+        </div>
+
+        {% elif platform == 'tiktok' %}
+        <!-- TikTok preview -->
+        <div style="background:#000;position:relative;overflow:hidden;">
+            {% if post.media_attachments.all %}
+            {% with pm=post.media_attachments.all.0 %}{% if pm.media_asset.file %}
+            {% if pm.media_asset.media_type == 'video' %}
+            <video src="{{ pm.media_asset.file.url }}" style="width:100%;aspect-ratio:9/16;object-fit:cover;max-height:320px;" controls preload="auto"></video>
+            {% else %}
+            <img src="{{ pm.media_asset.file.url }}" style="width:100%;aspect-ratio:9/16;object-fit:cover;max-height:320px;" loading="lazy">
+            {% endif %}
+            {% endif %}{% endwith %}
+            {% endif %}
+            <div style="position:absolute;bottom:0;left:0;right:0;padding:12px;background:linear-gradient(transparent,rgba(0,0,0,0.7));">
+                <p style="font-size:0.8125rem;font-weight:600;color:#fff;margin:0 0 4px;">@{{ workspace.name|lower|cut:" " }}</p>
+                <p style="font-size:0.75rem;color:#fff;margin:0;opacity:0.9;">{{ post.caption|truncatechars:80 }}</p>
+            </div>
+        </div>
+
+        {% elif platform == 'linkedin' %}
+        <!-- LinkedIn preview -->
+        <div style="padding:10px 12px;display:flex;align-items:center;gap:8px;">
+            <div style="width:40px;height:40px;border-radius:4px;background:#0a66c2;display:flex;align-items:center;justify-content:center;">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="#fff"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"/><rect x="2" y="9" width="4" height="12"/><circle cx="4" cy="4" r="2"/></svg>
+            </div>
+            <div>
+                <p style="font-size:0.8125rem;font-weight:600;color:#000;margin:0;">{{ workspace.name }}</p>
+                <p style="font-size:0.6875rem;color:#666;margin:0;">Just now · 🌐</p>
+            </div>
+        </div>
+        <div style="padding:4px 12px 10px;">
+            <p style="font-size:0.875rem;color:#000;line-height:1.5;white-space:pre-wrap;margin:0;">{{ post.caption|truncatechars:200 }}</p>
+        </div>
+        {% if post.media_attachments.all %}
+        {% with pm=post.media_attachments.all.0 %}{% if pm.media_asset.file %}
+        <img src="{{ pm.media_asset.file.url }}" style="width:100%;max-height:260px;object-fit:cover;" loading="lazy">
+        {% endif %}{% endwith %}
+        {% endif %}
+        <div style="padding:6px 12px;display:flex;gap:16px;border-top:1px solid #e0e0e0;">
+            <span style="font-size:0.75rem;color:#666;">👍 Like</span>
+            <span style="font-size:0.75rem;color:#666;">💬 Comment</span>
+            <span style="font-size:0.75rem;color:#666;">🔁 Repost</span>
+        </div>
+
+        {% else %}
+        <!-- Generic platform preview -->
+        <div style="padding:12px;">
+            <p style="font-size:0.6875rem;font-weight:700;color:#a8a29e;text-transform:uppercase;margin-bottom:6px;">{{ pp.social_account.platform|upper }} Preview</p>
+            <p style="font-size:0.875rem;color:#44403c;white-space:pre-wrap;margin:0;">{{ post.caption|truncatechars:200 }}</p>
+        </div>
+        {% endif %}
+
     </div>
-    {% endif %}
+    {% endwith %}
+    {% endfor %}
 
     <!-- Scheduled -->
     {% if post.scheduled_at %}
