@@ -12,7 +12,7 @@
      data-scheduled-at="{% if post.scheduled_at %}{{ post.scheduled_at|date:'M j, Y g:i A' }}{% endif %}"
      data-review-comment="{{ post.latest_review_comment|default:''|escapejs }}"
      data-edit-url="{% url 'composer:compose_edit' workspace_id=workspace.id post_id=post.id %}"
-     @click="openPanelFromRow('{{ post.id }}', $el.dataset)">
+     onclick="approvalPanelOpen('{{ post.id }}', this.dataset)">
 
     <div class="flex items-start gap-3">
         <div class="flex-1 min-w-0">
