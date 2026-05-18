@@ -136,12 +136,15 @@ def post_detail_panel(request, workspace_id, post_id):
     membership = getattr(request, "workspace_membership", None)
     is_super = request.user.is_superuser
     can_approve = is_super or (membership and membership.workspace_role in ("owner", "manager"))
-    can_schedule = is_super or (membership and membership.get_permissions().get("schedule_posts", False))
+    perms = membership.effective_permissions if membership else {}
+    can_schedule = is_super or perms.get("schedule_posts", False)
+    can_edit = is_super or perms.get("edit_own_posts", False)
     return render(request, "approvals/partials/post_panel.html", {
         "workspace": workspace,
         "post": post,
         "can_approve": can_approve,
         "can_schedule": can_schedule,
+        "can_edit": can_edit,
     })
 
 
