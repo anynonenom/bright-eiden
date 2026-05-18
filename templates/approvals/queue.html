@@ -79,6 +79,14 @@
 </div>
 
 <script>
+function loadApprovalPanel(url) {
+    fetch(url, {headers: {'X-Requested-With': 'XMLHttpRequest'}})
+        .then(function(r) { return r.text(); })
+        .then(function(html) {
+            document.getElementById('approval-panel').innerHTML = html;
+            openApprovalPanel();
+        });
+}
 function openApprovalPanel() {
     document.getElementById('approval-backdrop').style.display = 'block';
     document.getElementById('approval-panel').style.display = 'flex';
