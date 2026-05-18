@@ -62,7 +62,28 @@ def approval_queue(request, workspace_id):
     }
     filter_kwargs = status_map.get(status_filter, {"platform_posts__status": "pending_review"})
     order = "scheduled_at" if status_filter in ("pending_review", "approved") else "-created_at"
-    posts = base_qs.filter(**filter_kwargs).distinct().order_by(order)
+    posts = list(base_qs.filter(**filter_kwargs).distinct().order_by(order))
+
+    # Attach latest review comment to each post
+    from apps.approvals.models import ApprovalAction
+    post_ids = [p.id for p in posts]
+    latest_comments = {}
+    if post_ids:
+        actions = (
+            ApprovalAction.objects
+            .filter(post_id__in=post_ids, action__in=[
+                ApprovalAction.ActionType.CHANGES_REQUESTED,
+                ApprovalAction.ActionType.REJECTED,
+            ])
+            .order_by("post_id", "-created_at")
+        )
+        seen = set()
+        for action in actions:
+            if action.post_id not in seen:
+                latest_comments[action.post_id] = action.comment or ""
+                seen.add(action.post_id)
+    for post in posts:
+        post.latest_review_comment = latest_comments.get(post.id, "")
 
     pp_qs = PlatformPost.objects.filter(post__workspace=workspace)
     pending_review_count = pp_qs.filter(status="pending_review").values("post_id").distinct().count()

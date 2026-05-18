@@ -1,29 +1,38 @@
 {% load humanize %}
-<div id="post-row-{{ post.id }}" class="bg-white border border-stone-200 rounded-xl p-4 hover:shadow-md transition-all group"
-     x-data="{ expanded: false, showActions: false, showSchedule: false }">
+<div id="post-row-{{ post.id }}"
+     class="bg-white border border-stone-200 rounded-xl p-4 hover:shadow-md hover:border-stone-300 transition-all cursor-pointer select-none"
+     data-post-id="{{ post.id }}"
+     data-caption="{{ post.caption|default:''|escapejs }}"
+     data-status="{{ post.status }}"
+     data-author="{{ post.author.display_name|default:'Unknown'|escapejs }}"
+     data-author-initial="{{ post.author.display_name|default:'?'|make_list|first|upper }}"
+     data-platforms="{% for pp in post.platform_posts.all %}{{ pp.social_account.platform }}{% if not forloop.last %},{% endif %}{% endfor %}"
+     data-media="{% for pm in post.media_attachments.all %}{% if pm.media_asset.file %}{{ pm.media_asset.file.url }}|{{ pm.media_asset.media_type|default:'image' }}{% if not forloop.last %},{% endif %}{% endif %}{% endfor %}"
+     data-scheduled-at="{% if post.scheduled_at %}{{ post.scheduled_at|date:'M j, Y g:i A' }}{% endif %}"
+     data-review-comment="{{ post.latest_review_comment|escapejs }}"
+     data-edit-url="{% url 'composer:compose_edit' workspace_id=workspace.id post_id=post.id %}"
+     @click="openPanel($el.dataset)">
+
     <div class="flex items-start gap-3">
-        <!-- Post content -->
         <div class="flex-1 min-w-0">
-            <div class="flex items-center gap-2 mb-1.5">
-                <!-- Status badge -->
+            <!-- Status + platforms + scheduled -->
+            <div class="flex items-center gap-2 mb-1.5 flex-wrap">
                 {% if post.status == 'pending_review' %}
                 <span class="inline-flex items-center px-2 py-0.5 text-[0.6875rem] font-semibold rounded-full bg-orange-50 text-orange-700">Pending Review</span>
                 {% elif post.status == 'approved' %}
                 <span class="inline-flex items-center px-2 py-0.5 text-[0.6875rem] font-semibold rounded-full bg-emerald-50 text-emerald-700">Approved</span>
                 {% elif post.status == 'changes_requested' %}
-                <span class="inline-flex items-center px-2 py-0.5 text-[0.6875rem] font-semibold rounded-full bg-orange-50 text-orange-700">Changes Requested</span>
+                <span class="inline-flex items-center px-2 py-0.5 text-[0.6875rem] font-semibold rounded-full bg-amber-50 text-amber-700">Changes Requested</span>
                 {% elif post.status == 'rejected' %}
                 <span class="inline-flex items-center px-2 py-0.5 text-[0.6875rem] font-semibold rounded-full bg-red-50 text-red-700">Rejected</span>
                 {% endif %}
 
-                <!-- Platform icons -->
                 <div class="flex gap-1">
                     {% for pp in post.platform_posts.all %}
                     <span class="text-[0.6875rem] text-stone-400 bg-stone-100 px-1.5 py-0.5 rounded font-medium">{{ pp.social_account.platform|upper|truncatechars:2 }}</span>
                     {% endfor %}
                 </div>
 
-                <!-- Scheduled time -->
                 {% if post.scheduled_at %}
                 <span class="text-[0.6875rem] text-stone-400 ml-auto flex-shrink-0">
                     <svg class="w-3 h-3 inline -mt-0.5 mr-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
@@ -33,9 +42,7 @@
             </div>
 
             <!-- Caption snippet -->
-            <p class="text-sm text-stone-700 leading-relaxed line-clamp-2 cursor-pointer" @click="expanded = !expanded">
-                {{ post.caption_snippet }}
-            </p>
+            <p class="text-sm text-stone-700 leading-relaxed line-clamp-2">{{ post.caption_snippet }}</p>
 
             <!-- Author -->
             <div class="flex items-center gap-1.5 mt-2">
@@ -44,123 +51,11 @@
                 </div>
                 <span class="text-[0.75rem] text-stone-400">{{ post.author.display_name|default:"Unknown" }}</span>
             </div>
-
-            <!-- Expanded content -->
-            <div x-show="expanded" x-cloak x-collapse class="mt-3 pt-3 border-t border-stone-100">
-                <!-- Full caption -->
-                <p class="text-sm text-stone-600 whitespace-pre-wrap mb-3">{{ post.caption }}</p>
-
-                <!-- Media thumbnails -->
-                {% if post.media_attachments.all %}
-                <div class="flex gap-2 mb-3 flex-wrap">
-                    {% for pm in post.media_attachments.all %}
-                    {% if pm.media_asset.thumbnail %}
-                    <img src="{{ pm.media_asset.thumbnail.url }}" alt="{{ pm.alt_text }}" class="w-16 h-16 rounded-lg object-cover border border-stone-200">
-                    {% elif pm.media_asset.file %}
-                    <div class="w-16 h-16 rounded-lg border border-stone-200 bg-stone-50 flex items-center justify-center">
-                        <svg class="w-5 h-5 text-stone-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909M3.75 21h16.5A2.25 2.25 0 0022.5 18.75V5.25A2.25 2.25 0 0020.25 3H3.75A2.25 2.25 0 001.5 5.25v13.5A2.25 2.25 0 003.75 21z"/></svg>
-                    </div>
-                    {% endif %}
-                    {% endfor %}
-                </div>
-                {% endif %}
-
-            </div>
         </div>
 
-        <!-- Action buttons -->
-        <div class="flex items-center gap-1.5 flex-shrink-0">
-            <!-- Edit post -->
-            <a href="{% url 'composer:compose_edit' workspace_id=workspace.id post_id=post.id %}"
-               class="w-8 h-8 flex items-center justify-center rounded-full border border-stone-200 text-stone-400 hover:text-stone-700 hover:border-stone-300 hover:bg-stone-50 transition-colors"
-               title="Edit post">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931z"/></svg>
-            </a>
-            {% if post.status == 'pending_review' %}
-            <!-- Approve -->
-            <button hx-post="{% url 'approvals:approve' workspace_id=workspace.id post_id=post.id %}"
-                    hx-target="#post-row-{{ post.id }}"
-                    hx-swap="outerHTML"
-                    class="px-3 py-1.5 text-[0.8125rem] font-semibold rounded-full bg-emerald-500 hover:bg-emerald-600 text-white transition-colors">
-                Approve
-            </button>
-
-            <!-- Request Changes (opens modal) -->
-            <button @click="showActions = !showActions"
-                    class="px-3 py-1.5 text-[0.8125rem] font-semibold rounded-full border border-stone-200 text-stone-600 hover:bg-stone-50 transition-colors">
-                Review
-            </button>
-            {% elif post.status == 'approved' %}
-            <!-- Schedule -->
-            <button @click="showSchedule = !showSchedule"
-                    class="px-3 py-1.5 text-[0.8125rem] font-semibold rounded-full border border-stone-200 text-stone-600 hover:bg-stone-50 transition-colors flex items-center gap-1.5">
-                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-                Schedule
-            </button>
-            {% endif %}
-        </div>
-    </div>
-
-    <!-- Inline schedule panel (approved posts) -->
-    {% if post.status == 'approved' %}
-    <div x-show="showSchedule" x-cloak x-collapse class="mt-3 pt-3 border-t border-stone-100">
-        <form hx-post="{% url 'approvals:schedule_post' workspace_id=workspace.id post_id=post.id %}"
-              hx-target="#post-row-{{ post.id }}"
-              hx-swap="outerHTML"
-              class="flex flex-wrap items-end gap-3">
-            <div>
-                <label class="block text-[0.75rem] font-medium text-stone-500 mb-1">Date</label>
-                <input type="date" name="scheduled_date" required
-                       class="px-3 py-1.5 text-sm border border-stone-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-300 focus:border-transparent">
-            </div>
-            <div>
-                <label class="block text-[0.75rem] font-medium text-stone-500 mb-1">Time</label>
-                <input type="time" name="scheduled_time" required
-                       class="px-3 py-1.5 text-sm border border-stone-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-300 focus:border-transparent">
-            </div>
-            <div class="flex gap-2">
-                <button type="submit"
-                        class="px-4 py-1.5 text-[0.8125rem] font-semibold rounded-full bg-emerald-500 hover:bg-emerald-600 text-white transition-colors">
-                    Confirm Schedule
-                </button>
-                <button type="button" @click="showSchedule = false"
-                        class="px-3 py-1.5 text-[0.8125rem] font-medium rounded-full text-stone-500 hover:bg-stone-100 transition-colors">
-                    Cancel
-                </button>
-            </div>
-        </form>
-    </div>
-    {% endif %}
-
-    <!-- Review actions dropdown -->
-    <div x-show="showActions" x-cloak x-collapse class="mt-3 pt-3 border-t border-stone-100">
-        <div class="space-y-3">
-            <textarea id="review-comment-{{ post.id }}" rows="2"
-                      class="w-full px-3 py-2 text-sm border border-stone-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-300 focus:border-transparent resize-none"
-                      placeholder="Add a comment (required for changes/rejection)..."></textarea>
-            <div class="flex gap-2">
-                <button hx-post="{% url 'approvals:request_changes' workspace_id=workspace.id post_id=post.id %}"
-                        hx-target="#post-row-{{ post.id }}"
-                        hx-swap="outerHTML"
-                        hx-include="#review-comment-{{ post.id }}"
-                        hx-vals='{"comment": ""}'
-                        @click="htmx.find('#review-comment-{{ post.id }}').name = 'comment'"
-                        class="px-3 py-1.5 text-[0.8125rem] font-semibold rounded-full bg-amber-500 hover:bg-amber-600 text-white transition-colors">
-                    Request Changes
-                </button>
-                <button hx-post="{% url 'approvals:reject' workspace_id=workspace.id post_id=post.id %}"
-                        hx-target="#post-row-{{ post.id }}"
-                        hx-swap="outerHTML"
-                        hx-include="#review-comment-{{ post.id }}"
-                        @click="htmx.find('#review-comment-{{ post.id }}').name = 'comment'"
-                        class="px-3 py-1.5 text-[0.8125rem] font-semibold rounded-full bg-red-500 hover:bg-red-600 text-white transition-colors">
-                    Reject
-                </button>
-                <button @click="showActions = false"
-                        class="px-3 py-1.5 text-[0.8125rem] font-medium rounded-full text-stone-500 hover:bg-stone-100 transition-colors ml-auto">
-                    Cancel
-                </button>
-            </div>
+        <!-- Chevron -->
+        <div class="flex-shrink-0 mt-1 text-stone-300">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
         </div>
     </div>
 </div>
