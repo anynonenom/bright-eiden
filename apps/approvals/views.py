@@ -134,11 +134,14 @@ def post_detail_panel(request, workspace_id, post_id):
     )
     post.latest_review_comment = last_action.comment if last_action else ""
     membership = getattr(request, "workspace_membership", None)
-    can_approve = membership and membership.workspace_role in ("owner", "manager") or request.user.is_superuser
+    is_super = request.user.is_superuser
+    can_approve = is_super or (membership and membership.workspace_role in ("owner", "manager"))
+    can_schedule = is_super or (membership and membership.get_permissions().get("schedule_posts", False))
     return render(request, "approvals/partials/post_panel.html", {
         "workspace": workspace,
         "post": post,
         "can_approve": can_approve,
+        "can_schedule": can_schedule,
     })
 
 
@@ -258,7 +261,7 @@ def reject(request, workspace_id, post_id):
 
 
 @login_required
-@require_permission("approve_posts")
+@require_permission("schedule_posts")
 @require_POST
 def schedule_post(request, workspace_id, post_id):
     """Schedule an approved post directly from the approval queue."""

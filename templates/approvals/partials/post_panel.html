@@ -174,9 +174,8 @@
 </div>
 
 <!-- Footer -->
-{% if can_approve %}
+{% if can_approve and status == 'pending_review' %}
 <div id="panel-footer" style="flex-shrink:0;border-top:1px solid #e7e5e4;padding:16px 20px;background:#fafaf9;display:flex;flex-direction:column;gap:10px;">
-    {% if status == 'pending_review' %}
     <div id="panel-comment-wrap" style="display:none;">
         <textarea id="panel-comment" placeholder="Add a note…" rows="3"
             style="width:100%;padding:8px 10px;border:1px solid #e7e5e4;border-radius:8px;font-size:0.8125rem;resize:none;color:#44403c;box-sizing:border-box;"></textarea>
@@ -186,7 +185,9 @@
         <button class="panel-action-btn" data-action="request_changes" data-post-id="{{ post.id }}" data-csrf="{{ csrf_token }}" style="flex:1;padding:9px 16px;border-radius:10px;border:1px solid #e7e5e4;cursor:pointer;font-size:0.8125rem;font-weight:600;color:#57534e;background:#fff;">Request Changes</button>
         <button class="panel-action-btn" data-action="reject" data-post-id="{{ post.id }}" data-csrf="{{ csrf_token }}" style="flex:1;padding:9px 16px;border-radius:10px;border:none;cursor:pointer;font-size:0.8125rem;font-weight:600;color:#b91c1c;background:#fef2f2;">Reject</button>
     </div>
-    {% elif status == 'approved' %}
+</div>
+{% elif can_schedule and status == 'approved' %}
+<div id="panel-footer" style="flex-shrink:0;border-top:1px solid #e7e5e4;padding:16px 20px;background:#fafaf9;display:flex;flex-direction:column;gap:10px;">
     <div id="panel-sched-form" style="display:none;flex-direction:column;gap:8px;">
         <div style="display:flex;gap:8px;">
             <input type="date" id="panel-sched-date" style="flex:1;padding:7px 10px;border:1px solid #e7e5e4;border-radius:8px;font-size:0.8125rem;">
@@ -197,7 +198,6 @@
     <div style="display:flex;gap:8px;">
         <button class="panel-sched-toggle-btn" style="flex:1;padding:9px 16px;border-radius:10px;border:none;cursor:pointer;font-size:0.8125rem;font-weight:600;color:#fff;background:var(--primary);">Schedule</button>
     </div>
-    {% endif %}
 </div>
 {% endif %}
 
