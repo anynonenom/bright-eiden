@@ -1,14 +1,9 @@
 # ═══════════════════════════════════════════════════════════════
 #  BrightBean Studio — Caddy Reverse Proxy
-#  HTTP-only when APP_DOMAIN is an IP address.
-#  Switch to domain + auto HTTPS by setting APP_DOMAIN to a real domain.
+#  Auto HTTPS via Let's Encrypt. Set APP_DOMAIN to your domain.
 # ═══════════════════════════════════════════════════════════════
 
-{
-    auto_https off
-}
-
-:{$CADDY_PORT:80} {
+{$APP_DOMAIN} {
     # Proxy to Django/Gunicorn
     reverse_proxy app:8000 {
         header_up X-Forwarded-Proto {scheme}
@@ -22,6 +17,7 @@
 
     # Security headers
     header {
+        Strict-Transport-Security "max-age=31536000; includeSubDomains"
         X-Frame-Options "SAMEORIGIN"
         X-Content-Type-Options "nosniff"
         Referrer-Policy "strict-origin-when-cross-origin"
