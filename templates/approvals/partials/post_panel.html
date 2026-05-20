@@ -1,27 +1,27 @@
 {% load humanize %}
-{% with status=post.platform_posts.first.status %}
+{% with status=post.status %}
 
 <!-- Header -->
-<div style="display:flex;align-items:center;justify-content:space-between;padding:16px 20px;border-bottom:1px solid #e7e5e4;flex-shrink:0;">
+<div style="display:flex;align-items:center;justify-content:space-between;padding:14px 18px;border-bottom:1px solid #f0eeec;flex-shrink:0;">
     <div style="display:flex;align-items:center;gap:10px;">
-        <button class="panel-close-btn" style="width:28px;height:28px;border-radius:50%;border:none;background:none;cursor:pointer;color:#a8a29e;display:flex;align-items:center;justify-content:center;">
-            <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        <button class="panel-close-btn" style="width:28px;height:28px;border-radius:50%;border:none;background:#f5f5f4;cursor:pointer;color:#78716c;display:flex;align-items:center;justify-content:center;">
+            <svg width="13" height="13" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
         </button>
-        <span style="font-size:0.8125rem;font-weight:600;color:#44403c;">{% if status == 'pending_review' %}Review Post{% else %}Post Preview{% endif %}</span>
+        <span style="font-size:0.8125rem;font-weight:600;color:#1c1917;">{% if status == 'pending_review' %}Review Post{% else %}Post Preview{% endif %}</span>
     </div>
     {% if can_edit %}
-    <a href="{% url 'composer:compose_edit' workspace_id=workspace.id post_id=post.id %}" style="display:inline-flex;align-items:center;gap:5px;padding:5px 12px;border-radius:8px;border:1px solid #e7e5e4;color:#57534e;text-decoration:none;font-size:0.75rem;font-weight:600;">
-        <svg width="13" height="13" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931z"/></svg>
+    <a href="{% url 'composer:compose_edit' workspace_id=workspace.id post_id=post.id %}" style="display:inline-flex;align-items:center;gap:5px;padding:5px 12px;border-radius:8px;border:1px solid #e7e5e4;color:#57534e;text-decoration:none;font-size:0.75rem;font-weight:600;background:#fff;">
+        <svg width="12" height="12" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931z"/></svg>
         Edit
     </a>
     {% endif %}
 </div>
 
 <!-- Body -->
-<div style="flex:1;overflow-y:auto;padding:20px;display:flex;flex-direction:column;gap:20px;">
+<div style="flex:1;overflow-y:auto;">
 
-    <!-- Meta -->
-    <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+    <!-- Status + author row -->
+    <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding:14px 18px 0;">
         {% if status == 'pending_review' %}
         <span style="font-size:0.6875rem;font-weight:600;padding:2px 8px;border-radius:9999px;background:#fff7ed;color:#c2410c;">Pending Review</span>
         {% elif status == 'approved' %}
@@ -30,127 +30,233 @@
         <span style="font-size:0.6875rem;font-weight:600;padding:2px 8px;border-radius:9999px;background:#fffbeb;color:#b45309;">Changes Requested</span>
         {% elif status == 'rejected' %}
         <span style="font-size:0.6875rem;font-weight:600;padding:2px 8px;border-radius:9999px;background:#fef2f2;color:#b91c1c;">Rejected</span>
+        {% elif status == 'scheduled' %}
+        <span style="font-size:0.6875rem;font-weight:600;padding:2px 8px;border-radius:9999px;background:#eff6ff;color:#1d4ed8;">Scheduled</span>
         {% endif %}
-        {% for pp in post.platform_posts.all %}
-        <span style="font-size:0.6875rem;color:#a8a29e;background:#f5f5f4;padding:2px 6px;border-radius:4px;font-weight:500;">{{ pp.social_account.platform|upper|truncatechars:2 }}</span>
-        {% endfor %}
-        <span style="font-size:0.75rem;color:#a8a29e;margin-left:auto;display:flex;align-items:center;gap:6px;">
+        <span style="margin-left:auto;font-size:0.75rem;color:#a8a29e;display:flex;align-items:center;gap:5px;">
             <span style="width:20px;height:20px;border-radius:50%;background:#e7e5e4;display:inline-flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;color:#78716c;">{{ post.author.display_name|default:"?"|make_list|first|upper }}</span>
             {{ post.author.display_name|default:"Unknown" }}
         </span>
     </div>
 
-    <!-- Platform previews -->
+    <!-- PREVIEW header -->
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:14px 18px 10px;">
+        <span style="font-size:0.6875rem;font-weight:700;letter-spacing:0.08em;color:#a8a29e;text-transform:uppercase;">Preview</span>
+        <span style="font-size:0.6875rem;color:#a8a29e;">{{ post.platform_posts.all|length }} platform{{ post.platform_posts.all|length|pluralize }}</span>
+    </div>
+
+    <!-- Platform previews — same card style as composer -->
     {% for pp in post.platform_posts.all %}
-    {% with platform=pp.social_account.platform|lower %}
-    <div style="border:1px solid #e7e5e4;border-radius:12px;overflow:hidden;background:#fff;">
+    {% with platform=pp.social_account.platform|lower caption_len=post.caption|length %}
+
+    <div class="preview-card" style="margin:0 0 1px 0;border-top:{% if not forloop.first %}1px solid #f0eeec{% else %}none{% endif %};">
+
+        <!-- Platform label + char badge -->
+        <div style="padding:8px 14px;border-bottom:1px solid #e7e5e4;display:flex;align-items:center;gap:8px;">
+            {% include "partials/_platform_icon.html" with platform=platform size="sm" %}
+            <span style="font-size:0.6875rem;font-weight:600;color:#78716c;flex:1;">{{ pp.social_account.platform|title }} Preview</span>
+            <span style="font-size:0.625rem;font-weight:600;padding:2px 8px;border-radius:9999px;background:#f5f5f4;color:#78716c;">{{ caption_len }}/{% if platform == 'facebook' %}63206{% elif platform == 'instagram' or platform == 'instagram_login' %}2200{% elif platform == 'tiktok' %}2200{% elif platform == 'linkedin_personal' or platform == 'linkedin_company' or platform == 'linkedin' %}3000{% else %}280{% endif %}</span>
+        </div>
 
         {% if platform == 'facebook' %}
-        <!-- Facebook preview -->
-        <div style="padding:10px 12px;display:flex;align-items:center;gap:8px;border-bottom:1px solid #f0f0f0;">
-            <div style="width:36px;height:36px;border-radius:50%;background:#1877f2;display:flex;align-items:center;justify-content:center;">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="#fff"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/></svg>
+        <div class="bg-white">
+            <div style="display:flex;align-items:center;gap:10px;padding:12px 12px 8px;">
+                {% if pp.social_account.avatar_url %}
+                <img src="{{ pp.social_account.avatar_url }}" style="width:40px;height:40px;border-radius:50%;object-fit:cover;">
+                {% else %}
+                <div style="width:40px;height:40px;border-radius:50%;background:#1877f2;display:flex;align-items:center;justify-content:center;font-size:0.8125rem;font-weight:700;color:#fff;flex-shrink:0;">{{ pp.social_account.account_name|default:pp.social_account.account_handle|make_list|first|upper }}</div>
+                {% endif %}
+                <div style="flex:1;">
+                    <div style="font-size:0.8125rem;font-weight:600;color:#1c1917;">{{ pp.social_account.account_name|default:pp.social_account.account_handle }}</div>
+                    <div style="font-size:0.6875rem;color:#a8a29e;display:flex;align-items:center;gap:4px;">Just now ·
+                        <svg width="10" height="10" viewBox="0 0 16 16" fill="currentColor"><path d="M8 16A8 8 0 108 0a8 8 0 000 16zM4.5 7.5a.5.5 0 01.5-.5h6a.5.5 0 010 1H5a.5.5 0 01-.5-.5z"/></svg>
+                    </div>
+                </div>
+                <svg width="18" height="18" fill="currentColor" style="color:#a8a29e;" viewBox="0 0 24 24"><circle cx="12" cy="6" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="12" cy="18" r="2"/></svg>
             </div>
-            <div>
-                <p style="font-size:0.8125rem;font-weight:600;color:#050505;margin:0;">{{ workspace.name }}</p>
-                <p style="font-size:0.6875rem;color:#65676b;margin:0;">Just now · 🌐</p>
-            </div>
-        </div>
-        <div style="padding:10px 12px;">
-            <p style="font-size:0.875rem;color:#050505;line-height:1.5;white-space:pre-wrap;margin:0;">{{ post.caption|truncatechars:180 }}</p>
-        </div>
-        {% if post.media_attachments.all %}
-        <div style="{% if post.media_attachments.all|length == 1 %}display:block{% else %}display:grid;grid-template-columns:1fr 1fr;gap:2px{% endif %};">
-            {% for pm in post.media_attachments.all %}{% if pm.media_asset.file %}
-            {% if pm.media_asset.media_type == 'video' %}
-            <video src="{{ pm.media_asset.file.url }}" style="width:100%;{% if post.media_attachments.all|length == 1 %}max-height:300px{% else %}height:140px{% endif %};object-fit:cover;" controls preload="auto"></video>
-            {% else %}
-            <img src="{{ pm.media_asset.file.url }}" style="width:100%;{% if post.media_attachments.all|length == 1 %}max-height:300px{% else %}height:140px{% endif %};object-fit:cover;" loading="lazy">
+            {% if post.caption %}
+            <div style="padding:0 12px 10px;font-size:0.875rem;color:#292929;line-height:1.5;white-space:pre-wrap;word-break:break-words;">{{ post.caption|truncatechars:250 }}</div>
             {% endif %}
-            {% endif %}{% endfor %}
-        </div>
-        {% endif %}
-        <div style="padding:6px 12px;display:flex;gap:16px;border-top:1px solid #f0f0f0;">
-            <span style="font-size:0.75rem;color:#65676b;display:flex;align-items:center;gap:4px;">👍 Like</span>
-            <span style="font-size:0.75rem;color:#65676b;display:flex;align-items:center;gap:4px;">💬 Comment</span>
-            <span style="font-size:0.75rem;color:#65676b;display:flex;align-items:center;gap:4px;">↗ Share</span>
+            {% if post.media_attachments.all %}
+            {% with attachments=post.media_attachments.all total=post.media_attachments.all|length %}
+            {% if total > 1 %}
+            <div style="position:relative;overflow:hidden;" x-data="{ slide: 0, count: {{ total }} }">
+                <div style="display:flex;transition:transform 0.3s ease;" :style="'transform:translateX(-'+(slide*100)+'%)'">
+                    {% for pm in attachments %}{% if pm.media_asset.file %}
+                    <div style="min-width:100%;flex-shrink:0;">
+                        {% if pm.media_asset.media_type == 'video' %}
+                        <video src="{{ pm.media_asset.file.url }}" style="width:100%;max-height:260px;object-fit:cover;display:block;" controls preload="auto"></video>
+                        {% else %}
+                        <img src="{{ pm.media_asset.file.url }}" style="width:100%;max-height:260px;object-fit:cover;display:block;" loading="lazy">
+                        {% endif %}
+                    </div>
+                    {% endif %}{% endfor %}
+                </div>
+                <div style="position:absolute;top:10px;right:10px;background:rgba(0,0,0,0.6);color:#fff;font-size:0.6875rem;font-weight:500;padding:2px 8px;border-radius:9999px;pointer-events:none;" x-text="(slide+1)+'/'+count"></div>
+                <button type="button" x-show="slide > 0" @click.stop="slide--" style="position:absolute;left:8px;top:50%;transform:translateY(-50%);width:28px;height:28px;border-radius:50%;border:none;background:rgba(255,255,255,0.92);cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 1px 6px rgba(0,0,0,0.18);">
+                    <svg width="14" height="14" fill="none" stroke="#333" viewBox="0 0 24 24" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5"/></svg>
+                </button>
+                <button type="button" x-show="slide < count-1" @click.stop="slide++" style="position:absolute;right:8px;top:50%;transform:translateY(-50%);width:28px;height:28px;border-radius:50%;border:none;background:rgba(255,255,255,0.92);cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 1px 6px rgba(0,0,0,0.18);">
+                    <svg width="14" height="14" fill="none" stroke="#333" viewBox="0 0 24 24" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5"/></svg>
+                </button>
+                <div style="position:absolute;bottom:8px;left:50%;transform:translateX(-50%);display:flex;gap:5px;">
+                    {% for pm in attachments %}<button type="button" @click.stop="slide={{ forloop.counter0 }}" style="width:6px;height:6px;border-radius:50%;border:none;cursor:pointer;padding:0;transition:background 0.2s;" :style="slide==={{ forloop.counter0 }} ? 'background:#1877f2' : 'background:rgba(255,255,255,0.55)'"></button>{% endfor %}
+                </div>
+            </div>
+            {% else %}
+            {% with pm=attachments.0 %}{% if pm.media_asset.file %}
+            <div>
+                {% if pm.media_asset.media_type == 'video' %}
+                <video src="{{ pm.media_asset.file.url }}" style="width:100%;max-height:220px;object-fit:cover;display:block;" controls preload="auto"></video>
+                {% else %}
+                <img src="{{ pm.media_asset.file.url }}" style="width:100%;max-height:220px;object-fit:cover;display:block;" loading="lazy">
+                {% endif %}
+            </div>
+            {% endif %}{% endwith %}
+            {% endif %}
+            {% endwith %}
+            {% endif %}
+            <div style="padding:8px 12px;border-top:1px solid #f0f0f0;display:flex;align-items:center;justify-content:space-around;">
+                <span style="display:flex;align-items:center;gap:6px;font-size:0.75rem;color:#65676b;font-weight:500;padding:4px 8px;border-radius:6px;cursor:default;">
+                    <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M6.633 10.5c.806 0 1.533-.446 2.031-1.08a9.041 9.041 0 012.861-2.4c.723-.384 1.35-.956 1.653-1.715a4.498 4.498 0 00.322-1.672V3a.75.75 0 01.75-.75A2.25 2.25 0 0116.5 4.5c0 1.152-.26 2.243-.723 3.218-.266.558.107 1.282.725 1.282h3.126c1.026 0 1.945.694 2.054 1.715.045.422.068.85.068 1.285a11.95 11.95 0 01-2.649 7.521c-.388.482-.987.729-1.605.729H13.48c-.483 0-.964-.078-1.423-.23l-3.114-1.04a4.501 4.501 0 00-1.423-.23H5.904M14.25 9h2.25M5.904 18.75c.083.205.173.405.27.602.197.4-.078.898-.523.898h-.908c-.889 0-1.713-.518-1.972-1.368a12 12 0 01-.521-3.507c0-1.553.295-3.036.831-4.398C3.387 9.953 4.167 9.5 5 9.5h.096c.5 0 .905.405.905.905 0 .714-.211 1.412-.608 2.006L4 14.25l1.904 4.5z"/></svg>
+                    Like
+                </span>
+                <span style="display:flex;align-items:center;gap:6px;font-size:0.75rem;color:#65676b;font-weight:500;padding:4px 8px;border-radius:6px;cursor:default;">
+                    <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 20.25c4.97 0 9-3.694 9-8.25s-4.03-8.25-9-8.25S3 7.444 3 12c0 2.104.859 4.023 2.273 5.48.432.447.74 1.04.586 1.641a4.483 4.483 0 01-.923 1.785A5.969 5.969 0 006 21c1.282 0 2.47-.402 3.445-1.087.81.22 1.668.337 2.555.337z"/></svg>
+                    Comment
+                </span>
+                <span style="display:flex;align-items:center;gap:6px;font-size:0.75rem;color:#65676b;font-weight:500;padding:4px 8px;border-radius:6px;cursor:default;">
+                    <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M7.217 10.907a2.25 2.25 0 100 2.186m0-2.186c.18.324.283.696.283 1.093s-.103.77-.283 1.093m0-2.186l9.566-5.314m-9.566 7.5l9.566 5.314m0 0a2.25 2.25 0 103.935 2.186 2.25 2.25 0 00-3.935-2.186zm0-12.814a2.25 2.25 0 103.933-2.185 2.25 2.25 0 00-3.933 2.185z"/></svg>
+                    Share
+                </span>
+            </div>
         </div>
 
-        {% elif platform == 'instagram' %}
-        <!-- Instagram preview -->
-        <div style="padding:10px 12px;display:flex;align-items:center;gap:8px;">
-            <div style="width:32px;height:32px;border-radius:50%;background:linear-gradient(45deg,#f09433,#e6683c,#dc2743,#cc2366,#bc1888);display:flex;align-items:center;justify-content:center;">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="0.5" fill="#fff"/></svg>
+        {% elif platform == 'instagram' or platform == 'instagram_login' %}
+        <div class="bg-white">
+            <div style="display:flex;align-items:center;gap:10px;padding:10px 12px;">
+                {% if pp.social_account.avatar_url %}
+                <img src="{{ pp.social_account.avatar_url }}" style="width:32px;height:32px;border-radius:50%;object-fit:cover;border:2px solid #e7e5e4;">
+                {% else %}
+                <div style="width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,#F58529,#DD2A7B,#8134AF);display:flex;align-items:center;justify-content:center;font-size:0.75rem;font-weight:700;color:#fff;flex-shrink:0;">{{ pp.social_account.account_name|default:pp.social_account.account_handle|make_list|first|upper }}</div>
+                {% endif %}
+                <span style="font-size:0.8125rem;font-weight:600;color:#1c1917;flex:1;">{{ pp.social_account.account_name|default:pp.social_account.account_handle }}</span>
+                <svg width="16" height="16" fill="currentColor" style="color:#a8a29e;" viewBox="0 0 24 24"><circle cx="12" cy="6" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="12" cy="18" r="2"/></svg>
             </div>
-            <p style="font-size:0.8125rem;font-weight:600;color:#262626;margin:0;flex:1;">{{ workspace.name|lower|cut:" " }}</p>
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#262626" stroke-width="2"><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/><circle cx="5" cy="12" r="1"/></svg>
-        </div>
-        {% if post.media_attachments.all %}
-        {% with pm=post.media_attachments.all.0 %}{% if pm.media_asset.file %}
-        {% if pm.media_asset.media_type == 'video' %}
-        <video src="{{ pm.media_asset.file.url }}" style="width:100%;aspect-ratio:1;object-fit:cover;" controls preload="auto"></video>
-        {% else %}
-        <img src="{{ pm.media_asset.file.url }}" style="width:100%;aspect-ratio:1;object-fit:cover;" loading="lazy">
-        {% endif %}
-        {% endif %}{% endwith %}
-        {% endif %}
-        <div style="padding:8px 12px;">
-            <div style="display:flex;gap:12px;margin-bottom:6px;">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#262626" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#262626" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#262626" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+            {% if post.media_attachments.all %}
+            {% with attachments=post.media_attachments.all total=post.media_attachments.all|length %}
+            {% if total > 1 %}
+            <div style="position:relative;overflow:hidden;" x-data="{ slide: 0, count: {{ total }} }">
+                <div style="display:flex;transition:transform 0.3s ease;" :style="'transform:translateX(-'+(slide*100)+'%)'">
+                    {% for pm in attachments %}{% if pm.media_asset.file %}
+                    <div style="min-width:100%;flex-shrink:0;aspect-ratio:1/1;background:#f5f5f4;">
+                        {% if pm.media_asset.media_type == 'video' %}
+                        <video src="{{ pm.media_asset.file.url }}" style="width:100%;height:100%;object-fit:cover;display:block;" controls preload="auto"></video>
+                        {% else %}
+                        <img src="{{ pm.media_asset.file.url }}" style="width:100%;height:100%;object-fit:cover;display:block;" loading="lazy">
+                        {% endif %}
+                    </div>
+                    {% endif %}{% endfor %}
+                </div>
+                <div style="position:absolute;top:10px;right:10px;background:rgba(0,0,0,0.6);color:#fff;font-size:0.6875rem;font-weight:500;padding:2px 8px;border-radius:9999px;pointer-events:none;" x-text="(slide+1)+'/'+count"></div>
+                <button type="button" x-show="slide > 0" @click.stop="slide--" style="position:absolute;left:8px;top:50%;transform:translateY(-50%);width:28px;height:28px;border-radius:50%;border:none;background:rgba(255,255,255,0.92);cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 1px 6px rgba(0,0,0,0.18);">
+                    <svg width="14" height="14" fill="none" stroke="#333" viewBox="0 0 24 24" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5"/></svg>
+                </button>
+                <button type="button" x-show="slide < count-1" @click.stop="slide++" style="position:absolute;right:8px;top:50%;transform:translateY(-50%);width:28px;height:28px;border-radius:50%;border:none;background:rgba(255,255,255,0.92);cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 1px 6px rgba(0,0,0,0.18);">
+                    <svg width="14" height="14" fill="none" stroke="#333" viewBox="0 0 24 24" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5"/></svg>
+                </button>
+                <div style="position:absolute;bottom:8px;left:50%;transform:translateX(-50%);display:flex;gap:5px;">
+                    {% for pm in attachments %}<button type="button" @click.stop="slide={{ forloop.counter0 }}" style="width:6px;height:6px;border-radius:50%;border:none;cursor:pointer;padding:0;transition:background 0.2s;" :style="slide==={{ forloop.counter0 }} ? 'background:#3897f0' : 'background:rgba(255,255,255,0.55)'"></button>{% endfor %}
+                </div>
             </div>
-            <p style="font-size:0.8125rem;color:#262626;line-height:1.5;margin:0;white-space:pre-wrap;"><strong>{{ workspace.name|lower|cut:" " }}</strong> {{ post.caption|truncatechars:120 }}</p>
+            {% else %}
+            {% with pm=attachments.0 %}{% if pm.media_asset.file %}
+            <div style="background:#f5f5f4;aspect-ratio:1/1;">
+                {% if pm.media_asset.media_type == 'video' %}
+                <video src="{{ pm.media_asset.file.url }}" style="width:100%;aspect-ratio:1/1;object-fit:cover;display:block;" controls preload="auto"></video>
+                {% else %}
+                <img src="{{ pm.media_asset.file.url }}" style="width:100%;aspect-ratio:1/1;object-fit:cover;display:block;" loading="lazy">
+                {% endif %}
+            </div>
+            {% endif %}{% endwith %}
+            {% endif %}
+            {% endwith %}
+            {% endif %}
+            <div style="display:flex;align-items:center;gap:16px;padding:10px 12px;">
+                <svg width="24" height="24" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12z"/></svg>
+                <svg width="24" height="24" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 20.25c4.97 0 9-3.694 9-8.25s-4.03-8.25-9-8.25S3 7.444 3 12c0 2.104.859 4.023 2.273 5.48.432.447.74 1.04.586 1.641a4.483 4.483 0 01-.923 1.785A5.969 5.969 0 006 21c1.282 0 2.47-.402 3.445-1.087.81.22 1.668.337 2.555.337z"/></svg>
+                <svg width="24" height="24" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M6 12L3.269 3.126A59.768 59.768 0 0121.485 12 59.77 59.77 0 013.27 20.876L5.999 12zm0 0h7.5"/></svg>
+                <svg width="22" height="22" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5" style="margin-left:auto;"><path stroke-linecap="round" stroke-linejoin="round" d="M17.593 3.322c1.1.128 1.907 1.077 1.907 2.185V21L12 17.25 4.5 21V5.507c0-1.108.806-2.057 1.907-2.185a48.507 48.507 0 0111.186 0z"/></svg>
+            </div>
+            <div style="padding:0 12px 12px;">
+                {% if post.caption %}
+                <div style="font-size:0.8125rem;color:#1c1917;line-height:1.5;"><strong>{{ pp.social_account.account_name|default:pp.social_account.account_handle }}</strong> <span style="white-space:pre-wrap;word-break:break-words;">{{ post.caption|truncatechars:150 }}</span></div>
+                {% endif %}
+                <div style="font-size:0.625rem;color:#a8a29e;text-transform:uppercase;letter-spacing:0.08em;margin-top:4px;">Just now</div>
+            </div>
         </div>
 
         {% elif platform == 'tiktok' %}
-        <!-- TikTok preview -->
-        <div style="background:#000;position:relative;overflow:hidden;">
+        <div style="background:#000;position:relative;overflow:hidden;aspect-ratio:9/16;max-height:380px;">
             {% if post.media_attachments.all %}
             {% with pm=post.media_attachments.all.0 %}{% if pm.media_asset.file %}
             {% if pm.media_asset.media_type == 'video' %}
-            <video src="{{ pm.media_asset.file.url }}" style="width:100%;aspect-ratio:9/16;object-fit:cover;max-height:320px;" controls preload="auto"></video>
+            <video src="{{ pm.media_asset.file.url }}" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;" controls preload="auto"></video>
             {% else %}
-            <img src="{{ pm.media_asset.file.url }}" style="width:100%;aspect-ratio:9/16;object-fit:cover;max-height:320px;" loading="lazy">
+            <img src="{{ pm.media_asset.file.url }}" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;" loading="lazy">
             {% endif %}
             {% endif %}{% endwith %}
             {% endif %}
-            <div style="position:absolute;bottom:0;left:0;right:0;padding:12px;background:linear-gradient(transparent,rgba(0,0,0,0.7));">
-                <p style="font-size:0.8125rem;font-weight:600;color:#fff;margin:0 0 4px;">@{{ workspace.name|lower|cut:" " }}</p>
-                <p style="font-size:0.75rem;color:#fff;margin:0;opacity:0.9;">{{ post.caption|truncatechars:80 }}</p>
+            <div style="position:absolute;inset:0;background:linear-gradient(to top,rgba(0,0,0,0.75) 0%,transparent 50%);"></div>
+            <div style="position:absolute;right:10px;bottom:60px;display:flex;flex-direction:column;align-items:center;gap:14px;">
+                <div style="position:relative;">
+                    <div style="width:40px;height:40px;border-radius:50%;background:#444;display:flex;align-items:center;justify-content:center;font-size:0.875rem;font-weight:700;color:#fff;border:2px solid #fff;">{{ pp.social_account.account_name|default:pp.social_account.account_handle|make_list|first|upper }}</div>
+                </div>
+                <div style="display:flex;flex-direction:column;align-items:center;gap:2px;"><svg width="28" height="28" fill="white" viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg><span style="font-size:0.625rem;color:#fff;font-weight:500;">0</span></div>
+                <div style="display:flex;flex-direction:column;align-items:center;gap:2px;"><svg width="28" height="28" fill="white" viewBox="0 0 24 24"><path d="M12 2C6.477 2 2 5.813 2 10.5c0 2.614 1.394 4.96 3.586 6.53-.16 1.404-.862 2.672-1.586 3.47a.5.5 0 00.362.84c2.026-.064 3.762-.76 5.028-1.59.853.164 1.74.25 2.61.25 5.523 0 10-3.813 10-8.5S17.523 2 12 2z"/></svg><span style="font-size:0.625rem;color:#fff;font-weight:500;">0</span></div>
+                <div style="width:32px;height:32px;border-radius:50%;border:2px solid #555;background:#222;display:flex;align-items:center;justify-content:center;"><div style="width:12px;height:12px;border-radius:50%;background:#888;"></div></div>
+            </div>
+            <div style="position:absolute;bottom:12px;left:12px;right:60px;">
+                <div style="font-size:0.8125rem;font-weight:700;color:#fff;margin-bottom:4px;">@{{ pp.social_account.account_name|default:pp.social_account.account_handle }}</div>
+                {% if post.caption %}<div style="font-size:0.75rem;color:rgba(255,255,255,0.9);line-clamp:2;overflow:hidden;">{{ post.caption|truncatechars:100 }}</div>{% endif %}
             </div>
         </div>
 
-        {% elif platform == 'linkedin' %}
-        <!-- LinkedIn preview -->
-        <div style="padding:10px 12px;display:flex;align-items:center;gap:8px;">
-            <div style="width:40px;height:40px;border-radius:4px;background:#0a66c2;display:flex;align-items:center;justify-content:center;">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="#fff"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"/><rect x="2" y="9" width="4" height="12"/><circle cx="4" cy="4" r="2"/></svg>
+        {% elif platform == 'linkedin_personal' or platform == 'linkedin_company' or platform == 'linkedin' %}
+        <div class="bg-white">
+            <div style="display:flex;align-items:flex-start;gap:10px;padding:12px 12px 8px;">
+                {% if pp.social_account.avatar_url %}
+                <img src="{{ pp.social_account.avatar_url }}" style="width:48px;height:48px;border-radius:50%;object-fit:cover;flex-shrink:0;">
+                {% else %}
+                <div style="width:48px;height:48px;border-radius:50%;background:#0a66c2;display:flex;align-items:center;justify-content:center;font-size:1rem;font-weight:700;color:#fff;flex-shrink:0;">{{ pp.social_account.account_name|default:pp.social_account.account_handle|make_list|first|upper }}</div>
+                {% endif %}
+                <div style="flex:1;min-width:0;">
+                    <div style="font-size:0.8125rem;font-weight:600;color:#1c1917;">{{ pp.social_account.account_name|default:pp.social_account.account_handle }}</div>
+                    <div style="font-size:0.6875rem;color:#a8a29e;display:flex;align-items:center;gap:4px;">Just now ·
+                        <svg width="10" height="10" viewBox="0 0 16 16" fill="currentColor"><path d="M0 8a8 8 0 1116 0A8 8 0 010 8zm5.496-3.397A.75.75 0 004.5 5.25v5.5a.75.75 0 001.052.687l4.97-2.522.063-.035a.75.75 0 000-1.34l-.063-.036-4.97-2.521-.056-.02z"/></svg>
+                    </div>
+                </div>
+                <svg width="18" height="18" fill="currentColor" style="color:#a8a29e;flex-shrink:0;" viewBox="0 0 24 24"><circle cx="12" cy="6" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="12" cy="18" r="2"/></svg>
             </div>
-            <div>
-                <p style="font-size:0.8125rem;font-weight:600;color:#000;margin:0;">{{ workspace.name }}</p>
-                <p style="font-size:0.6875rem;color:#666;margin:0;">Just now · 🌐</p>
+            {% if post.caption %}
+            <div style="padding:0 12px 10px;font-size:0.8125rem;color:#1c1917;line-height:1.5;white-space:pre-wrap;word-break:break-words;">{{ post.caption|truncatechars:200 }}</div>
+            {% endif %}
+            {% if post.media_attachments.all %}
+            {% with pm=post.media_attachments.all.0 %}{% if pm.media_asset.file %}
+            <img src="{{ pm.media_asset.file.url }}" style="width:100%;max-height:240px;object-fit:cover;display:block;" loading="lazy">
+            {% endif %}{% endwith %}
+            {% endif %}
+            <div style="padding:8px 12px;border-top:1px solid #e0e0e0;display:flex;align-items:center;justify-content:space-around;">
+                <span style="display:flex;align-items:center;gap:5px;font-size:0.6875rem;color:#666;font-weight:500;"><svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M6.633 10.5c.806 0 1.533-.446 2.031-1.08a9.041 9.041 0 012.861-2.4c.723-.384 1.35-.956 1.653-1.715a4.498 4.498 0 00.322-1.672V3a.75.75 0 01.75-.75A2.25 2.25 0 0116.5 4.5c0 1.152-.26 2.243-.723 3.218-.266.558.107 1.282.725 1.282h3.126c1.026 0 1.945.694 2.054 1.715.045.422.068.85.068 1.285a11.95 11.95 0 01-2.649 7.521c-.388.482-.987.729-1.605.729H13.48c-.483 0-.964-.078-1.423-.23l-3.114-1.04a4.501 4.501 0 00-1.423-.23H5.904M14.25 9h2.25M5.904 18.75c.083.205.173.405.27.602.197.4-.078.898-.523.898h-.908c-.889 0-1.713-.518-1.972-1.368a12 12 0 01-.521-3.507c0-1.553.295-3.036.831-4.398C3.387 9.953 4.167 9.5 5 9.5h.096c.5 0 .905.405.905.905 0 .714-.211 1.412-.608 2.006L4 14.25l1.904 4.5z"/></svg> Like</span>
+                <span style="display:flex;align-items:center;gap:5px;font-size:0.6875rem;color:#666;font-weight:500;"><svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 20.25c4.97 0 9-3.694 9-8.25s-4.03-8.25-9-8.25S3 7.444 3 12c0 2.104.859 4.023 2.273 5.48.432.447.74 1.04.586 1.641a4.483 4.483 0 01-.923 1.785A5.969 5.969 0 006 21c1.282 0 2.47-.402 3.445-1.087.81.22 1.668.337 2.555.337z"/></svg> Comment</span>
+                <span style="display:flex;align-items:center;gap:5px;font-size:0.6875rem;color:#666;font-weight:500;"><svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 12c0-1.232-.046-2.453-.138-3.662a4.006 4.006 0 00-3.7-3.7 48.678 48.678 0 00-7.324 0 4.006 4.006 0 00-3.7 3.7c-.017.22-.032.441-.046.662M19.5 12l3-3m-3 3l-3-3m-12 3c0 1.232.046 2.453.138 3.662a4.006 4.006 0 003.7 3.7 48.656 48.656 0 007.324 0 4.006 4.006 0 003.7-3.7c.017-.22.032-.441.046-.662M4.5 12l3 3m-3-3l-3 3"/></svg> Repost</span>
+                <span style="display:flex;align-items:center;gap:5px;font-size:0.6875rem;color:#666;font-weight:500;"><svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M6 12L3.269 3.126A59.768 59.768 0 0121.485 12 59.77 59.77 0 013.27 20.876L5.999 12zm0 0h7.5"/></svg> Send</span>
             </div>
-        </div>
-        <div style="padding:4px 12px 10px;">
-            <p style="font-size:0.875rem;color:#000;line-height:1.5;white-space:pre-wrap;margin:0;">{{ post.caption|truncatechars:200 }}</p>
-        </div>
-        {% if post.media_attachments.all %}
-        {% with pm=post.media_attachments.all.0 %}{% if pm.media_asset.file %}
-        <img src="{{ pm.media_asset.file.url }}" style="width:100%;max-height:260px;object-fit:cover;" loading="lazy">
-        {% endif %}{% endwith %}
-        {% endif %}
-        <div style="padding:6px 12px;display:flex;gap:16px;border-top:1px solid #e0e0e0;">
-            <span style="font-size:0.75rem;color:#666;">👍 Like</span>
-            <span style="font-size:0.75rem;color:#666;">💬 Comment</span>
-            <span style="font-size:0.75rem;color:#666;">🔁 Repost</span>
         </div>
 
         {% else %}
-        <!-- Generic platform preview -->
-        <div style="padding:12px;">
-            <p style="font-size:0.6875rem;font-weight:700;color:#a8a29e;text-transform:uppercase;margin-bottom:6px;">{{ pp.social_account.platform|upper }} Preview</p>
-            <p style="font-size:0.875rem;color:#44403c;white-space:pre-wrap;margin:0;">{{ post.caption|truncatechars:200 }}</p>
+        <div style="background:#fff;padding:14px;">
+            <p style="font-size:0.9375rem;color:#44403c;white-space:pre-wrap;margin:0;line-height:1.5;">{{ post.caption|truncatechars:200 }}</p>
         </div>
         {% endif %}
 
@@ -160,17 +266,17 @@
 
     <!-- Scheduled -->
     {% if post.scheduled_at %}
-    <div>
+    <div style="padding:14px 18px;border-top:1px solid #f0eeec;">
         <p style="font-size:0.6875rem;font-weight:600;color:#a8a29e;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:4px;">Scheduled For</p>
-        <p style="font-size:0.875rem;color:#57534e;">{{ post.scheduled_at|date:"M j, Y g:i A" }}</p>
+        <p style="font-size:0.875rem;color:#57534e;margin:0;">{{ post.scheduled_at|date:"M j, Y g:i A" }}</p>
     </div>
     {% endif %}
 
     <!-- Review note -->
     {% if post.latest_review_comment %}
-    <div style="padding:10px 12px;border-radius:12px;border:1px solid #fcd34d;background:#fffbeb;">
+    <div style="margin:0 18px 18px;padding:10px 12px;border-radius:10px;border:1px solid #fcd34d;background:#fffbeb;">
         <p style="font-size:0.6875rem;font-weight:600;color:#b45309;margin-bottom:4px;">Review Note</p>
-        <p style="font-size:0.875rem;color:#92400e;font-style:italic;">{{ post.latest_review_comment }}</p>
+        <p style="font-size:0.875rem;color:#92400e;font-style:italic;margin:0;">{{ post.latest_review_comment }}</p>
     </div>
     {% endif %}
 
@@ -178,28 +284,28 @@
 
 <!-- Footer -->
 {% if can_approve and status == 'pending_review' %}
-<div id="panel-footer" style="flex-shrink:0;border-top:1px solid #e7e5e4;padding:16px 20px;background:#fafaf9;display:flex;flex-direction:column;gap:10px;">
+<div id="panel-footer" style="flex-shrink:0;border-top:1px solid #e7e5e4;padding:14px 18px;background:#fafaf9;display:flex;flex-direction:column;gap:10px;">
     <div id="panel-comment-wrap" style="display:none;">
-        <textarea id="panel-comment" placeholder="Add a note…" rows="3"
+        <textarea id="panel-comment" placeholder="Add a note..." rows="3"
             style="width:100%;padding:8px 10px;border:1px solid #e7e5e4;border-radius:8px;font-size:0.8125rem;resize:none;color:#44403c;box-sizing:border-box;"></textarea>
     </div>
     <div id="panel-btn-row" style="display:flex;gap:8px;">
-        <button class="panel-action-btn" data-action="approve" data-post-id="{{ post.id }}" data-csrf="{{ csrf_token }}" style="flex:1;padding:9px 16px;border-radius:10px;border:none;cursor:pointer;font-size:0.8125rem;font-weight:600;color:#fff;background:var(--primary);">Approve</button>
-        <button class="panel-action-btn" data-action="request_changes" data-post-id="{{ post.id }}" data-csrf="{{ csrf_token }}" style="flex:1;padding:9px 16px;border-radius:10px;border:1px solid #e7e5e4;cursor:pointer;font-size:0.8125rem;font-weight:600;color:#57534e;background:#fff;">Request Changes</button>
-        <button class="panel-action-btn" data-action="reject" data-post-id="{{ post.id }}" data-csrf="{{ csrf_token }}" style="flex:1;padding:9px 16px;border-radius:10px;border:none;cursor:pointer;font-size:0.8125rem;font-weight:600;color:#b91c1c;background:#fef2f2;">Reject</button>
+        <button class="panel-action-btn" data-action="approve" data-post-id="{{ post.id }}" data-csrf="{{ csrf_token }}" style="flex:1;padding:9px 0;border-radius:10px;border:none;cursor:pointer;font-size:0.8125rem;font-weight:600;color:#fff;background:var(--primary);">Approve</button>
+        <button class="panel-action-btn" data-action="request_changes" data-post-id="{{ post.id }}" data-csrf="{{ csrf_token }}" style="flex:1;padding:9px 0;border-radius:10px;border:1px solid #e7e5e4;cursor:pointer;font-size:0.8125rem;font-weight:600;color:#57534e;background:#fff;">Changes</button>
+        <button class="panel-action-btn" data-action="reject" data-post-id="{{ post.id }}" data-csrf="{{ csrf_token }}" style="flex:1;padding:9px 0;border-radius:10px;border:none;cursor:pointer;font-size:0.8125rem;font-weight:600;color:#b91c1c;background:#fef2f2;">Reject</button>
     </div>
 </div>
 {% elif can_schedule and status == 'approved' %}
-<div id="panel-footer" style="flex-shrink:0;border-top:1px solid #e7e5e4;padding:16px 20px;background:#fafaf9;display:flex;flex-direction:column;gap:10px;">
+<div id="panel-footer" style="flex-shrink:0;border-top:1px solid #e7e5e4;padding:14px 18px;background:#fafaf9;display:flex;flex-direction:column;gap:10px;">
     <div id="panel-sched-form" style="display:none;flex-direction:column;gap:8px;">
         <div style="display:flex;gap:8px;">
             <input type="date" id="panel-sched-date" style="flex:1;padding:7px 10px;border:1px solid #e7e5e4;border-radius:8px;font-size:0.8125rem;">
             <input type="time" id="panel-sched-time" style="flex:1;padding:7px 10px;border:1px solid #e7e5e4;border-radius:8px;font-size:0.8125rem;">
         </div>
-        <button class="panel-sched-confirm-btn" data-post-id="{{ post.id }}" data-csrf="{{ csrf_token }}" style="padding:9px 16px;border-radius:10px;border:none;cursor:pointer;font-size:0.8125rem;font-weight:600;color:#fff;background:var(--primary);">Confirm Schedule</button>
+        <button class="panel-sched-confirm-btn" data-post-id="{{ post.id }}" data-csrf="{{ csrf_token }}" style="padding:9px;border-radius:10px;border:none;cursor:pointer;font-size:0.8125rem;font-weight:600;color:#fff;background:var(--primary);">Confirm Schedule</button>
     </div>
     <div style="display:flex;gap:8px;">
-        <button class="panel-sched-toggle-btn" style="flex:1;padding:9px 16px;border-radius:10px;border:none;cursor:pointer;font-size:0.8125rem;font-weight:600;color:#fff;background:var(--primary);">Schedule</button>
+        <button class="panel-sched-toggle-btn" style="flex:1;padding:9px 0;border-radius:10px;border:none;cursor:pointer;font-size:0.8125rem;font-weight:600;color:#fff;background:var(--primary);">Schedule</button>
     </div>
 </div>
 {% endif %}

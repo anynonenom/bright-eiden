@@ -41,8 +41,7 @@
     {% if posts %}
     <div class="space-y-2.5">
         {% for post in posts %}
-        <a href="{% url 'composer:compose_edit' workspace_id=workspace.id post_id=post.id %}"
-           class="block bg-white border border-stone-200 rounded-xl p-4 hover:shadow-md hover:border-stone-300 hover:-translate-y-px transition-all duration-150 group">
+        <div class="block bg-white border border-stone-200 rounded-xl p-4 hover:shadow-md hover:border-stone-300 transition-all group">
             <div class="flex items-start gap-4">
 
                 {# Status indicator stripe #}
@@ -138,9 +137,25 @@
                         </div>
                     </div>
                     {% endif %}
+
+                    {# Action buttons #}
+                    <div class="flex items-center gap-2 mt-3">
+                        {% if post.status == 'approved' %}
+                        <button data-panel-url="{% url 'approvals:post_detail_panel' workspace_id=workspace.id post_id=post.id %}"
+                                class="approval-view-btn inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-lg border border-stone-200 text-stone-600 bg-white hover:bg-stone-50 transition-colors">
+                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                            Schedule
+                        </button>
+                        {% endif %}
+                        <a href="{% url 'composer:compose_edit' workspace_id=workspace.id post_id=post.id %}"
+                           class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-lg border border-stone-200 text-stone-600 bg-white hover:bg-stone-50 transition-colors">
+                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931z"/></svg>
+                            Edit
+                        </a>
+                    </div>
                 </div>
             </div>
-        </a>
+        </div>
         {% endfor %}
     </div>
 
@@ -167,4 +182,74 @@
     {% endif %}
 
 </div>
+
+<div id="approval-backdrop" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.18);z-index:40;"></div>
+<div id="approval-panel" style="display:none;position:fixed;top:0;right:0;bottom:0;width:100%;max-width:480px;background:#fff;box-shadow:-8px 0 40px rgba(0,0,0,0.12);z-index:41;flex-direction:column;overflow:hidden;"></div>
+
+<script nonce="{{ request.csp_nonce }}">
+document.addEventListener('click', function(e) {
+    var viewBtn = e.target.closest('.approval-view-btn');
+    if (viewBtn) { loadApprovalPanel(viewBtn.dataset.panelUrl); return; }
+    if (e.target.closest('.panel-close-btn') || e.target.id === 'approval-backdrop') { closeApprovalPanel(); return; }
+    var actionBtn = e.target.closest('.panel-action-btn');
+    if (actionBtn) { panelAction(actionBtn.dataset.postId, actionBtn.dataset.action, actionBtn.dataset.csrf); return; }
+    if (e.target.closest('.panel-sched-toggle-btn')) {
+        var form = document.getElementById('panel-sched-form');
+        if (form) { form.style.display = 'flex'; form.style.flexDirection = 'column'; }
+        return;
+    }
+    var schedBtn = e.target.closest('.panel-sched-confirm-btn');
+    if (schedBtn) { panelSchedule(schedBtn.dataset.postId, schedBtn.dataset.csrf); return; }
+});
+function loadApprovalPanel(url) {
+    fetch(url, {credentials: 'same-origin'})
+        .then(function(r) { return r.text(); })
+        .then(function(html) {
+            var panel = document.getElementById('approval-panel');
+            panel.innerHTML = html;
+            if (window.Alpine) Alpine.initTree(panel);
+            openApprovalPanel();
+        })
+        .catch(function(e) { alert('Error: ' + e); });
+}
+function openApprovalPanel() {
+    document.getElementById('approval-backdrop').style.display = 'block';
+    document.getElementById('approval-panel').style.display = 'flex';
+}
+function closeApprovalPanel() {
+    document.getElementById('approval-backdrop').style.display = 'none';
+    document.getElementById('approval-panel').style.display = 'none';
+}
+document.addEventListener('keydown', function(e) { if (e.key === 'Escape') closeApprovalPanel(); });
+async function panelAction(postId, action, csrf) {
+    var comment = (document.getElementById('panel-comment') || {}).value || '';
+    if ((action === 'request_changes' || action === 'reject') && !comment.trim()) {
+        alert('Please add a note first.');
+        return;
+    }
+    var base = '/workspace/{{ workspace.id }}/approvals/';
+    var urls = {
+        approve: base + postId + '/approve/',
+        request_changes: base + postId + '/request-changes/',
+        reject: base + postId + '/reject/',
+    };
+    var body = new FormData();
+    body.append('csrfmiddlewaretoken', csrf);
+    if (comment) body.append('comment', comment);
+    var resp = await fetch(urls[action], { method: 'POST', body: body });
+    if (resp.ok) { closeApprovalPanel(); location.reload(); }
+}
+async function panelSchedule(postId, csrf) {
+    var date = (document.getElementById('panel-sched-date') || {}).value || '';
+    var time = (document.getElementById('panel-sched-time') || {}).value || '';
+    if (!date || !time) { alert('Pick a date and time.'); return; }
+    var url = '/workspace/{{ workspace.id }}/approvals/' + postId + '/schedule/';
+    var body = new FormData();
+    body.append('csrfmiddlewaretoken', csrf);
+    body.append('scheduled_date', date);
+    body.append('scheduled_time', time);
+    var resp = await fetch(url, { method: 'POST', body: body });
+    if (resp.ok) { closeApprovalPanel(); location.reload(); }
+}
+</script>
 {% endblock %}

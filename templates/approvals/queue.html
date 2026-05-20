@@ -103,7 +103,9 @@ function loadApprovalPanel(url) {
     fetch(url, {credentials: 'same-origin'})
         .then(function(r) { return r.text(); })
         .then(function(html) {
-            document.getElementById('approval-panel').innerHTML = html;
+            var panel = document.getElementById('approval-panel');
+            panel.innerHTML = html;
+            if (window.Alpine) Alpine.initTree(panel);
             openApprovalPanel();
         })
         .catch(function(e) { alert('Error: ' + e); });
